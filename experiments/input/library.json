@@ -1,0 +1,13 @@
+{
+  "app_name": "LibraryAPI",
+  "entities": ["Book", "User", "Loan"],
+  "features": ["CRUD", "auth", "search"],
+  "database": "PostgreSQL",
+  "difficulty": "Intermediate",
+  "objectives": [
+    "Implement REST CRUD in Go",
+    "Use JSON encoders/decoders",
+    "Write handler tests"
+  ],
+  "api_pattern": "REST"
+}
