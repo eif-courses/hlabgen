@@ -1,0 +1,40 @@
+
+🚀 Starting generation for app: TaskManagerAPI (mode=hybrid)
+✅ Rule-based scaffold created
+2025/10/18 23:44:54 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 13.98824908s
+
+📊 Generation Summary:
+  • Duration: 13.988768466s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+2025/10/18 23:45:08 ✅ Generated 1 test file(s)
+2025/10/18 23:45:08 🔧 Detected module name: TaskManagerAPI — fixing imports...
+2025/10/18 23:45:08 ✅ Import paths updated successfully.
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+✅ ML generation completed (13.99s)
+📁 Saved per-package coverage → experiments/out/TaskManagerAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/TaskManagerAPI/internal/handlers/handlers_test ---
+# TaskManagerAPI/internal/handlers/handlers_test
+/home/marius/GolandProjects/hlabgen/experiments/out/TaskManagerAPI/internal/handlers/handlers_test/task_test.go:10:1: wrong signature for TestCreateTask, must be: func TestCreateTask(t *testing.T)
+FAIL	TaskManagerAPI/internal/handlers/handlers_test [setup failed]
+
+------------------------
+
+📊 Summary for TaskManagerAPI:
+  • BuildSuccess = false
+  • LintWarnings = 0
+  • TestsPass    = false
+  • Coverage     = 0.0%
+  • ML Duration  = 0s (repair 0)
+🧾 Aggregated 26 experiments into experiments/logs/summary.csv
+📊 Markdown results saved → experiments/logs/results.md
+
+✅ Experiment complete.

@@ -1,0 +1,40 @@
+
+🚀 Starting generation for app: FoodDeliveryAPI (mode=hybrid)
+✅ Rule-based scaffold created
+2025/10/18 23:39:56 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 19.601039304s
+
+📊 Generation Summary:
+  • Duration: 19.601612225s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+2025/10/18 23:40:16 ✅ Generated 1 test file(s)
+2025/10/18 23:40:16 🔧 Detected module name: FoodDeliveryAPI — fixing imports...
+2025/10/18 23:40:16 ✅ Import paths updated successfully.
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+✅ ML generation completed (19.60s)
+📁 Saved per-package coverage → experiments/out/FoodDeliveryAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/FoodDeliveryAPI/internal/handlers ---
+# FoodDeliveryAPI/internal/handlers
+/home/marius/GolandProjects/hlabgen/experiments/out/FoodDeliveryAPI/internal/handlers/handlers_test.go:10:1: wrong signature for TestCreateRestaurant, must be: func TestCreateRestaurant(t *testing.T)
+FAIL	FoodDeliveryAPI/internal/handlers [setup failed]
+
+------------------------
+
+📊 Summary for FoodDeliveryAPI:
+  • BuildSuccess = false
+  • LintWarnings = 0
+  • TestsPass    = false
+  • Coverage     = 0.0%
+  • ML Duration  = 0s (repair 0)
+🧾 Aggregated 9 experiments into experiments/logs/summary.csv
+📊 Markdown results saved → experiments/logs/results.md
+
+✅ Experiment complete.

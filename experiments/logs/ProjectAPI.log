@@ -1,0 +1,40 @@
+
+🚀 Starting generation for app: ProjectAPI (mode=hybrid)
+✅ Rule-based scaffold created
+2025/10/18 23:42:35 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 14.156956497s
+
+📊 Generation Summary:
+  • Duration: 14.157413114s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+2025/10/18 23:42:50 ✅ Generated 1 test file(s)
+2025/10/18 23:42:50 🔧 Detected module name: ProjectAPI — fixing imports...
+2025/10/18 23:42:50 ✅ Import paths updated successfully.
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+✅ ML generation completed (14.16s)
+📁 Saved per-package coverage → experiments/out/ProjectAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/ProjectAPI/internal/handlers ---
+# ProjectAPI/internal/handlers
+/home/marius/GolandProjects/hlabgen/experiments/out/ProjectAPI/internal/handlers/handlers_test.go:10:1: wrong signature for TestCreateProject, must be: func TestCreateProject(t *testing.T)
+FAIL	ProjectAPI/internal/handlers [setup failed]
+
+------------------------
+
+📊 Summary for ProjectAPI:
+  • BuildSuccess = false
+  • LintWarnings = 0
+  • TestsPass    = false
+  • Coverage     = 0.0%
+  • ML Duration  = 0s (repair 0)
+🧾 Aggregated 18 experiments into experiments/logs/summary.csv
+📊 Markdown results saved → experiments/logs/results.md
+
+✅ Experiment complete.

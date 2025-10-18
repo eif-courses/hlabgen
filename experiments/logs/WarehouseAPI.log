@@ -1,0 +1,40 @@
+
+🚀 Starting generation for app: WarehouseAPI (mode=hybrid)
+✅ Rule-based scaffold created
+2025/10/18 23:45:59 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 23.078754727s
+
+📊 Generation Summary:
+  • Duration: 23.079349178s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+2025/10/18 23:46:22 ✅ Generated 3 test file(s)
+2025/10/18 23:46:22 🔧 Detected module name: WarehouseAPI — fixing imports...
+2025/10/18 23:46:22 ✅ Import paths updated successfully.
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+✅ ML generation completed (23.08s)
+📁 Saved per-package coverage → experiments/out/WarehouseAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/WarehouseAPI/internal/handlers ---
+# WarehouseAPI/internal/handlers
+item_test.go:13:67: missing ',' before newline in composite literal
+FAIL	WarehouseAPI/internal/handlers [setup failed]
+
+------------------------
+
+📊 Summary for WarehouseAPI:
+  • BuildSuccess = false
+  • LintWarnings = 0
+  • TestsPass    = false
+  • Coverage     = 0.0%
+  • ML Duration  = 0s (repair 0)
+🧾 Aggregated 30 experiments into experiments/logs/summary.csv
+📊 Markdown results saved → experiments/logs/results.md
+
+✅ Experiment complete.

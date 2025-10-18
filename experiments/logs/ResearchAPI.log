@@ -1,0 +1,40 @@
+
+🚀 Starting generation for app: ResearchAPI (mode=hybrid)
+✅ Rule-based scaffold created
+2025/10/18 23:43:05 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 17.176230234s
+
+📊 Generation Summary:
+  • Duration: 17.177707143s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+2025/10/18 23:43:22 ✅ Generated 3 test file(s)
+2025/10/18 23:43:22 🔧 Detected module name: ResearchAPI — fixing imports...
+2025/10/18 23:43:22 ✅ Import paths updated successfully.
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+✅ ML generation completed (17.18s)
+📁 Saved per-package coverage → experiments/out/ResearchAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/ResearchAPI/internal/handlers/handlers_test ---
+# ResearchAPI/internal/handlers/handlers_test
+/home/marius/GolandProjects/hlabgen/experiments/out/ResearchAPI/internal/handlers/handlers_test/author_test.go:10:1: wrong signature for TestCreateAuthor, must be: func TestCreateAuthor(t *testing.T)
+FAIL	ResearchAPI/internal/handlers/handlers_test [setup failed]
+
+------------------------
+
+📊 Summary for ResearchAPI:
+  • BuildSuccess = false
+  • LintWarnings = 0
+  • TestsPass    = false
+  • Coverage     = 0.0%
+  • ML Duration  = 0s (repair 0)
+🧾 Aggregated 20 experiments into experiments/logs/summary.csv
+📊 Markdown results saved → experiments/logs/results.md
+
+✅ Experiment complete.

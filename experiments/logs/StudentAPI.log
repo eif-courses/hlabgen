@@ -1,0 +1,40 @@
+
+🚀 Starting generation for app: StudentAPI (mode=hybrid)
+✅ Rule-based scaffold created
+2025/10/18 23:44:19 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 17.109241294s
+
+📊 Generation Summary:
+  • Duration: 17.109687302s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+2025/10/18 23:44:36 ✅ Generated 1 test file(s)
+2025/10/18 23:44:36 🔧 Detected module name: StudentAPI — fixing imports...
+2025/10/18 23:44:36 ✅ Import paths updated successfully.
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+✅ ML generation completed (17.11s)
+📁 Saved per-package coverage → experiments/out/StudentAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/StudentAPI/internal/handlers ---
+# StudentAPI/internal/handlers
+/home/marius/GolandProjects/hlabgen/experiments/out/StudentAPI/internal/handlers/handlers_test.go:10:1: wrong signature for TestCreateStudent, must be: func TestCreateStudent(t *testing.T)
+FAIL	StudentAPI/internal/handlers [setup failed]
+
+------------------------
+
+📊 Summary for StudentAPI:
+  • BuildSuccess = false
+  • LintWarnings = 0
+  • TestsPass    = false
+  • Coverage     = 0.0%
+  • ML Duration  = 0s (repair 0)
+🧾 Aggregated 24 experiments into experiments/logs/summary.csv
+📊 Markdown results saved → experiments/logs/results.md
+
+✅ Experiment complete.

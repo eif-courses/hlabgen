@@ -1,0 +1,40 @@
+
+🚀 Starting generation for app: AuctionAPI (mode=hybrid)
+✅ Rule-based scaffold created
+2025/10/18 23:37:32 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 18.854905495s
+
+📊 Generation Summary:
+  • Duration: 18.856679254s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+2025/10/18 23:37:51 ✅ Generated 3 test file(s)
+2025/10/18 23:37:51 🔧 Detected module name: AuctionAPI — fixing imports...
+2025/10/18 23:37:51 ✅ Import paths updated successfully.
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+✅ ML generation completed (18.86s)
+📁 Saved per-package coverage → experiments/out/AuctionAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/AuctionAPI/internal/handlers ---
+# AuctionAPI/internal/handlers
+/home/marius/GolandProjects/hlabgen/experiments/out/AuctionAPI/internal/handlers/auction_test.go:10:1: wrong signature for TestCreateAuction, must be: func TestCreateAuction(t *testing.T)
+FAIL	AuctionAPI/internal/handlers [setup failed]
+
+------------------------
+
+📊 Summary for AuctionAPI:
+  • BuildSuccess = false
+  • LintWarnings = 0
+  • TestsPass    = false
+  • Coverage     = 0.0%
+  • ML Duration  = 0s (repair 0)
+🧾 Aggregated 1 experiments into experiments/logs/summary.csv
+📊 Markdown results saved → experiments/logs/results.md
+
+✅ Experiment complete.

@@ -1,0 +1,9 @@
+App: InventoryAPI
+Mode: hybrid
+Timestamp: 2025-10-18T23:41:10+03:00
+OpenAI Model: gpt-4o-mini
+BuildSuccess: false
+TestsPass: false
+Coverage: 0.0%
+MLDuration: 0s
+RepairAttempts: 0

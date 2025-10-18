@@ -1,0 +1,40 @@
+
+🚀 Starting generation for app: SocialAPI (mode=hybrid)
+✅ Rule-based scaffold created
+2025/10/18 23:44:00 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 18.363176303s
+
+📊 Generation Summary:
+  • Duration: 18.363746367s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+2025/10/18 23:44:19 ✅ Generated 3 test file(s)
+2025/10/18 23:44:19 🔧 Detected module name: SocialAPI — fixing imports...
+2025/10/18 23:44:19 ✅ Import paths updated successfully.
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+✅ ML generation completed (18.36s)
+📁 Saved per-package coverage → experiments/out/SocialAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/SocialAPI/internal/handlers ---
+# SocialAPI/internal/handlers
+comment_test.go:16:1: expected declaration, found '}'
+FAIL	SocialAPI/internal/handlers [setup failed]
+
+------------------------
+
+📊 Summary for SocialAPI:
+  • BuildSuccess = false
+  • LintWarnings = 0
+  • TestsPass    = false
+  • Coverage     = 0.0%
+  • ML Duration  = 0s (repair 0)
+🧾 Aggregated 23 experiments into experiments/logs/summary.csv
+📊 Markdown results saved → experiments/logs/results.md
+
+✅ Experiment complete.
