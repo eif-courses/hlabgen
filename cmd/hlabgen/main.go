@@ -94,7 +94,7 @@ func main() {
 		if err != nil {
 			log.Printf("❌ ML generation failed completely — falling back to rule-based only: %v", err)
 		} else {
-			if err := assemble.WriteMany(*out, files); err != nil {
+			if err := assemble.WriteMany(*out, files, &genMetrics); err != nil {
 				log.Fatalf("❌ Failed to write generated files: %v", err)
 			}
 

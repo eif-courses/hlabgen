@@ -20,6 +20,10 @@ type File struct {
 // WriteMany writes multiple generated files to disk,
 // applies rule-based safety fixes, and auto-fixes import paths.
 func WriteMany(base string, files []File, metrics *ml.GenerationMetrics) error {
+	if metrics == nil {
+		metrics = &ml.GenerationMetrics{}
+	}
+
 	// Detect Go module name from go.mod
 	moduleName, err := detectModule(base)
 	if err != nil {
@@ -32,41 +36,58 @@ func WriteMany(base string, files []File, metrics *ml.GenerationMetrics) error {
 
 		// ✅ Move tests next to handlers and adjust package name
 		filename, content = rules.PlaceTestsWithHandlers(filename, content)
+		metrics.RuleFixes++
 
 		// ✅ Apply safety rule for handlers (decode + type mismatch fix)
 		if strings.Contains(filename, "handlers/") && !strings.HasSuffix(filename, "_test.go") {
+			before := content
 			content = rules.SafeDecode(content)
 			content = rules.FixIDTypeMismatch(content)
-			content = removeUnusedModelsImport(content) // NEW: Add this line
+			content = removeUnusedModelsImport(content)
+			if content != before {
+				metrics.RuleFixes++
+			}
 		}
 
 		// ✅ Remove unused imports from models
 		if strings.Contains(filename, "models/") && !strings.HasSuffix(filename, "_test.go") {
+			before := content
 			content = cleanUnusedImportsInModels(content)
-			content = ensureTimeImport(content) // NEW: Add this line
+			content = ensureTimeImport(content)
+			if content != before {
+				metrics.RuleFixes++
+			}
 		}
 
 		// ✅ Normalize routes: rename RegisterRoutes → Register
 		if strings.Contains(filename, "routes.go") {
+			before := content
 			content = rules.FixRegisterFunction(content)
+			if content != before {
+				metrics.RuleFixes++
+			}
 		}
 
+		// ✅ Apply test-specific cleanups
 		if strings.HasSuffix(filename, "_test.go") {
+			before := content
 			content = rules.FixTestImports(content)
-			metrics.RuleFixes++
 			content = rules.FixTestBodies(content)
-			metrics.RuleFixes++
 			content = CleanDuplicateImports(content)
-			metrics.RuleFixes++
+			if content != before {
+				metrics.RuleFixes++
+			}
 		}
 
 		// ✅ Remove unnecessary mux imports in handlers
 		if strings.Contains(filename, "handlers/") && strings.Contains(content, `"github.com/gorilla/mux"`) {
 			content = strings.ReplaceAll(content, "\t\"github.com/gorilla/mux\"\n", "")
+			metrics.RuleFixes++
 		}
 
 		// ✅ Auto-fix placeholder import paths like "yourapp/", "your_project/", etc.
 		if moduleName != "" {
+			before := content
 			content = strings.ReplaceAll(content, `"yourapp/routes"`, fmt.Sprintf(`"%s/internal/routes"`, moduleName))
 			content = strings.ReplaceAll(content, `"yourapp/handlers"`, fmt.Sprintf(`"%s/internal/handlers"`, moduleName))
 			content = strings.ReplaceAll(content, `"yourapp/models"`, fmt.Sprintf(`"%s/internal/models"`, moduleName))
@@ -75,13 +96,20 @@ func WriteMany(base string, files []File, metrics *ml.GenerationMetrics) error {
 			content = strings.ReplaceAll(content, `"your_project/handlers"`, fmt.Sprintf(`"%s/internal/handlers"`, moduleName))
 			content = strings.ReplaceAll(content, `"your_project/models"`, fmt.Sprintf(`"%s/internal/models"`, moduleName))
 
-			// Generic fallback regex for any other "your..." placeholder
 			re := regexp.MustCompile(`"your[^"]+/`)
 			content = re.ReplaceAllString(content, fmt.Sprintf(`"%s/internal/`, moduleName))
+
+			if content != before {
+				metrics.RuleFixes++
+			}
 		}
 
-		// ✅ Final deduplication pass
+		// ✅ Final deduplication and brace fixes
+		before := content
 		content = CleanDuplicateImports(content)
+		if content != before {
+			metrics.RuleFixes++
+		}
 
 		// ✅ Normalize output paths (ensure /internal/ structure)
 		fullPath := filepath.Join(base, rules.NormalizePath(filename))
@@ -92,11 +120,6 @@ func WriteMany(base string, files []File, metrics *ml.GenerationMetrics) error {
 		// ✅ Write file to disk
 		if err := os.WriteFile(fullPath, []byte(content), 0o644); err != nil {
 			return fmt.Errorf("failed to write file %s: %w", fullPath, err)
-		}
-
-		// ✅ Log fixes for visibility
-		if strings.Contains(f.Content, "yourapp/") || strings.Contains(f.Content, "your_project/") {
-			fmt.Printf("🔧 Fixed imports in: %s\n", filename)
 		}
 	}
 
@@ -125,53 +148,40 @@ func CleanDuplicateImports(code string) string {
 	inImportBlock := false
 	seenImports := make(map[string]bool)
 
-	for i := 0; i < len(lines); i++ {
-		line := lines[i]
+	for _, line := range lines {
 		trim := strings.TrimSpace(line)
 
-		// Detect import block start
 		if strings.HasPrefix(trim, "import (") {
 			inImportBlock = true
-			seenImports = make(map[string]bool) // Reset for this block
 			out = append(out, line)
 			continue
 		}
 
-		// Detect import block end
 		if inImportBlock && trim == ")" {
 			inImportBlock = false
 			out = append(out, line)
 			continue
 		}
 
-		// Process imports inside the block
 		if inImportBlock {
-			// Extract the import path (everything between quotes)
 			if strings.Contains(trim, `"`) {
-				// Extract just the import path for comparison
 				start := strings.Index(trim, `"`)
 				end := strings.LastIndex(trim, `"`)
 				if start >= 0 && end > start {
-					importPath := trim[start : end+1] // Include quotes
-
+					importPath := trim[start : end+1]
 					if seenImports[importPath] {
-						// Skip this duplicate import
 						continue
 					}
 					seenImports[importPath] = true
 				}
 			}
-			out = append(out, line)
-			continue
 		}
 
-		// Not in import block
 		out = append(out, line)
 	}
 
 	code = strings.Join(out, "\n")
 
-	// ✅ Ensure balanced braces
 	openCount := strings.Count(code, "{")
 	closeCount := strings.Count(code, "}")
 	if openCount > closeCount {
@@ -181,26 +191,12 @@ func CleanDuplicateImports(code string) string {
 	return code
 }
 
-// FixUnbalancedBraces ensures generated Go files end with properly balanced braces.
-func FixUnbalancedBraces(code string) string {
-	openCount := strings.Count(code, "{")
-	closeCount := strings.Count(code, "}")
-	diff := openCount - closeCount
-
-	if diff > 0 {
-		code += strings.Repeat("\n}", diff)
-	}
-	return code
-}
-
 // cleanUnusedImportsInModels removes unused imports from model files
 func cleanUnusedImportsInModels(code string) string {
-	// Check if encoding/json is actually used
 	if strings.Contains(code, `"encoding/json"`) && !strings.Contains(code, "json.") {
 		lines := strings.Split(code, "\n")
 		var result []string
 		for _, line := range lines {
-			// Skip the encoding/json import line
 			if strings.Contains(line, `"encoding/json"`) {
 				continue
 			}
@@ -213,27 +209,20 @@ func cleanUnusedImportsInModels(code string) string {
 
 // ensureTimeImport adds time import if time.Time is used but not imported
 func ensureTimeImport(code string) string {
-	// Check if time.Time is used
 	if !strings.Contains(code, "time.Time") {
 		return code
 	}
-
-	// Check if time is already imported
 	if strings.Contains(code, `"time"`) {
 		return code
 	}
 
-	// Add time import
 	lines := strings.Split(code, "\n")
 	var result []string
 	importAdded := false
 
 	for i, line := range lines {
 		result = append(result, line)
-
-		// Add after package declaration
 		if !importAdded && strings.HasPrefix(strings.TrimSpace(line), "package ") {
-			// Check if next line is already an import
 			if i+1 < len(lines) && strings.Contains(lines[i+1], "import") {
 				continue
 			}
@@ -248,12 +237,10 @@ func ensureTimeImport(code string) string {
 
 // removeUnusedModelsImport removes models import if not used in handlers
 func removeUnusedModelsImport(code string) string {
-	// Check if models package is used
 	if !strings.Contains(code, "models.") {
 		lines := strings.Split(code, "\n")
 		var result []string
 		for _, line := range lines {
-			// Skip the models import line
 			if strings.Contains(line, "/internal/models\"") {
 				continue
 			}
