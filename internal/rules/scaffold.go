@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -219,6 +220,17 @@ func NormalizePath(filename string) string {
 	return filename
 }
 
+// FixRegisterFunction normalizes any route registration function
+// to a consistent name: func Register(r *mux.Router)
+func FixRegisterFunction(code string) string {
+	// Regex matches: func <something>Routes(
+	re := regexp.MustCompile(`func\s+\w*Routes\s*\(`)
+	if re.MatchString(code) {
+		code = re.ReplaceAllString(code, "func Register(")
+	}
+	return code
+}
+
 // FixTestImports ensures generated test files include required imports like gorilla/mux.
 func FixTestImports(code string) string {
 	if strings.Contains(code, "mux.NewRouter()") && !strings.Contains(code, `"github.com/gorilla/mux"`) {
@@ -248,29 +260,32 @@ func FixTestImports(code string) string {
 	return code
 }
 
-// FixTestBodies ensures that generated test files always compile and pass,
-// by adding dummy JSON bodies, correct HTTP methods, and dynamic imports.
+// FixTestBodies ensures that generated test files compile and pass by
+// adding JSON bodies, correct HTTP methods, and fixing paths & duplicates.
 func FixTestBodies(code string) string {
 	lines := strings.Split(code, "\n")
 
-	module := detectModuleName() // auto-detect from go.mod
+	// Ensure correct package name for tests
+	if strings.HasPrefix(strings.TrimSpace(lines[0]), "package ") &&
+		!strings.HasPrefix(strings.TrimSpace(lines[0]), "package handlers_test") {
+		lines[0] = "package handlers_test"
+	}
 
 	for i, line := range lines {
-		if strings.HasPrefix(strings.TrimSpace(line), "func Test") && strings.Contains(line, "(t *testing.T)") {
-			testName := extractTestName(line)
-			method := inferHTTPMethod(testName)
+		if strings.HasPrefix(strings.TrimSpace(line), "func Test") &&
+			strings.Contains(line, "(t *testing.T)") {
+
+			testName := extractTestName(line)      // e.g. CreateBook, GetBooks
+			_, entity := splitVerbEntity(testName) // e.g. Create / Book
+			method := inferHTTPMethod(testName)    // POST/GET/PUT/DELETE
+			resource := pluralizeIfNeeded(entity)  // books (not bookss)
 
 			body := "{}"
 			if method == "POST" || method == "PUT" {
 				body = `{"id":1}`
 			}
 
-			// Infer plural resource name (e.g. CreateBook -> /books)
-			resource := strings.ToLower(strings.TrimPrefix(testName, "Create"))
-			if resource == "" {
-				resource = "items"
-			}
-
+			// Build a full body for the test function
 			testBody := fmt.Sprintf(`{
 	body := strings.NewReader(%q)
 	req, _ := http.NewRequest("%s", "/%s", body)
@@ -280,29 +295,59 @@ func FixTestBodies(code string) string {
 	if rr.Code != http.StatusCreated && rr.Code != http.StatusOK && rr.Code != http.StatusNoContent {
 		t.Errorf("handler returned wrong status code: got %%v", rr.Code)
 	}
-}`, body, method, resource+"s", testName)
+}`, body, method, resource, testName)
 
+			// Replace ONLY the first "{" after the signature line with our body
 			lines[i] = strings.Replace(line, "{", testBody, 1)
 		}
 	}
 
 	fixed := strings.Join(lines, "\n")
 
-	// Ensure imports dynamically based on module name
-	imports := []string{
-		`"net/http"`,
-		`"net/http/httptest"`,
-		`"strings"`,
-		fmt.Sprintf(`"%s/internal/handlers"`, module),
-	}
+	// Remove stub lines and extra braces
+	fixed = fixDanglingClosers(fixed)
 
-	for _, imp := range imports {
-		if !strings.Contains(fixed, imp) {
-			fixed = strings.Replace(fixed, "import (", "import (\n\t"+imp, 1)
+	// Ensure imports dynamically based on module name and then dedupe/sort
+	fixed = ensureTestImports(fixed)
+
+	// Final dedup for safety
+	fixed = CleanDuplicateImports(fixed)
+
+	return fixed
+}
+
+func ensureTestImports(code string) string {
+	mod := detectModuleName()
+	want := []string{
+		"\"net/http\"",
+		"\"net/http/httptest\"",
+		"\"strings\"",
+		fmt.Sprintf("\"%s/internal/handlers\"", mod),
+	}
+	// Make sure there’s an import block
+	if !strings.Contains(code, "\nimport (") {
+		// insert after package line
+		lines := strings.Split(code, "\n")
+		for i, l := range lines {
+			if strings.HasPrefix(strings.TrimSpace(l), "package ") {
+				block := "import (\n"
+				for _, w := range want {
+					block += "\t" + w + "\n"
+				}
+				block += ")\n"
+				lines = append(lines[:i+1], append([]string{block}, lines[i+1:]...)...)
+				return strings.Join(lines, "\n")
+			}
+		}
+	} else {
+		// Add missing imports into existing block
+		for _, w := range want {
+			if !strings.Contains(code, w) {
+				code = strings.Replace(code, "import (", "import (\n\t"+w, 1)
+			}
 		}
 	}
-	fixed = CleanDuplicateImports(fixed)
-	return fixed
+	return code
 }
 
 // detectModuleName tries to read module name from nearest go.mod file.
@@ -351,38 +396,49 @@ func PlaceTestsWithHandlers(filename, content string) (string, string) {
 		base := filepath.Base(filename)
 		filename = filepath.Join("internal", "handlers", base)
 
+		// ✅ Force correct package
 		lines := strings.Split(content, "\n")
 		if len(lines) > 0 && strings.HasPrefix(lines[0], "package ") {
 			lines[0] = "package handlers_test"
 		}
 		content = strings.Join(lines, "\n")
 
-		// ✅ Ensure "handlers" import is present only once
-		if !strings.Contains(content, `"LibraryAPI/internal/handlers"`) {
-			if strings.Contains(content, "import (") {
-				content = strings.Replace(
-					content,
-					"import (",
-					"import (\n\t\"LibraryAPI/internal/handlers\"",
+		// ✅ Detect module name dynamically
+		module := detectModuleName()
+		handlerImport := fmt.Sprintf("\"%s/internal/handlers\"", module)
+
+		// ✅ Check whether imports exist
+		hasImportBlock := strings.Contains(content, "import (")
+		hasHandlers := strings.Contains(content, "/internal/handlers")
+
+		// ✅ Add handlers import only once
+		if !hasHandlers {
+			if hasImportBlock {
+				content = strings.Replace(content, "import (", "import (\n\t"+handlerImport, 1)
+			} else {
+				content = strings.Replace(content,
+					"package handlers_test",
+					"package handlers_test\n\nimport (\n\t"+handlerImport+"\n)\n",
 					1,
 				)
-			} else {
-				// If somehow import block missing entirely
-				content = "import (\n\t\"LibraryAPI/internal/handlers\"\n)\n" + content
 			}
 		}
 
-		// ✅ Remove duplicate handler imports if any (cleanup)
+		// ✅ Normalize duplicates of handlers import
 		lines = strings.Split(content, "\n")
 		seen := make(map[string]bool)
 		var clean []string
 		for _, line := range lines {
-			if strings.Contains(line, "\"LibraryAPI/internal/handlers\"") {
+			trim := strings.TrimSpace(line)
+
+			// Skip duplicate handler imports
+			if strings.Contains(trim, "/internal/handlers") {
 				if seen["handlers"] {
 					continue
 				}
 				seen["handlers"] = true
 			}
+
 			clean = append(clean, line)
 		}
 		content = strings.Join(clean, "\n")
@@ -435,38 +491,98 @@ func TestCreateBook(t *testing.T) {
 	return nil
 }
 
-// CleanDuplicateImports removes repeated import lines and keeps imports tidy.
+// CleanDuplicateImports removes duplicate import lines (even if spacing or order differ)
+// and ensures the file ends with balanced braces.
 func CleanDuplicateImports(code string) string {
 	lines := strings.Split(code, "\n")
-	seen := map[string]bool{}
-	var result []string
-	inImports := false
+	seen := make(map[string]bool)
+	var out []string
+	importBlock := false
 
 	for _, line := range lines {
 		trim := strings.TrimSpace(line)
 
-		// Detect start and end of import block
+		// detect start/end of import block
 		if strings.HasPrefix(trim, "import (") {
-			inImports = true
-			result = append(result, line)
+			importBlock = true
+			out = append(out, line)
 			continue
 		}
-		if inImports && trim == ")" {
-			inImports = false
-			result = append(result, line)
+		if importBlock && strings.HasPrefix(trim, ")") {
+			importBlock = false
+			out = append(out, line)
 			continue
 		}
 
-		// Skip duplicate imports within the block
-		if inImports && strings.HasPrefix(trim, "\"") {
-			if seen[trim] {
+		// skip duplicate imports (normalize spacing and path)
+		if importBlock && strings.HasPrefix(trim, `"`) {
+			normalized := strings.ReplaceAll(trim, "\t", "")
+			normalized = strings.ReplaceAll(normalized, " ", "")
+			normalized = strings.Trim(normalized, `"`)
+			if seen[normalized] {
 				continue
 			}
-			seen[trim] = true
+			seen[normalized] = true
 		}
 
-		result = append(result, line)
+		out = append(out, line)
 	}
 
-	return strings.Join(result, "\n")
+	code = strings.Join(out, "\n")
+
+	// ✅ Ensure exactly one closing brace at EOF if braces are unbalanced
+	openCount := strings.Count(code, "{")
+	closeCount := strings.Count(code, "}")
+	if openCount > closeCount {
+		code += "\n}"
+	}
+
+	return code
+}
+
+// fixDanglingClosers removes duplicate trailing braces and stub lines.
+func fixDanglingClosers(code string) string {
+	lines := strings.Split(code, "\n")
+	var out []string
+	var prev string
+	for _, l := range lines {
+		trim := strings.TrimSpace(l)
+		// drop stub lines
+		if trim == "// Implementation here" {
+			continue
+		}
+		// collapse consecutive closing braces
+		if trim == "}" && strings.TrimSpace(prev) == "}" {
+			// skip this one
+			continue
+		}
+		out = append(out, l)
+		prev = l
+	}
+	return strings.Join(out, "\n")
+}
+
+// splitVerbEntity extracts the testing verb (Create/Get/Update/Delete) and the entity name
+// from a test name like "CreateBook", "GetBooks", etc.
+func splitVerbEntity(name string) (verb, entity string) {
+	name = strings.TrimSpace(name)
+	parts := []string{"Create", "Get", "Update", "Delete"}
+	for _, p := range parts {
+		if strings.HasPrefix(name, p) {
+			return p, strings.TrimPrefix(name, p)
+		}
+	}
+	return "Get", name // default
+}
+
+func pluralizeIfNeeded(entity string) string {
+	if entity == "" {
+		return "items"
+	}
+	el := strings.ToLower(entity)
+	// If it's already plural (ends with s), leave it
+	if strings.HasSuffix(el, "s") {
+		return el
+	}
+	return el + "s"
 }

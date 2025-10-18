@@ -38,10 +38,16 @@ func WriteMany(base string, files []File) error {
 			content = rules.FixIDTypeMismatch(content)
 		}
 
+		// ✅ Normalize routes: rename RegisterRoutes → Register
+		if strings.Contains(filename, "routes.go") {
+			content = rules.FixRegisterFunction(content)
+		}
+
 		// ✅ Apply test fixes (imports + JSON body)
-		if strings.Contains(filename, "_test.go") {
+		if strings.HasSuffix(filename, "_test.go") {
 			content = rules.FixTestImports(content)
 			content = rules.FixTestBodies(content)
+			content = rules.CleanDuplicateImports(content) // 🧹 strong dedupe
 		}
 
 		// ✅ Remove unnecessary mux imports in handlers
@@ -64,8 +70,8 @@ func WriteMany(base string, files []File) error {
 			content = re.ReplaceAllString(content, fmt.Sprintf(`"%s/internal/`, moduleName))
 		}
 
-		// ✅ Clean duplicate imports (e.g. handlers imported twice)
-		content = cleanDuplicateImports(content)
+		// ✅ Final deduplication pass (catch anything that slipped through)
+		content = rules.CleanDuplicateImports(content)
 
 		// ✅ Normalize output paths (ensure /internal/ structure)
 		fullPath := filepath.Join(base, rules.NormalizePath(filename))
@@ -99,37 +105,4 @@ func detectModule(base string) (string, error) {
 		}
 	}
 	return "", nil
-}
-
-// cleanDuplicateImports removes repeated identical import lines.
-func cleanDuplicateImports(code string) string {
-	lines := strings.Split(code, "\n")
-	seen := make(map[string]bool)
-	var cleaned []string
-	inImport := false
-
-	for _, line := range lines {
-		trim := strings.TrimSpace(line)
-
-		if strings.HasPrefix(trim, "import (") {
-			inImport = true
-			cleaned = append(cleaned, line)
-			continue
-		}
-		if inImport && strings.HasPrefix(trim, ")") {
-			inImport = false
-			cleaned = append(cleaned, line)
-			continue
-		}
-		if inImport && strings.HasPrefix(trim, "\"") {
-			if seen[trim] {
-				continue // skip duplicate
-			}
-			seen[trim] = true
-		}
-
-		cleaned = append(cleaned, line)
-	}
-
-	return strings.Join(cleaned, "\n")
 }
