@@ -2,30 +2,22 @@ package handlers
 
 import (
 	"RecipeAPI/internal/models"
+	"encoding/json"
 	"net/http"
 )
 
 // CreateCategory handles the creation of a new category.
 func CreateCategory(w http.ResponseWriter, r *http.Request) {
-	// Implementation here
+	var category models.Category
+	if err := json.NewDecoder(r.Body).Decode(&category); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(category)
 }
 
-// GetCategory handles fetching a category by ID.
-func GetCategory(w http.ResponseWriter, r *http.Request) {
-	// Implementation here
-}
-
-// UpdateCategory handles updating an existing category.
-func UpdateCategory(w http.ResponseWriter, r *http.Request) {
-	// Implementation here
-}
-
-// DeleteCategory handles deleting a category.
-func DeleteCategory(w http.ResponseWriter, r *http.Request) {
-	// Implementation here
-}
-
-// ListCategories handles listing all categories.
-func ListCategories(w http.ResponseWriter, r *http.Request) {
+// GetCategories handles fetching all categories.
+func GetCategories(w http.ResponseWriter, r *http.Request) {
 	// Implementation here
 }

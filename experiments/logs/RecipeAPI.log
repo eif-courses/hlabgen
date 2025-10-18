@@ -1,45 +1,33 @@
 
 🚀 Starting generation for app: RecipeAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/18 19:46:22 🧠 Starting ML-based code generation...
-⏱️  Initial model call took 26.631765733s
+2025/10/18 21:26:08 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 14.016927882s
 
 📊 Generation Summary:
-  • Duration: 26.633148537s
+  • Duration: 14.017528541s
   • Primary Success: true
   • Repair Attempts: 0
   • Final Success: true
   • Error: 
-🔧 Fixed imports in: handlers/recipe.go
-🔧 Fixed imports in: handlers/ingredient.go
-🔧 Fixed imports in: handlers/category.go
-🔧 Fixed imports in: routes/routes.go
-🔧 Fixed imports in: internal/handlers/recipe_test.go
-🔧 Fixed imports in: internal/handlers/ingredient_test.go
-🔧 Fixed imports in: internal/handlers/category_test.go
+2025/10/18 21:26:22 ✅ Generated 3 test file(s)
+2025/10/18 21:26:22 🔧 Detected module name: RecipeAPI — fixing imports...
+2025/10/18 21:26:22 ✅ Import paths updated successfully.
 🔧 Running go mod tidy...
-go: finding module for package github.com/eif-courses/hlabgen/internal/handlers
-go: RecipeAPI/internal/handlers tested by
-	RecipeAPI/internal/handlers.test imports
-	github.com/eif-courses/hlabgen/internal/handlers: module github.com/eif-courses/hlabgen@latest found (v0.0.0-20251018161011-98d4a82a676f), but does not contain package github.com/eif-courses/hlabgen/internal/handlers
-2025/10/18 19:46:49 ⚠️  go mod tidy failed: exit status 1
-2025/10/18 19:46:49 🔧 Detected module name: RecipeAPI — fixing imports...
-2025/10/18 19:46:49   ✅ Updated imports in: experiments/out/RecipeAPI/internal/handlers/category_test.go
-2025/10/18 19:46:49   ✅ Updated imports in: experiments/out/RecipeAPI/internal/handlers/ingredient_test.go
-2025/10/18 19:46:49   ✅ Updated imports in: experiments/out/RecipeAPI/internal/handlers/recipe_test.go
-2025/10/18 19:46:49 ✅ Import paths updated successfully.
-✅ ML generation completed (26.63s)
+✅ Dependencies tidied
+✅ ML generation completed (14.02s)
 📁 Saved per-package coverage → experiments/out/RecipeAPI/coverage.json
 🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
 
 --- go test summary ---
 
---- experiments/out/RecipeAPI/internal/handlers ---
-# RecipeAPI/internal/handlers [RecipeAPI/internal/handlers.test]
-./category.go:5:2: "RecipeAPI/internal/models" imported and not used
-./ingredient.go:5:2: "RecipeAPI/internal/models" imported and not used
-./recipe.go:5:2: "RecipeAPI/internal/models" imported and not used
-FAIL	RecipeAPI/internal/handlers [build failed]
+--- experiments/out/RecipeAPI/internal/handlers/handlers_test ---
+# RecipeAPI/internal/models
+../../models/recipe.go:15:6: Ingredient redeclared in this block
+	../../models/ingredient.go:4:6: other declaration of Ingredient
+../../models/recipe.go:23:6: Category redeclared in this block
+	../../models/category.go:4:6: other declaration of Category
+FAIL	RecipeAPI/internal/handlers/handlers_test [build failed]
 
 ------------------------
 

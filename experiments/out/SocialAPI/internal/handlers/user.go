@@ -2,22 +2,32 @@ package handlers
 
 import (
 	"SocialAPI/internal/models"
-	"github.com/gin-gonic/gin"
+	"encoding/json"
 	"net/http"
 )
 
-func CreateUser(c *gin.Context) {
-	// Implementation
+// CreateUser handles the creation of a new user.
+func CreateUser(w http.ResponseWriter, r *http.Request) {
+	var user models.User
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(user)
 }
 
-func GetUser(c *gin.Context) {
-	// Implementation
+// GetUser handles fetching a user by ID.
+func GetUser(w http.ResponseWriter, r *http.Request) {
+	// Implementation here
 }
 
-func UpdateUser(c *gin.Context) {
-	// Implementation
+// UpdateUser handles updating user information.
+func UpdateUser(w http.ResponseWriter, r *http.Request) {
+	// Implementation here
 }
 
-func DeleteUser(c *gin.Context) {
-	// Implementation
+// DeleteUser handles deleting a user.
+func DeleteUser(w http.ResponseWriter, r *http.Request) {
+	// Implementation here
 }

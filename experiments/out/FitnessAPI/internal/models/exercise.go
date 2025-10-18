@@ -1,8 +1,9 @@
 package models
 
 type Exercise struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-	Sets int    `json:"sets"`
-	Reps int    `json:"reps"`
+	ID     int     `json:"id"`
+	Name   string  `json:"name"`
+	Reps   int     `json:"reps"`
+	Sets   int     `json:"sets"`
+	Weight float64 `json:"weight"`
 }

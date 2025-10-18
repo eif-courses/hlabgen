@@ -2,29 +2,16 @@ package handlers
 
 import (
 	"InventoryAPI/internal/models"
-	"github.com/gin-gonic/gin"
+	"encoding/json"
 	"net/http"
 )
 
-func CreateWarehouse(c *gin.Context) {
+func CreateWarehouse(w http.ResponseWriter, r *http.Request) {
 	var warehouse models.Warehouse
-	if err := c.ShouldBindJSON(&warehouse); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := json.NewDecoder(r.Body).Decode(&warehouse); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// Logic to save warehouse
-	c.JSON(http.StatusCreated, warehouse)
-}
-
-func GetWarehouses(c *gin.Context) {
-	// Logic to get warehouses
-	c.JSON(http.StatusOK, []models.Warehouse{})
-}
-
-func UpdateWarehouse(c *gin.Context) {
-	// Logic to update warehouse
-}
-
-func DeleteWarehouse(c *gin.Context) {
-	// Logic to delete warehouse
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(warehouse)
 }

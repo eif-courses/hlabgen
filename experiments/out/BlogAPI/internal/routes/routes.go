@@ -1,30 +1,17 @@
 package routes
 
 import (
-    "github.com/gin-gonic/gin"
-    "BlogAPI/internal/handlers"
+	"BlogAPI/internal/handlers"
+	"github.com/gorilla/mux"
 )
 
-func Register(router *gin.Engine) {
-    posts := router.Group("/posts") {
-        router.POST("/", handlers.CreatePost)
-        router.GET("/", handlers.GetPosts)
-        router.GET("/:id", handlers.GetPost)
-        router.PUT("/:id", handlers.UpdatePost)
-        router.DELETE("/:id", handlers.DeletePost)
-    }
-    comments := router.Group("/comments") {
-        router.POST("/", handlers.CreateComment)
-        router.GET("/", handlers.GetComments)
-        router.GET("/:id", handlers.GetComment)
-        router.PUT("/:id", handlers.UpdateComment)
-        router.DELETE("/:id", handlers.DeleteComment)
-    }
-    authors := router.Group("/authors") {
-        router.POST("/", handlers.CreateAuthor)
-        router.GET("/", handlers.GetAuthors)
-        router.GET("/:id", handlers.GetAuthor)
-        router.PUT("/:id", handlers.UpdateAuthor)
-        router.DELETE("/:id", handlers.DeleteAuthor)
-    }
+func Register(r *mux.Router) {
+	r.HandleFunc("/posts", handlers.CreatePost).Methods("POST")
+	r.HandleFunc("/posts", handlers.GetPosts).Methods("GET")
+	r.HandleFunc("/posts/{id}", handlers.UpdatePost).Methods("PUT")
+	r.HandleFunc("/posts/{id}", handlers.DeletePost).Methods("DELETE")
+	r.HandleFunc("/comments", handlers.CreateComment).Methods("POST")
+	r.HandleFunc("/comments", handlers.GetComments).Methods("GET")
+	r.HandleFunc("/authors", handlers.CreateAuthor).Methods("POST")
+	r.HandleFunc("/authors", handlers.GetAuthors).Methods("GET")
 }

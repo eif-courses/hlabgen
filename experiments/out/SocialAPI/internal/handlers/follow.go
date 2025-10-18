@@ -2,14 +2,15 @@ package handlers
 
 import (
 	"SocialAPI/internal/models"
-	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func FollowUser(c *gin.Context) {
-	// Implementation
+// FollowUser handles following a user.
+func FollowUser(w http.ResponseWriter, r *http.Request) {
+	// Implementation here
 }
 
-func UnfollowUser(c *gin.Context) {
-	// Implementation
+// UnfollowUser handles unfollowing a user.
+func UnfollowUser(w http.ResponseWriter, r *http.Request) {
+	// Implementation here
 }

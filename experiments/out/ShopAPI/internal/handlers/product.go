@@ -2,26 +2,28 @@ package handlers
 
 import (
 	"ShopAPI/internal/models"
-	"github.com/gin-gonic/gin"
+	"encoding/json"
 	"net/http"
 )
 
-func CreateProduct(c *gin.Context) {
-	// Implementation
+func CreateProduct(w http.ResponseWriter, r *http.Request) {
+	var product models.Product
+	if err := json.NewDecoder(r.Body).Decode(&product); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(product)
 }
 
-func GetProduct(c *gin.Context) {
-	// Implementation
+func GetProducts(w http.ResponseWriter, r *http.Request) {
+	// Implementation for fetching products
 }
 
-func UpdateProduct(c *gin.Context) {
-	// Implementation
+func UpdateProduct(w http.ResponseWriter, r *http.Request) {
+	// Implementation for updating a product
 }
 
-func DeleteProduct(c *gin.Context) {
-	// Implementation
-}
-
-func ListProducts(c *gin.Context) {
-	// Implementation
+func DeleteProduct(w http.ResponseWriter, r *http.Request) {
+	// Implementation for deleting a product
 }

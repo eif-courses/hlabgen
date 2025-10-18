@@ -2,31 +2,18 @@ package handlers
 
 import (
 	"TaskAPI/internal/models"
-	"github.com/gin-gonic/gin"
+	"encoding/json"
 	"net/http"
 )
 
-func CreateTeam(c *gin.Context) {
+func CreateTeam(w http.ResponseWriter, r *http.Request) {
 	var team models.Team
-	if err := c.ShouldBindJSON(&team); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := json.NewDecoder(r.Body).Decode(&team); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// Save team to database
-	c.JSON(http.StatusCreated, team)
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(team)
 }
 
-func GetTeams(c *gin.Context) {
-	// Retrieve teams from database
-	c.JSON(http.StatusOK, []models.Team{})
-}
-
-func UpdateTeam(c *gin.Context) {
-	// Update team in database
-	c.JSON(http.StatusOK, gin.H{"message": "Team updated"})
-}
-
-func DeleteTeam(c *gin.Context) {
-	// Delete team from database
-	c.JSON(http.StatusOK, gin.H{"message": "Team deleted"})
-}
+// Other team handlers...

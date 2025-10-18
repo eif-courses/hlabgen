@@ -2,31 +2,18 @@ package handlers
 
 import (
 	"TaskAPI/internal/models"
-	"github.com/gin-gonic/gin"
+	"encoding/json"
 	"net/http"
 )
 
-func CreateUser(c *gin.Context) {
+func CreateUser(w http.ResponseWriter, r *http.Request) {
 	var user models.User
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// Save user to database
-	c.JSON(http.StatusCreated, user)
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(user)
 }
 
-func GetUsers(c *gin.Context) {
-	// Retrieve users from database
-	c.JSON(http.StatusOK, []models.User{})
-}
-
-func UpdateUser(c *gin.Context) {
-	// Update user in database
-	c.JSON(http.StatusOK, gin.H{"message": "User updated"})
-}
-
-func DeleteUser(c *gin.Context) {
-	// Delete user from database
-	c.JSON(http.StatusOK, gin.H{"message": "User deleted"})
-}
+// Other user handlers...

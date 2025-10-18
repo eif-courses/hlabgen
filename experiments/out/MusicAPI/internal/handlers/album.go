@@ -2,26 +2,18 @@ package handlers
 
 import (
 	"MusicAPI/internal/models"
-	"github.com/gin-gonic/gin"
+	"encoding/json"
 	"net/http"
 )
 
-func CreateAlbum(c *gin.Context) {
-	// Implementation
+func CreateAlbum(w http.ResponseWriter, r *http.Request) {
+	var album models.Album
+	if err := json.NewDecoder(r.Body).Decode(&album); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(album)
 }
 
-func GetAlbum(c *gin.Context) {
-	// Implementation
-}
-
-func UpdateAlbum(c *gin.Context) {
-	// Implementation
-}
-
-func DeleteAlbum(c *gin.Context) {
-	// Implementation
-}
-
-func GetAllAlbums(c *gin.Context) {
-	// Implementation
-}
+// Other CRUD functions for Album

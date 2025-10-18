@@ -2,29 +2,28 @@ package handlers
 
 import (
 	"InventoryAPI/internal/models"
-	"github.com/gin-gonic/gin"
+	"encoding/json"
 	"net/http"
 )
 
-func CreateProduct(c *gin.Context) {
+func CreateProduct(w http.ResponseWriter, r *http.Request) {
 	var product models.Product
-	if err := c.ShouldBindJSON(&product); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := json.NewDecoder(r.Body).Decode(&product); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// Logic to save product
-	c.JSON(http.StatusCreated, product)
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(product)
 }
 
-func GetProducts(c *gin.Context) {
-	// Logic to get products
-	c.JSON(http.StatusOK, []models.Product{})
+func GetProducts(w http.ResponseWriter, r *http.Request) {
+	// Implementation here
 }
 
-func UpdateProduct(c *gin.Context) {
-	// Logic to update product
+func UpdateProduct(w http.ResponseWriter, r *http.Request) {
+	// Implementation here
 }
 
-func DeleteProduct(c *gin.Context) {
-	// Logic to delete product
+func DeleteProduct(w http.ResponseWriter, r *http.Request) {
+	// Implementation here
 }

@@ -1,9 +1,9 @@
 package models
 
 type Goal struct {
-	ID       int    `json:"id"`
-	UserID   int    `json:"user_id"`
-	GoalType string `json:"goal_type"`
-	Target   int    `json:"target"`
-	Achieved bool   `json:"achieved"`
+	ID        int       `json:"id"`
+	UserID    int       `json:"user_id"`
+	Target    string    `json:"target"`
+	Progress  float64   `json:"progress"`
+	CreatedAt time.Time `json:"created_at"`
 }

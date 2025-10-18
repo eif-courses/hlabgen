@@ -2,28 +2,16 @@ package handlers
 
 import (
 	"FitnessAPI/internal/models"
-	"github.com/gin-gonic/gin"
+	"encoding/json"
 	"net/http"
 )
 
-func CreateWorkout(c *gin.Context) {
+func CreateWorkout(w http.ResponseWriter, r *http.Request) {
 	var workout models.Workout
-	if err := c.ShouldBindJSON(&workout); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := json.NewDecoder(r.Body).Decode(&workout); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// Logic to save workout to database
-	c.JSON(http.StatusCreated, workout)
-}
-
-func GetWorkout(c *gin.Context) {
-	// Logic to get workout from database
-}
-
-func UpdateWorkout(c *gin.Context) {
-	// Logic to update workout in database
-}
-
-func DeleteWorkout(c *gin.Context) {
-	// Logic to delete workout from database
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(workout)
 }

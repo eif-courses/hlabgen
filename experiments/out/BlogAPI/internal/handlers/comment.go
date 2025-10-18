@@ -2,36 +2,21 @@ package handlers
 
 import (
 	"BlogAPI/internal/models"
-	"github.com/gin-gonic/gin"
+	"encoding/json"
 	"net/http"
 )
 
-func CreateComment(c *gin.Context) {
+func CreateComment(w http.ResponseWriter, r *http.Request) {
 	var comment models.Comment
-	if err := c.ShouldBindJSON(&comment); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// Save comment to database
-	c.JSON(http.StatusCreated, comment)
+	// Here you would typically save the comment to the database
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(comment)
 }
 
-func GetComments(c *gin.Context) {
-	// Fetch comments from database
-	c.JSON(http.StatusOK, []models.Comment{})
-}
-
-func GetComment(c *gin.Context) {
-	// Fetch single comment by ID
-	c.JSON(http.StatusOK, models.Comment{})
-}
-
-func UpdateComment(c *gin.Context) {
-	// Update comment logic
-	c.JSON(http.StatusOK, models.Comment{})
-}
-
-func DeleteComment(c *gin.Context) {
-	// Delete comment logic
-	c.Status(http.StatusNoContent)
+func GetComments(w http.ResponseWriter, r *http.Request) {
+	// Logic to retrieve comments
 }

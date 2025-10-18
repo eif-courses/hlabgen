@@ -1,67 +1,50 @@
 
 🚀 Starting generation for app: HotelAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/18 19:44:06 🧠 Starting ML-based code generation...
-⏱️  Initial model call took 26.688475987s
+2025/10/18 21:24:39 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 25.727614189s
 
 📊 Generation Summary:
-  • Duration: 26.689063707s
+  • Duration: 25.72955853s
   • Primary Success: true
   • Repair Attempts: 0
   • Final Success: true
   • Error: 
-🔧 Fixed imports in: handlers/hotel.go
-🔧 Fixed imports in: handlers/room.go
-🔧 Fixed imports in: handlers/booking.go
-🔧 Fixed imports in: handlers/guest.go
-🔧 Fixed imports in: handlers/review.go
-🔧 Fixed imports in: routes/routes.go
-🔧 Fixed imports in: internal/handlers/hotel_test.go
-🔧 Fixed imports in: internal/handlers/room_test.go
-🔧 Fixed imports in: internal/handlers/booking_test.go
-🔧 Fixed imports in: internal/handlers/guest_test.go
-🔧 Fixed imports in: internal/handlers/review_test.go
+2025/10/18 21:25:05 ✅ Generated 1 test file(s)
+2025/10/18 21:25:05 🔧 Detected module name: HotelAPI — fixing imports...
+2025/10/18 21:25:05 ✅ Import paths updated successfully.
 🔧 Running go mod tidy...
-go: finding module for package github.com/eif-courses/hlabgen/internal/handlers
-go: HotelAPI/internal/handlers tested by
-	HotelAPI/internal/handlers.test imports
-	github.com/eif-courses/hlabgen/internal/handlers: module github.com/eif-courses/hlabgen@latest found (v0.0.0-20251018161011-98d4a82a676f), but does not contain package github.com/eif-courses/hlabgen/internal/handlers
-2025/10/18 19:44:33 ⚠️  go mod tidy failed: exit status 1
-2025/10/18 19:44:33 🔧 Detected module name: HotelAPI — fixing imports...
-2025/10/18 19:44:33   ✅ Updated imports in: experiments/out/HotelAPI/internal/handlers/booking_test.go
-2025/10/18 19:44:33   ✅ Updated imports in: experiments/out/HotelAPI/internal/handlers/guest_test.go
-2025/10/18 19:44:33   ✅ Updated imports in: experiments/out/HotelAPI/internal/handlers/hotel_test.go
-2025/10/18 19:44:33   ✅ Updated imports in: experiments/out/HotelAPI/internal/handlers/review_test.go
-2025/10/18 19:44:33   ✅ Updated imports in: experiments/out/HotelAPI/internal/handlers/room_test.go
-2025/10/18 19:44:33 ✅ Import paths updated successfully.
-✅ ML generation completed (26.69s)
+✅ Dependencies tidied
+✅ ML generation completed (25.73s)
 📁 Saved per-package coverage → experiments/out/HotelAPI/coverage.json
 🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
 
 --- go test summary ---
 
 --- experiments/out/HotelAPI/internal/handlers ---
-# HotelAPI/internal/handlers [HotelAPI/internal/handlers.test]
-./booking.go:5:9: "encoding/json" imported and not used
-./booking.go:6:5: "HotelAPI/internal/models" imported and not used
-./guest.go:5:9: "encoding/json" imported and not used
-./guest.go:6:5: "HotelAPI/internal/models" imported and not used
-./hotel.go:5:9: "encoding/json" imported and not used
-./hotel.go:6:5: "HotelAPI/internal/models" imported and not used
-./review.go:5:9: "encoding/json" imported and not used
-./review.go:6:5: "HotelAPI/internal/models" imported and not used
-./room.go:5:9: "encoding/json" imported and not used
-./room.go:6:5: "HotelAPI/internal/models" imported and not used
-./room.go:6:5: too many errors
-FAIL	HotelAPI/internal/handlers [build failed]
+=== RUN   TestCreateHotel
+--- PASS: TestCreateHotel (0.00s)
+=== RUN   TestGetHotels
+--- PASS: TestGetHotels (0.00s)
+=== RUN   TestCreateRoom
+--- PASS: TestCreateRoom (0.00s)
+=== RUN   TestGetRooms
+--- PASS: TestGetRooms (0.00s)
+=== RUN   TestCreateBooking
+--- PASS: TestCreateBooking (0.00s)
+=== RUN   TestGetBookings
+--- PASS: TestGetBookings (0.00s)
+PASS
+coverage: 40.0% of statements
+ok  	HotelAPI/internal/handlers	0.002s
 
 ------------------------
 
 📊 Summary for HotelAPI:
-  • BuildSuccess = false
+  • BuildSuccess = true
   • LintWarnings = 0
-  • TestsPass    = false
-  • Coverage     = 0.0%
+  • TestsPass    = true
+  • Coverage     = 40.0%
   • ML Duration  = 0s (repair 0)
 🧾 Aggregated 4 experiments into experiments/logs/summary.csv
 

@@ -1,9 +1,6 @@
 package handlers_test
 
 import (
-	"FitnessAPI/internal/handlers"
-	"FitnessAPI/internal/routes"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"net/http/httptest"
 	"strings"

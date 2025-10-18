@@ -2,22 +2,32 @@ package handlers
 
 import (
 	"SocialAPI/internal/models"
-	"github.com/gin-gonic/gin"
+	"encoding/json"
 	"net/http"
 )
 
-func CreatePost(c *gin.Context) {
-	// Implementation
+// CreatePost handles the creation of a new post.
+func CreatePost(w http.ResponseWriter, r *http.Request) {
+	var post models.Post
+	if err := json.NewDecoder(r.Body).Decode(&post); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(post)
 }
 
-func GetPost(c *gin.Context) {
-	// Implementation
+// GetPost handles fetching a post by ID.
+func GetPost(w http.ResponseWriter, r *http.Request) {
+	// Implementation here
 }
 
-func UpdatePost(c *gin.Context) {
-	// Implementation
+// UpdatePost handles updating a post.
+func UpdatePost(w http.ResponseWriter, r *http.Request) {
+	// Implementation here
 }
 
-func DeletePost(c *gin.Context) {
-	// Implementation
+// DeletePost handles deleting a post.
+func DeletePost(w http.ResponseWriter, r *http.Request) {
+	// Implementation here
 }

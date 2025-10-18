@@ -1,88 +1,40 @@
 
 🚀 Starting generation for app: BlogAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/18 19:42:37 🧠 Starting ML-based code generation...
-⏱️  Initial model call took 26.538972552s
+2025/10/18 21:23:28 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 14.29498172s
 
 📊 Generation Summary:
-  • Duration: 26.539269203s
+  • Duration: 14.295615582s
   • Primary Success: true
   • Repair Attempts: 0
   • Final Success: true
   • Error: 
-🔧 Fixed imports in: handlers/post.go
-🔧 Fixed imports in: handlers/comment.go
-🔧 Fixed imports in: handlers/author.go
-🔧 Fixed imports in: routes/routes.go
-🔧 Fixed imports in: internal/handlers/post_test.go
-🔧 Fixed imports in: internal/handlers/comment_test.go
-🔧 Fixed imports in: internal/handlers/author_test.go
+2025/10/18 21:23:42 ✅ Generated 1 test file(s)
+2025/10/18 21:23:42 🔧 Detected module name: BlogAPI — fixing imports...
+2025/10/18 21:23:42 ✅ Import paths updated successfully.
 🔧 Running go mod tidy...
-go: finding module for package github.com/eif-courses/hlabgen/internal/handlers
-go: finding module for package github.com/gin-gonic/gin
-go: downloading github.com/gin-gonic/gin v1.11.0
-go: found github.com/gin-gonic/gin in github.com/gin-gonic/gin v1.11.0
-go: downloading github.com/gin-contrib/sse v1.1.0
-go: downloading github.com/quic-go/quic-go v0.54.0
-go: downloading github.com/stretchr/testify v1.11.1
-go: downloading github.com/goccy/go-yaml v1.18.0
-go: downloading github.com/go-playground/validator/v10 v10.27.0
-go: downloading github.com/bytedance/sonic v1.14.0
-go: downloading github.com/goccy/go-json v0.10.2
-go: downloading github.com/ugorji/go/codec v1.3.0
-go: downloading github.com/json-iterator/go v1.1.12
-go: downloading google.golang.org/protobuf v1.36.9
-go: downloading github.com/modern-go/reflect2 v1.0.2
-go: downloading golang.org/x/text v0.27.0
-go: downloading github.com/davecgh/go-spew v1.1.1
-go: downloading github.com/pmezard/go-difflib v1.0.0
-go: downloading gopkg.in/yaml.v3 v3.0.1
-go: downloading github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421
-go: downloading github.com/go-playground/locales v0.14.1
-go: downloading github.com/leodido/go-urn v1.4.0
-go: downloading github.com/gabriel-vasile/mimetype v1.4.8
-go: downloading github.com/go-playground/universal-translator v0.18.1
-go: downloading golang.org/x/crypto v0.40.0
-go: downloading go.uber.org/mock v0.5.0
-go: downloading github.com/quic-go/qpack v0.5.1
-go: downloading golang.org/x/tools v0.34.0
-go: downloading github.com/bytedance/sonic/loader v0.3.0
-go: downloading github.com/cloudwego/base64x v0.1.6
-go: downloading github.com/twitchyliquid64/golang-asm v0.15.1
-go: downloading github.com/klauspost/cpuid/v2 v2.3.0
-go: downloading golang.org/x/arch v0.20.0
-go: downloading golang.org/x/mod v0.25.0
-go: downloading github.com/go-playground/assert/v2 v2.2.0
-go: downloading github.com/google/go-cmp v0.7.0
-go: finding module for package github.com/eif-courses/hlabgen/internal/handlers
-go: BlogAPI/internal/handlers tested by
-	BlogAPI/internal/handlers.test imports
-	github.com/eif-courses/hlabgen/internal/handlers: module github.com/eif-courses/hlabgen@latest found (v0.0.0-20251018161011-98d4a82a676f), but does not contain package github.com/eif-courses/hlabgen/internal/handlers
-2025/10/18 19:43:06 ⚠️  go mod tidy failed: exit status 1
-2025/10/18 19:43:06 🔧 Detected module name: BlogAPI — fixing imports...
-2025/10/18 19:43:06   ✅ Updated imports in: experiments/out/BlogAPI/internal/handlers/author_test.go
-2025/10/18 19:43:06   ✅ Updated imports in: experiments/out/BlogAPI/internal/handlers/comment_test.go
-2025/10/18 19:43:06   ✅ Updated imports in: experiments/out/BlogAPI/internal/handlers/post_test.go
-2025/10/18 19:43:06 ✅ Import paths updated successfully.
-✅ ML generation completed (26.54s)
+✅ Dependencies tidied
+✅ ML generation completed (14.30s)
 📁 Saved per-package coverage → experiments/out/BlogAPI/coverage.json
 🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
 
 --- go test summary ---
 
 --- experiments/out/BlogAPI/internal/handlers ---
-# BlogAPI/internal/handlers
-author.go:5:5: no required module provides package github.com/gin-gonic/gin; to add it:
-	go get github.com/gin-gonic/gin
-FAIL	BlogAPI/internal/handlers [setup failed]
+=== RUN   TestCreatePost
+--- PASS: TestCreatePost (0.00s)
+PASS
+coverage: 20.0% of statements
+ok  	BlogAPI/internal/handlers	0.002s
 
 ------------------------
 
 📊 Summary for BlogAPI:
-  • BuildSuccess = false
+  • BuildSuccess = true
   • LintWarnings = 0
-  • TestsPass    = false
-  • Coverage     = 0.0%
+  • TestsPass    = true
+  • Coverage     = 20.0%
   • ML Duration  = 0s (repair 0)
 🧾 Aggregated 1 experiments into experiments/logs/summary.csv
 

@@ -1,47 +1,30 @@
 
 🚀 Starting generation for app: InventoryAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/18 19:44:33 🧠 Starting ML-based code generation...
-⏱️  Initial model call took 33.078218103s
+2025/10/18 21:25:05 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 17.476944409s
 
 📊 Generation Summary:
-  • Duration: 33.078882109s
+  • Duration: 17.477311416s
   • Primary Success: true
   • Repair Attempts: 0
   • Final Success: true
   • Error: 
-🔧 Fixed imports in: handlers/product.go
-🔧 Fixed imports in: handlers/warehouse.go
-🔧 Fixed imports in: handlers/stock.go
-🔧 Fixed imports in: handlers/supplier.go
-🔧 Fixed imports in: handlers/order.go
-🔧 Fixed imports in: routes/routes.go
-🔧 Fixed imports in: internal/handlers/product_test.go
-🔧 Fixed imports in: internal/handlers/warehouse_test.go
+2025/10/18 21:25:23 ✅ Generated 2 test file(s)
+2025/10/18 21:25:23 🔧 Detected module name: InventoryAPI — fixing imports...
+2025/10/18 21:25:23 ✅ Import paths updated successfully.
 🔧 Running go mod tidy...
-go: finding module for package github.com/eif-courses/hlabgen/internal/handlers
-go: finding module for package github.com/gin-gonic/gin
-go: found github.com/gin-gonic/gin in github.com/gin-gonic/gin v1.11.0
-go: finding module for package github.com/eif-courses/hlabgen/internal/handlers
-go: InventoryAPI/internal/handlers tested by
-	InventoryAPI/internal/handlers.test imports
-	github.com/eif-courses/hlabgen/internal/handlers: module github.com/eif-courses/hlabgen@latest found (v0.0.0-20251018161011-98d4a82a676f), but does not contain package github.com/eif-courses/hlabgen/internal/handlers
-2025/10/18 19:45:07 ⚠️  go mod tidy failed: exit status 1
-2025/10/18 19:45:07 🔧 Detected module name: InventoryAPI — fixing imports...
-2025/10/18 19:45:07   ✅ Updated imports in: experiments/out/InventoryAPI/internal/handlers/product_test.go
-2025/10/18 19:45:07   ✅ Updated imports in: experiments/out/InventoryAPI/internal/handlers/warehouse_test.go
-2025/10/18 19:45:07 ✅ Import paths updated successfully.
-✅ ML generation completed (33.08s)
+✅ Dependencies tidied
+✅ ML generation completed (17.48s)
 📁 Saved per-package coverage → experiments/out/InventoryAPI/coverage.json
 🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
 
 --- go test summary ---
 
---- experiments/out/InventoryAPI/internal/handlers ---
-# InventoryAPI/internal/handlers
-order.go:5:2: no required module provides package github.com/gin-gonic/gin; to add it:
-	go get github.com/gin-gonic/gin
-FAIL	InventoryAPI/internal/handlers [setup failed]
+--- experiments/out/InventoryAPI/internal/handlers/handlers_test ---
+# InventoryAPI/internal/models
+../../models/order.go:7:16: undefined: time
+FAIL	InventoryAPI/internal/handlers/handlers_test [build failed]
 
 ------------------------
 

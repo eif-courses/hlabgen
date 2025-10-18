@@ -2,28 +2,16 @@ package handlers
 
 import (
 	"FitnessAPI/internal/models"
-	"github.com/gin-gonic/gin"
+	"encoding/json"
 	"net/http"
 )
 
-func CreateProgress(c *gin.Context) {
+func CreateProgress(w http.ResponseWriter, r *http.Request) {
 	var progress models.Progress
-	if err := c.ShouldBindJSON(&progress); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := json.NewDecoder(r.Body).Decode(&progress); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// Logic to save progress to database
-	c.JSON(http.StatusCreated, progress)
-}
-
-func GetProgress(c *gin.Context) {
-	// Logic to get progress from database
-}
-
-func UpdateProgress(c *gin.Context) {
-	// Logic to update progress in database
-}
-
-func DeleteProgress(c *gin.Context) {
-	// Logic to delete progress from database
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(progress)
 }

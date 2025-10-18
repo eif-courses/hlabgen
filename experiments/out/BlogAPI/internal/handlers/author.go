@@ -2,36 +2,21 @@ package handlers
 
 import (
 	"BlogAPI/internal/models"
-	"github.com/gin-gonic/gin"
+	"encoding/json"
 	"net/http"
 )
 
-func CreateAuthor(c *gin.Context) {
+func CreateAuthor(w http.ResponseWriter, r *http.Request) {
 	var author models.Author
-	if err := c.ShouldBindJSON(&author); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := json.NewDecoder(r.Body).Decode(&author); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// Save author to database
-	c.JSON(http.StatusCreated, author)
+	// Here you would typically save the author to the database
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(author)
 }
 
-func GetAuthors(c *gin.Context) {
-	// Fetch authors from database
-	c.JSON(http.StatusOK, []models.Author{})
-}
-
-func GetAuthor(c *gin.Context) {
-	// Fetch single author by ID
-	c.JSON(http.StatusOK, models.Author{})
-}
-
-func UpdateAuthor(c *gin.Context) {
-	// Update author logic
-	c.JSON(http.StatusOK, models.Author{})
-}
-
-func DeleteAuthor(c *gin.Context) {
-	// Delete author logic
-	c.Status(http.StatusNoContent)
+func GetAuthors(w http.ResponseWriter, r *http.Request) {
+	// Logic to retrieve authors
 }

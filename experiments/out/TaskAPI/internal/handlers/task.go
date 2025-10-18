@@ -2,31 +2,28 @@ package handlers
 
 import (
 	"TaskAPI/internal/models"
-	"github.com/gin-gonic/gin"
+	"encoding/json"
 	"net/http"
 )
 
-func CreateTask(c *gin.Context) {
+func CreateTask(w http.ResponseWriter, r *http.Request) {
 	var task models.Task
-	if err := c.ShouldBindJSON(&task); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// Save task to database
-	c.JSON(http.StatusCreated, task)
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(task)
 }
 
-func GetTasks(c *gin.Context) {
-	// Retrieve tasks from database
-	c.JSON(http.StatusOK, []models.Task{})
+func GetTasks(w http.ResponseWriter, r *http.Request) {
+	// Implementation for getting tasks
 }
 
-func UpdateTask(c *gin.Context) {
-	// Update task in database
-	c.JSON(http.StatusOK, gin.H{"message": "Task updated"})
+func UpdateTask(w http.ResponseWriter, r *http.Request) {
+	// Implementation for updating a task
 }
 
-func DeleteTask(c *gin.Context) {
-	// Delete task from database
-	c.JSON(http.StatusOK, gin.H{"message": "Task deleted"})
+func DeleteTask(w http.ResponseWriter, r *http.Request) {
+	// Implementation for deleting a task
 }

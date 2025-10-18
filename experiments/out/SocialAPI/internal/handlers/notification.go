@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"SocialAPI/internal/models"
-	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func GetNotifications(c *gin.Context) {
-	// Implementation
+// GetNotifications handles fetching notifications for a user.
+func GetNotifications(w http.ResponseWriter, r *http.Request) {
+	// Implementation here
 }

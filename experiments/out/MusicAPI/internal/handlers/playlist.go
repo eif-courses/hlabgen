@@ -2,26 +2,18 @@ package handlers
 
 import (
 	"MusicAPI/internal/models"
-	"github.com/gin-gonic/gin"
+	"encoding/json"
 	"net/http"
 )
 
-func CreatePlaylist(c *gin.Context) {
-	// Implementation
+func CreatePlaylist(w http.ResponseWriter, r *http.Request) {
+	var playlist models.Playlist
+	if err := json.NewDecoder(r.Body).Decode(&playlist); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(playlist)
 }
 
-func GetPlaylist(c *gin.Context) {
-	// Implementation
-}
-
-func UpdatePlaylist(c *gin.Context) {
-	// Implementation
-}
-
-func DeletePlaylist(c *gin.Context) {
-	// Implementation
-}
-
-func GetAllPlaylists(c *gin.Context) {
-	// Implementation
-}
+// Other CRUD functions for Playlist

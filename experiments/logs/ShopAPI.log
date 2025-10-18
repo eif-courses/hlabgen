@@ -1,61 +1,46 @@
 
 🚀 Starting generation for app: ShopAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/18 19:46:49 🧠 Starting ML-based code generation...
-⏱️  Initial model call took 32.555504183s
+2025/10/18 21:26:22 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 15.672808467s
 
 📊 Generation Summary:
-  • Duration: 32.556008751s
+  • Duration: 15.673320354s
   • Primary Success: true
   • Repair Attempts: 0
   • Final Success: true
   • Error: 
-🔧 Fixed imports in: handlers/product.go
-🔧 Fixed imports in: handlers/order.go
-🔧 Fixed imports in: handlers/customer.go
-🔧 Fixed imports in: handlers/cart.go
-🔧 Fixed imports in: handlers/payment.go
-🔧 Fixed imports in: routes/routes.go
-🔧 Fixed imports in: internal/handlers/product_test.go
-🔧 Fixed imports in: internal/handlers/order_test.go
-🔧 Fixed imports in: internal/handlers/customer_test.go
-🔧 Fixed imports in: internal/handlers/cart_test.go
-🔧 Fixed imports in: internal/handlers/payment_test.go
+2025/10/18 21:26:38 ✅ Generated 1 test file(s)
+2025/10/18 21:26:38 🔧 Detected module name: ShopAPI — fixing imports...
+2025/10/18 21:26:38 ✅ Import paths updated successfully.
 🔧 Running go mod tidy...
-go: finding module for package github.com/gin-gonic/gin
-go: finding module for package github.com/eif-courses/hlabgen/internal/handlers
-go: found github.com/gin-gonic/gin in github.com/gin-gonic/gin v1.11.0
-go: finding module for package github.com/eif-courses/hlabgen/internal/handlers
-go: ShopAPI/internal/handlers tested by
-	ShopAPI/internal/handlers.test imports
-	github.com/eif-courses/hlabgen/internal/handlers: module github.com/eif-courses/hlabgen@latest found (v0.0.0-20251018161011-98d4a82a676f), but does not contain package github.com/eif-courses/hlabgen/internal/handlers
-2025/10/18 19:47:22 ⚠️  go mod tidy failed: exit status 1
-2025/10/18 19:47:22 🔧 Detected module name: ShopAPI — fixing imports...
-2025/10/18 19:47:22   ✅ Updated imports in: experiments/out/ShopAPI/internal/handlers/cart_test.go
-2025/10/18 19:47:22   ✅ Updated imports in: experiments/out/ShopAPI/internal/handlers/customer_test.go
-2025/10/18 19:47:22   ✅ Updated imports in: experiments/out/ShopAPI/internal/handlers/order_test.go
-2025/10/18 19:47:22   ✅ Updated imports in: experiments/out/ShopAPI/internal/handlers/payment_test.go
-2025/10/18 19:47:22   ✅ Updated imports in: experiments/out/ShopAPI/internal/handlers/product_test.go
-2025/10/18 19:47:22 ✅ Import paths updated successfully.
-✅ ML generation completed (32.56s)
+✅ Dependencies tidied
+✅ ML generation completed (15.67s)
 📁 Saved per-package coverage → experiments/out/ShopAPI/coverage.json
 🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
 
 --- go test summary ---
 
 --- experiments/out/ShopAPI/internal/handlers ---
-# ShopAPI/internal/handlers
-cart.go:5:2: no required module provides package github.com/gin-gonic/gin; to add it:
-	go get github.com/gin-gonic/gin
-FAIL	ShopAPI/internal/handlers [setup failed]
+=== RUN   TestCreateProduct
+--- PASS: TestCreateProduct (0.00s)
+=== RUN   TestGetProducts
+--- PASS: TestGetProducts (0.00s)
+=== RUN   TestUpdateProduct
+--- PASS: TestUpdateProduct (0.00s)
+=== RUN   TestDeleteProduct
+--- PASS: TestDeleteProduct (0.00s)
+PASS
+coverage: 33.3% of statements
+ok  	ShopAPI/internal/handlers	0.003s
 
 ------------------------
 
 📊 Summary for ShopAPI:
-  • BuildSuccess = false
+  • BuildSuccess = true
   • LintWarnings = 0
-  • TestsPass    = false
-  • Coverage     = 0.0%
+  • TestsPass    = true
+  • Coverage     = 33.3%
   • ML Duration  = 0s (repair 0)
 🧾 Aggregated 9 experiments into experiments/logs/summary.csv
 

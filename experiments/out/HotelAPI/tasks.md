@@ -1,16 +1,5 @@
 # Lab Tasks
 
-## Task 1: Implement Room Availability Checking
-- **Statement:** Implement a function that checks if a room is available for the specified dates.
-- **Hints:** Use the Booking model to check existing bookings.
-- **Expected Output:** A boolean indicating availability.
-
-## Task 2: Add Booking Date Validation
-- **Statement:** Ensure that the booking dates are valid (e.g., start date must be before end date).
-- **Hints:** Use time.Time methods to compare dates.
-- **Expected Output:** An error message if validation fails.
-
-## Task 3: Implement Dynamic Pricing
-- **Statement:** Adjust room prices based on demand or season.
-- **Hints:** Create a function that modifies the price based on certain conditions.
-- **Expected Output:** Updated room price based on the logic implemented.
+1. Implement room availability checking logic in the CreateBooking handler.
+2. Add booking date validation to ensure the start date is before the end date.
+3. Implement dynamic pricing based on room type and season in the CreateRoom handler.

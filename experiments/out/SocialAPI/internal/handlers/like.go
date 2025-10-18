@@ -2,14 +2,15 @@ package handlers
 
 import (
 	"SocialAPI/internal/models"
-	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func LikePost(c *gin.Context) {
-	// Implementation
+// CreateLike handles liking a post.
+func CreateLike(w http.ResponseWriter, r *http.Request) {
+	// Implementation here
 }
 
-func UnlikePost(c *gin.Context) {
-	// Implementation
+// DeleteLike handles unliking a post.
+func DeleteLike(w http.ResponseWriter, r *http.Request) {
+	// Implementation here
 }

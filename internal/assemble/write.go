@@ -33,9 +33,16 @@ func WriteMany(base string, files []File) error {
 		filename, content = rules.PlaceTestsWithHandlers(filename, content)
 
 		// ✅ Apply safety rule for handlers (decode + type mismatch fix)
-		if strings.Contains(filename, "handlers/") {
+		if strings.Contains(filename, "handlers/") && !strings.HasSuffix(filename, "_test.go") {
 			content = rules.SafeDecode(content)
 			content = rules.FixIDTypeMismatch(content)
+			content = removeUnusedModelsImport(content) // NEW: Add this line
+		}
+
+		// ✅ Remove unused imports from models
+		if strings.Contains(filename, "models/") && !strings.HasSuffix(filename, "_test.go") {
+			content = cleanUnusedImportsInModels(content)
+			content = ensureTimeImport(content) // NEW: Add this line
 		}
 
 		// ✅ Normalize routes: rename RegisterRoutes → Register
@@ -181,6 +188,77 @@ func FixUnbalancedBraces(code string) string {
 
 	if diff > 0 {
 		code += strings.Repeat("\n}", diff)
+	}
+	return code
+}
+
+// cleanUnusedImportsInModels removes unused imports from model files
+func cleanUnusedImportsInModels(code string) string {
+	// Check if encoding/json is actually used
+	if strings.Contains(code, `"encoding/json"`) && !strings.Contains(code, "json.") {
+		lines := strings.Split(code, "\n")
+		var result []string
+		for _, line := range lines {
+			// Skip the encoding/json import line
+			if strings.Contains(line, `"encoding/json"`) {
+				continue
+			}
+			result = append(result, line)
+		}
+		code = strings.Join(result, "\n")
+	}
+	return code
+}
+
+// ensureTimeImport adds time import if time.Time is used but not imported
+func ensureTimeImport(code string) string {
+	// Check if time.Time is used
+	if !strings.Contains(code, "time.Time") {
+		return code
+	}
+
+	// Check if time is already imported
+	if strings.Contains(code, `"time"`) {
+		return code
+	}
+
+	// Add time import
+	lines := strings.Split(code, "\n")
+	var result []string
+	importAdded := false
+
+	for i, line := range lines {
+		result = append(result, line)
+
+		// Add after package declaration
+		if !importAdded && strings.HasPrefix(strings.TrimSpace(line), "package ") {
+			// Check if next line is already an import
+			if i+1 < len(lines) && strings.Contains(lines[i+1], "import") {
+				continue
+			}
+			result = append(result, "")
+			result = append(result, `import "time"`)
+			importAdded = true
+		}
+	}
+
+	return strings.Join(result, "\n")
+}
+
+// removeUnusedModelsImport removes models import if not used in handlers
+func removeUnusedModelsImport(code string) string {
+	// Check if models package is used
+	if !strings.Contains(code, "models.") {
+		lines := strings.Split(code, "\n")
+		var result []string
+		for _, line := range lines {
+			// Skip the models import line
+			if strings.Contains(line, "/internal/models\"") {
+				continue
+			}
+			result = append(result, line)
+		}
+		return strings.Join(result, "\n")
 	}
 	return code
 }

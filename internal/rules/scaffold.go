@@ -348,6 +348,9 @@ import (
 		}
 	}
 
+	// ✅ NEW: Remove unused imports from test files
+	fixed = removeUnusedImports(fixed)
+
 	fixed = CleanDuplicateImports(fixed)
 	fixed = RemoveDuplicateHandlerImports(fixed)
 	return fixed
@@ -370,25 +373,63 @@ func PlaceTestsWithHandlers(filename, content string) (string, string) {
 		module := detectModuleName()
 		handlerImport := fmt.Sprintf(`"%s/internal/handlers"`, module)
 
-		// Only add handler import if it doesn't exist at all
-		// Check for any variation of the handler import path
-		if !strings.Contains(content, "/internal/handlers\"") {
-			if strings.Contains(content, "import (") {
-				// Find the import block and add to it
-				content = strings.Replace(content, "import (", "import (\n\t"+handlerImport, 1)
-			} else {
-				// No import block exists, create one
-				packageLine := "package handlers_test"
-				replacement := packageLine + "\n\nimport (\n\t" + handlerImport + "\n)\n"
-				content = strings.Replace(content, packageLine, replacement, 1)
-			}
+		// Check if there's ALREADY an import block with handlers
+		hasHandlerImport := strings.Contains(content, "/internal/handlers\"")
+
+		// Only add if completely missing AND there's an import block
+		if !hasHandlerImport && strings.Contains(content, "import (") {
+			// Add to existing import block
+			content = strings.Replace(content, "import (", "import (\n\t"+handlerImport, 1)
+		} else if !hasHandlerImport && !strings.Contains(content, "import") {
+			// Create new import block
+			packageLine := "package handlers_test"
+			replacement := packageLine + "\n\nimport (\n\t" + handlerImport + "\n)\n"
+			content = strings.Replace(content, packageLine, replacement, 1)
 		}
 
-		// Final cleanup - this is critical to remove any duplicates that slipped through
+		// CRITICAL: Final aggressive cleanup
+		content = RemoveAllDuplicateHandlerImports(content)
 		content = CleanDuplicateImports(content)
-		content = RemoveDuplicateHandlerImports(content)
 	}
 	return filename, content
+}
+
+// RemoveAllDuplicateHandlerImports - nuclear option, keeps only FIRST handler import
+func RemoveAllDuplicateHandlerImports(code string) string {
+	lines := strings.Split(code, "\n")
+	var out []string
+	handlerImportFound := false
+	inImport := false
+
+	for _, line := range lines {
+		trim := strings.TrimSpace(line)
+
+		if strings.HasPrefix(trim, "import (") {
+			inImport = true
+			out = append(out, line)
+			continue
+		}
+
+		if inImport && trim == ")" {
+			inImport = false
+			out = append(out, line)
+			continue
+		}
+
+		// Inside import block - check for handler import
+		if inImport && strings.Contains(trim, "/internal/handlers\"") {
+			if !handlerImportFound {
+				out = append(out, line)
+				handlerImportFound = true
+			}
+			// Skip all subsequent handler imports
+			continue
+		}
+
+		out = append(out, line)
+	}
+
+	return strings.Join(out, "\n")
 }
 
 // --- helpers used by test generation ---
@@ -591,4 +632,154 @@ func RemoveDuplicateHandlerImports(code string) string {
 	}
 
 	return strings.Join(out, "\n")
+}
+
+// removeUnusedImports strips imports that aren't used in the code (safe version)
+// removeUnusedImports strips imports that aren't used in the code (safe version)
+func removeUnusedImports(code string) string {
+	lines := strings.Split(code, "\n")
+	var result []string
+	inImportBlock := false
+
+	for _, line := range lines {
+		trim := strings.TrimSpace(line)
+
+		// Track import block start
+		if strings.HasPrefix(trim, "import (") {
+			inImportBlock = true
+			result = append(result, line)
+			continue
+		}
+
+		// Track import block end - ALWAYS KEEP IT
+		if inImportBlock && trim == ")" {
+			inImportBlock = false
+			result = append(result, line)
+			continue
+		}
+
+		// Inside import block - check if import should be kept
+		if inImportBlock && trim != "" && !strings.HasPrefix(trim, "//") {
+			// NEVER skip handlers import in test files - KEEP IT ALWAYS
+			if strings.Contains(trim, "/internal/handlers\"") {
+				result = append(result, line)
+				continue
+			}
+
+			// Check for common unused imports
+			shouldSkip := false
+
+			// Skip unused bytes
+			if strings.Contains(trim, `"bytes"`) && !strings.Contains(code, "bytes.") {
+				shouldSkip = true
+			}
+
+			// Skip unused encoding/json
+			if strings.Contains(trim, `"encoding/json"`) && !strings.Contains(code, "json.") {
+				shouldSkip = true
+			}
+
+			// Skip unused models
+			if strings.Contains(trim, "/internal/models\"") && !strings.Contains(code, "models.") {
+				shouldSkip = true
+			}
+
+			// If not skipping, keep this import
+			if !shouldSkip {
+				result = append(result, line)
+			}
+			continue
+		}
+
+		// Not in import block - always keep
+		result = append(result, line)
+	}
+
+	return strings.Join(result, "\n")
+}
+
+// parseImportLine extracts package name, alias, and full path from an import line
+func parseImportLine(line string) struct{ pkg, alias, fullPath string } {
+	result := struct{ pkg, alias, fullPath string }{}
+
+	// Remove leading/trailing whitespace and quotes
+	line = strings.TrimSpace(line)
+
+	// Handle aliased imports: alias "path/to/package"
+	if strings.Contains(line, " ") && strings.Contains(line, `"`) {
+		parts := strings.Fields(line)
+		if len(parts) >= 2 {
+			result.alias = parts[0]
+			result.fullPath = strings.Trim(parts[1], `"`)
+			result.pkg = getPackageNameFromPath(result.fullPath)
+			return result
+		}
+	}
+
+	// Handle regular imports: "path/to/package"
+	if strings.Contains(line, `"`) {
+		result.fullPath = strings.Trim(line, `"`)
+		result.pkg = getPackageNameFromPath(result.fullPath)
+		return result
+	}
+
+	return result
+}
+
+// getPackageNameFromPath extracts the package name from an import path
+func getPackageNameFromPath(path string) string {
+	// Remove quotes if present
+	path = strings.Trim(path, `"`)
+
+	// Get the last part of the path
+	parts := strings.Split(path, "/")
+	if len(parts) > 0 {
+		lastPart := parts[len(parts)-1]
+		// Handle versioned paths like v2, v3
+		if strings.HasPrefix(lastPart, "v") && len(lastPart) > 1 {
+			if len(parts) > 1 {
+				return parts[len(parts)-2]
+			}
+		}
+		return lastPart
+	}
+
+	return path
+}
+
+// isPackageUsed checks if a package name is actually used in the code
+func isPackageUsed(code, pkgName string) bool {
+	// Special cases: these are always considered "used"
+	alwaysUsed := map[string]bool{
+		"testing":  true,
+		"net/http": true, // Even if only types are used
+		"http":     true,
+		"httptest": true,
+	}
+
+	if alwaysUsed[pkgName] {
+		return true
+	}
+
+	// Check for package usage patterns:
+	// 1. pkgName.Something (function/type calls)
+	// 2. pkgName.CONSTANT (constants)
+	// 3. &pkgName.Type{} (struct initialization)
+	usagePatterns := []string{
+		pkgName + ".",          // Most common: json.Marshal, models.Book, etc.
+		"&" + pkgName + ".",    // Pointer: &models.Book{}
+		"*" + pkgName + ".",    // Pointer type: *models.Book
+		"[]" + pkgName + ".",   // Slice: []models.Book
+		"[]*" + pkgName + ".",  // Slice of pointers: []*models.Book
+		"map[" + pkgName + ".", // Map key
+		"]" + pkgName + ".",    // Map value
+	}
+
+	for _, pattern := range usagePatterns {
+		if strings.Contains(code, pattern) {
+			return true
+		}
+	}
+
+	return false
 }

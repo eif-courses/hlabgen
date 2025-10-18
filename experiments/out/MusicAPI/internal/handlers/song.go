@@ -2,26 +2,28 @@ package handlers
 
 import (
 	"MusicAPI/internal/models"
-	"github.com/gin-gonic/gin"
+	"encoding/json"
 	"net/http"
 )
 
-func CreateSong(c *gin.Context) {
-	// Implementation
+func CreateSong(w http.ResponseWriter, r *http.Request) {
+	var song models.Song
+	if err := json.NewDecoder(r.Body).Decode(&song); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(song)
 }
 
-func GetSong(c *gin.Context) {
-	// Implementation
+func GetSong(w http.ResponseWriter, r *http.Request) {
+	// Implementation here
 }
 
-func UpdateSong(c *gin.Context) {
-	// Implementation
+func UpdateSong(w http.ResponseWriter, r *http.Request) {
+	// Implementation here
 }
 
-func DeleteSong(c *gin.Context) {
-	// Implementation
-}
-
-func GetAllSongs(c *gin.Context) {
-	// Implementation
+func DeleteSong(w http.ResponseWriter, r *http.Request) {
+	// Implementation here
 }

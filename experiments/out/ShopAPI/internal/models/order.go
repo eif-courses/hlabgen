@@ -1,9 +1,12 @@
 package models
 
+import "time"
+
+// Order represents a customer's order.
 type Order struct {
 	ID         int       `json:"id"`
 	CustomerID int       `json:"customer_id"`
-	Products   []Product `json:"products"`
 	Total      float64   `json:"total"`
-	Status     string    `json:"status"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
 }

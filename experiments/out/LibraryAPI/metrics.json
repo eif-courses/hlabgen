@@ -3,7 +3,7 @@
   "vet_warnings": 0,
   "lint_warnings": 0,
   "tests_pass": true,
-  "coverage_pct": 23.8,
+  "coverage_pct": 44.4,
   "cyclomatic_avg": 0,
   "gen_time_sec": 0
 }

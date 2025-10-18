@@ -2,30 +2,21 @@ package routes
 
 import (
 	"SocialAPI/internal/handlers"
-	"github.com/gin-gonic/gin"
+	"github.com/gorilla/mux"
 )
 
-func Register(r *gin.Engine) {
-	r.POST("/users", handlers.CreateUser)
-	r.GET("/users/:id", handlers.GetUser)
-	r.PUT("/users/:id", handlers.UpdateUser)
-	r.DELETE("/users/:id", handlers.DeleteUser)
-
-	r.POST("/posts", handlers.CreatePost)
-	r.GET("/posts/:id", handlers.GetPost)
-	r.PUT("/posts/:id", handlers.UpdatePost)
-	r.DELETE("/posts/:id", handlers.DeletePost)
-
-	r.POST("/comments", handlers.CreateComment)
-	r.GET("/comments/:id", handlers.GetComment)
-	r.PUT("/comments/:id", handlers.UpdateComment)
-	r.DELETE("/comments/:id", handlers.DeleteComment)
-
-	r.POST("/likes", handlers.LikePost)
-	r.DELETE("/likes", handlers.UnlikePost)
-
-	r.POST("/follows", handlers.FollowUser)
-	r.DELETE("/follows", handlers.UnfollowUser)
-
-	r.GET("/notifications", handlers.GetNotifications)
+// Register registers the routes for the application.
+func Register(r *mux.Router) {
+	r.HandleFunc("/users", handlers.CreateUser).Methods("POST")
+	r.HandleFunc("/users/{id}", handlers.GetUser).Methods("GET")
+	r.HandleFunc("/users/{id}", handlers.UpdateUser).Methods("PUT")
+	r.HandleFunc("/users/{id}", handlers.DeleteUser).Methods("DELETE")
+	r.HandleFunc("/posts", handlers.CreatePost).Methods("POST")
+	r.HandleFunc("/posts/{id}", handlers.GetPost).Methods("GET")
+	r.HandleFunc("/posts/{id}", handlers.UpdatePost).Methods("PUT")
+	r.HandleFunc("/posts/{id}", handlers.DeletePost).Methods("DELETE")
+	r.HandleFunc("/comments", handlers.CreateComment).Methods("POST")
+	r.HandleFunc("/likes", handlers.CreateLike).Methods("POST")
+	r.HandleFunc("/follows", handlers.FollowUser).Methods("POST")
+	r.HandleFunc("/notifications", handlers.GetNotifications).Methods("GET")
 }
