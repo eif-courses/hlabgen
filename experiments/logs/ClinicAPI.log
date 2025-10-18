@@ -1,21 +1,21 @@
 
 🚀 Starting generation for app: ClinicAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/18 23:38:29 🧠 Starting ML-based code generation...
-⏱️  Initial model call took 17.360783964s
+2025/10/19 00:30:15 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 16.527714249s
 
 📊 Generation Summary:
-  • Duration: 17.361177808s
+  • Duration: 16.52933793s
   • Primary Success: true
   • Repair Attempts: 0
   • Final Success: true
   • Error: 
-2025/10/18 23:38:47 ✅ Generated 1 test file(s)
-2025/10/18 23:38:47 🔧 Detected module name: ClinicAPI — fixing imports...
-2025/10/18 23:38:47 ✅ Import paths updated successfully.
+2025/10/19 00:30:32 ✅ Generated 1 test file(s)
+2025/10/19 00:30:32 🔧 Detected module name: ClinicAPI — fixing imports...
+2025/10/19 00:30:32 ✅ Import paths updated successfully.
 🔧 Running go mod tidy...
 ✅ Dependencies tidied
-✅ ML generation completed (17.36s)
+✅ ML generation completed (16.53s)
 📁 Saved per-package coverage → experiments/out/ClinicAPI/coverage.json
 🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
 

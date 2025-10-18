@@ -1,0 +1,15 @@
+package handlers_test
+
+import (
+	"ResearchAPI/internal/handlers"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
+func TestCreateReview() {
+	// Test implementation here
+}
+func TestGetReview() {
+	// Test implementation here
+}

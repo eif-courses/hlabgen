@@ -8,8 +8,8 @@ import (
 )
 
 func TestCreateMovie() {
-	// Implementation for testing CreateMovie
+	// Test implementation for CreateMovie
 }
 func TestGetMovies() {
-	// Implementation for testing GetMovies
+	// Test implementation for GetMovies
 }

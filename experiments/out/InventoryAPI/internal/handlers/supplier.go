@@ -1,35 +1,29 @@
 package handlers
 
 import (
-	"InventoryAPI/internal/models"
-	"encoding/json"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"net/http"
+    "encoding/json"
+    "net/http"
+    "InventoryAPI/internal/models"
+    "go.mongodb.org/mongo-driver/mongo"
 )
 
-// CreateSupplier handles the creation of a new supplier.
+var supplierCollection *mongo.Collection
+
 func CreateSupplier() {
-	var supplier models.Supplier
-	if err := json.NewDecoder(r.Body).Decode(&supplier); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	supplier.ID = primitive.NewObjectID()
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(supplier)
+var supplier models.Supplier
+    if err := json.NewDecoder(r.Body).Decode(&supplier); err != nil {
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+}
+    // Insert supplier into the database (pseudo-code)
+    // supplierCollection.InsertOne(context.TODO(), supplier)
+    w.WriteHeader(http.StatusCreated)
+    json.NewEncoder(w).Encode(supplier)
 }
 
-// GetSuppliers handles fetching all suppliers.
 func GetSuppliers() {
-	// Implementation for fetching suppliers
+// Fetch suppliers from the database (pseudo-code)
+    // suppliers := []models.Supplier{
 }
-
-// UpdateSupplier handles updating an existing supplier.
-func UpdateSupplier() {
-	// Implementation for updating a supplier
-}
-
-// DeleteSupplier handles deleting a supplier.
-func DeleteSupplier() {
-	// Implementation for deleting a supplier
+    // json.NewEncoder(w).Encode(suppliers)
 }

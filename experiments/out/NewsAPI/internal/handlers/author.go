@@ -16,8 +16,8 @@ func CreateAuthor() {
 	json.NewEncoder(w).Encode(author)
 }
 
-func GetAuthor() {
-	// Implementation for getting an author
+func GetAuthors() {
+	// Implementation for fetching authors
 }
 func UpdateAuthor() {
 	// Implementation for updating an author

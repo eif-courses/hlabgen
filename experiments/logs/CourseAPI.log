@@ -1,22 +1,21 @@
 
 🚀 Starting generation for app: CourseAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/18 23:38:47 🧠 Starting ML-based code generation...
-⏱️  Initial model call took 18.430397044s
+2025/10/19 00:30:32 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 25.776752392s
 
 📊 Generation Summary:
-  • Duration: 18.430751405s
+  • Duration: 25.777440644s
   • Primary Success: true
   • Repair Attempts: 0
   • Final Success: true
   • Error: 
-🧩 Merged duplicate struct: Enrollment
-2025/10/18 23:39:06 ✅ Generated 1 test file(s)
-2025/10/18 23:39:06 🔧 Detected module name: CourseAPI — fixing imports...
-2025/10/18 23:39:06 ✅ Import paths updated successfully.
+2025/10/19 00:30:58 ✅ Generated 1 test file(s)
+2025/10/19 00:30:58 🔧 Detected module name: CourseAPI — fixing imports...
+2025/10/19 00:30:58 ✅ Import paths updated successfully.
 🔧 Running go mod tidy...
 ✅ Dependencies tidied
-✅ ML generation completed (18.43s)
+✅ ML generation completed (25.78s)
 📁 Saved per-package coverage → experiments/out/CourseAPI/coverage.json
 🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
 

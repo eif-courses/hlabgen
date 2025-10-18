@@ -1,4 +1,5 @@
 # Lab Tasks
-1. Implement authentication and role-based access for the API.
-2. Add pagination and query filtering to the GetTickets and GetEvents endpoints.
-3. Write comprehensive tests for all CRUD operations in the handlers.
+
+1. **Implement Authentication**: Add JWT-based authentication to secure the API endpoints.
+2. **Add Pagination and Filtering**: Implement pagination and query filtering for the list endpoints of tickets, events, attendees, and venues.
+3. **Write Comprehensive Tests**: Expand the test coverage for all CRUD operations and edge cases in the handlers.

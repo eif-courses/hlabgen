@@ -16,12 +16,12 @@ func CreatePost() {
 	json.NewEncoder(w).Encode(post)
 }
 
-func GetPost() {
-	// Implementation here
+func GetPosts() {
+	// Implementation for getting posts
 }
 func UpdatePost() {
-	// Implementation here
+	// Implementation for updating a post
 }
 func DeletePost() {
-	// Implementation here
+	// Implementation for deleting a post
 }

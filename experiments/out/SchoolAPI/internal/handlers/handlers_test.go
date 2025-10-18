@@ -7,15 +7,15 @@ import (
 	"testing"
 )
 
-func TestCreateClass() {
-	// Test implementation for CreateClass
+func TestCreateTeacher() {
+	// Test implementation here
 }
-func TestGetClasses() {
-	// Test implementation for GetClasses
+func TestGetTeachers() {
+	// Test implementation here
 }
-func TestUpdateClass() {
-	// Test implementation for UpdateClass
+func TestUpdateTeacher() {
+	// Test implementation here
 }
-func TestDeleteClass() {
-	// Test implementation for DeleteClass
+func TestDeleteTeacher() {
+	// Test implementation here
 }

@@ -2,7 +2,6 @@ package models
 
 import "time"
 
-// Comment represents a comment on a blog post.
 type Comment struct {
 	ID        int       `json:"id"`
 	PostID    int       `json:"post_id"`

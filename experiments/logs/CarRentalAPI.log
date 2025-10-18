@@ -1,23 +1,21 @@
 
 🚀 Starting generation for app: CarRentalAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/18 23:38:08 🧠 Starting ML-based code generation...
-⏱️  Initial model call took 21.309522925s
+2025/10/19 00:29:58 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 17.416035585s
 
 📊 Generation Summary:
-  • Duration: 21.309874125s
+  • Duration: 17.416619786s
   • Primary Success: true
   • Repair Attempts: 0
   • Final Success: true
   • Error: 
-🧹 Removed duplicate helper: FromJSON
-🧹 Removed duplicate helper: FromJSON
-2025/10/18 23:38:29 ✅ Generated 3 test file(s)
-2025/10/18 23:38:29 🔧 Detected module name: CarRentalAPI — fixing imports...
-2025/10/18 23:38:29 ✅ Import paths updated successfully.
+2025/10/19 00:30:15 ✅ Generated 3 test file(s)
+2025/10/19 00:30:15 🔧 Detected module name: CarRentalAPI — fixing imports...
+2025/10/19 00:30:15 ✅ Import paths updated successfully.
 🔧 Running go mod tidy...
 ✅ Dependencies tidied
-✅ ML generation completed (21.31s)
+✅ ML generation completed (17.42s)
 📁 Saved per-package coverage → experiments/out/CarRentalAPI/coverage.json
 🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
 

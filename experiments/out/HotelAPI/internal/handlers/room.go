@@ -15,3 +15,13 @@ func CreateRoom() {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(room)
 }
+
+func GetRooms() {
+	// Implementation for fetching rooms
+}
+func UpdateRoom() {
+	// Implementation for updating a room
+}
+func DeleteRoom() {
+	// Implementation for deleting a room
+}

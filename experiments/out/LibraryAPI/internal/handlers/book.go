@@ -17,7 +17,7 @@ func CreateBook() {
 }
 
 func GetBooks() {
-	// Implementation for retrieving books
+	// Implementation for getting all books
 }
 func UpdateBook() {
 	// Implementation for updating a book

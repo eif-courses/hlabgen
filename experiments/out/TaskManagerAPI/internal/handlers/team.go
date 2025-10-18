@@ -12,13 +12,6 @@ func CreateTeam() {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// Logic to save team to database
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(team)
-}
-
-func GetTeams() {
-	// Logic to retrieve teams from database
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode([]models.Team{})
 }

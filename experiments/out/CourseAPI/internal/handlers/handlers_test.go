@@ -12,23 +12,11 @@ func TestCreateCourse() {
 	if err != nil {
 		t.Fatal(err)
 	}
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(handlers.CreateCourse)
-	handler.ServeHTTP(rr, req)
-	if status := rr.Code; status != http.StatusCreated {
-		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusCreated)
+	w := httptest.NewRecorder()
+	handlers.CreateCourse(w, req)
+	if w.Code != http.StatusCreated {
+		t.Errorf("Expected status 201, got %v", w.Code)
 	}
 }
 
-func TestGetCourses() {
-	req, err := http.NewRequest("GET", "/courses", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(handlers.GetCourses)
-	handler.ServeHTTP(rr, req)
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
-	}
-}
+// Additional tests for other handlers would go here...

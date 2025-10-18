@@ -1,21 +1,21 @@
 
 🚀 Starting generation for app: FinanceAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/18 23:39:18 🧠 Starting ML-based code generation...
-⏱️  Initial model call took 15.532895223s
+2025/10/19 00:31:17 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 14.57752901s
 
 📊 Generation Summary:
-  • Duration: 15.533191594s
+  • Duration: 14.577688942s
   • Primary Success: true
   • Repair Attempts: 0
   • Final Success: true
   • Error: 
-2025/10/18 23:39:33 ✅ Generated 1 test file(s)
-2025/10/18 23:39:33 🔧 Detected module name: FinanceAPI — fixing imports...
-2025/10/18 23:39:33 ✅ Import paths updated successfully.
+2025/10/19 00:31:31 ✅ Generated 1 test file(s)
+2025/10/19 00:31:31 🔧 Detected module name: FinanceAPI — fixing imports...
+2025/10/19 00:31:31 ✅ Import paths updated successfully.
 🔧 Running go mod tidy...
 ✅ Dependencies tidied
-✅ ML generation completed (15.53s)
+✅ ML generation completed (14.58s)
 📁 Saved per-package coverage → experiments/out/FinanceAPI/coverage.json
 🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
 

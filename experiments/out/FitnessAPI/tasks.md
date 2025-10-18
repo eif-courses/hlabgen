@@ -1,5 +1,4 @@
 # Lab Tasks
-
-1. Implement the CRUD operations for the Workout entity.
-2. Add search functionality for Users based on name or email.
-3. Write unit tests for all handler functions in the handlers package.
+1. Implement the CRUD operations for Workout, Exercise, and Goal entities.
+2. Add search functionality for users based on name and email.
+3. Write unit tests for all handler functions to ensure they work as expected.

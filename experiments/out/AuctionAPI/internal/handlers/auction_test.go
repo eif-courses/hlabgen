@@ -13,9 +13,3 @@ func TestCreateAuction() {
 func TestGetAuction() {
 	// Test implementation here
 }
-func TestUpdateAuction() {
-	// Test implementation here
-}
-func TestDeleteAuction() {
-	// Test implementation here
-}

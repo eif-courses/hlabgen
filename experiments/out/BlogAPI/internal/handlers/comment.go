@@ -16,12 +16,4 @@ func CreateComment() {
 	json.NewEncoder(w).Encode(comment)
 }
 
-func GetComment() {
-	// Implementation here
-}
-func UpdateComment() {
-	// Implementation here
-}
-func DeleteComment() {
-	// Implementation here
-}
+// Additional comment handlers would go here

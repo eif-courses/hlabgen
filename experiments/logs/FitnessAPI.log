@@ -1,21 +1,21 @@
 
 🚀 Starting generation for app: FitnessAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/18 23:39:33 🧠 Starting ML-based code generation...
-⏱️  Initial model call took 22.445982189s
+2025/10/19 00:31:31 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 14.650520392s
 
 📊 Generation Summary:
-  • Duration: 22.44620292s
+  • Duration: 14.650786387s
   • Primary Success: true
   • Repair Attempts: 0
   • Final Success: true
   • Error: 
-2025/10/18 23:39:56 ✅ Generated 4 test file(s)
-2025/10/18 23:39:56 🔧 Detected module name: FitnessAPI — fixing imports...
-2025/10/18 23:39:56 ✅ Import paths updated successfully.
+2025/10/19 00:31:46 ✅ Generated 2 test file(s)
+2025/10/19 00:31:46 🔧 Detected module name: FitnessAPI — fixing imports...
+2025/10/19 00:31:46 ✅ Import paths updated successfully.
 🔧 Running go mod tidy...
 ✅ Dependencies tidied
-✅ ML generation completed (22.45s)
+✅ ML generation completed (14.65s)
 📁 Saved per-package coverage → experiments/out/FitnessAPI/coverage.json
 🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
 
@@ -23,7 +23,7 @@
 
 --- experiments/out/FitnessAPI/internal/handlers ---
 # FitnessAPI/internal/handlers
-exercise_test.go:16:1: expected declaration, found '}'
+/home/marius/GolandProjects/hlabgen/experiments/out/FitnessAPI/internal/handlers/user_test.go:10:1: wrong signature for TestCreateUser, must be: func TestCreateUser(t *testing.T)
 FAIL	FitnessAPI/internal/handlers [setup failed]
 
 ------------------------

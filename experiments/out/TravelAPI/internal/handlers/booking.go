@@ -17,11 +17,11 @@ func CreateBooking() {
 }
 
 func GetBooking() {
-	// Implementation for getting a booking
+	// Implementation here
 }
 func UpdateBooking() {
-	// Implementation for updating a booking
+	// Implementation here
 }
 func DeleteBooking() {
-	// Implementation for deleting a booking
+	// Implementation here
 }

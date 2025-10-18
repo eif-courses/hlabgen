@@ -17,11 +17,11 @@ func CreateDestination() {
 }
 
 func GetDestination() {
-	// Implementation for getting a destination
+	// Implementation here
 }
 func UpdateDestination() {
-	// Implementation for updating a destination
+	// Implementation here
 }
 func DeleteDestination() {
-	// Implementation for deleting a destination
+	// Implementation here
 }

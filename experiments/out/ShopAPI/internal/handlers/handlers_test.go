@@ -8,8 +8,14 @@ import (
 )
 
 func TestCreateProduct() {
-	// Implement test for CreateProduct
+	// Test implementation for CreateProduct
 }
 func TestGetProducts() {
-	// Implement test for GetProducts
+	// Test implementation for GetProducts
+}
+func TestUpdateProduct() {
+	// Test implementation for UpdateProduct
+}
+func TestDeleteProduct() {
+	// Test implementation for DeleteProduct
 }

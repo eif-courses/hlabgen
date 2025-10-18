@@ -1,8 +1,9 @@
 package models
 
+// Grade represents a grade entity.
 type Grade struct {
 	ID        int     `json:"id"`
 	StudentID int     `json:"student_id"`
 	CourseID  int     `json:"course_id"`
-	Score     float64 `json:"score"`
+	Value     float64 `json:"value"`
 }

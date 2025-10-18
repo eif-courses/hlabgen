@@ -4,13 +4,13 @@ import "encoding/json"
 
 // Shipment represents a shipment in the warehouse.
 type Shipment struct {
-	ID          int    `json:"id"`
-	ItemID      int    `json:"item_id"`
-	Quantity    int    `json:"quantity"`
-	Destination string `json:"destination"`
+	ID       int    `json:"id"`
+	ItemID   int    `json:"item_id"`
+	Quantity int    `json:"quantity"`
+	Status   string `json:"status"`
 }
 
-// ToJSON converts a Shipment to JSON.
+// ToJSON converts the Shipment to JSON format.
 func (s *Shipment) ToJSON() ([]byte, error) {
 	return json.Marshal(s)
 }

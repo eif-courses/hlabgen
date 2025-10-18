@@ -2,7 +2,7 @@ package models
 
 import "encoding/json"
 
-// Item represents a product in the warehouse.
+// Item represents an item in the warehouse.
 type Item struct {
 	ID         int    `json:"id"`
 	Name       string `json:"name"`
@@ -10,7 +10,7 @@ type Item struct {
 	LocationID int    `json:"location_id"`
 }
 
-// ToJSON converts an Item to JSON.
+// ToJSON converts the Item to JSON format.
 func (i *Item) ToJSON() ([]byte, error) {
 	return json.Marshal(i)
 }

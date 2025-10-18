@@ -5,7 +5,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// Register registers the routes for the application.
 func Register() {
 	r.HandleFunc("/cars", handlers.CreateCar).Methods("POST")
 	r.HandleFunc("/cars", handlers.GetCars).Methods("GET")

@@ -15,3 +15,13 @@ func CreateHotel() {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(hotel)
 }
+
+func GetHotels() {
+	// Implementation for fetching hotels
+}
+func UpdateHotel() {
+	// Implementation for updating a hotel
+}
+func DeleteHotel() {
+	// Implementation for deleting a hotel
+}

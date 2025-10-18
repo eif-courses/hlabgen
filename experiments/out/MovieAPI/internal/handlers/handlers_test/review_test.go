@@ -8,8 +8,8 @@ import (
 )
 
 func TestCreateReview() {
-	// Implementation for testing CreateReview
+	// Test implementation for CreateReview
 }
 func TestGetReviews() {
-	// Implementation for testing GetReviews
+	// Test implementation for GetReviews
 }

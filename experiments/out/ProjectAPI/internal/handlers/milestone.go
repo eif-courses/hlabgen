@@ -17,7 +17,7 @@ func CreateMilestone() {
 }
 
 func GetMilestones() {
-	// Implementation for getting milestones
+	// Implementation for retrieving milestones
 }
 func UpdateMilestone() {
 	// Implementation for updating a milestone

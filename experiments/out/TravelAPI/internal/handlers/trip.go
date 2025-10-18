@@ -17,11 +17,11 @@ func CreateTrip() {
 }
 
 func GetTrip() {
-	// Implementation for getting a trip
+	// Implementation here
 }
 func UpdateTrip() {
-	// Implementation for updating a trip
+	// Implementation here
 }
 func DeleteTrip() {
-	// Implementation for deleting a trip
+	// Implementation here
 }

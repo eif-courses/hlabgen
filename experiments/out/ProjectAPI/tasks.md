@@ -1,7 +1,5 @@
 # Lab Tasks
 
-1. **Implement Authentication**: Create a middleware for authentication and role-based access control.
-
-2. **Add Pagination and Query Filtering**: Enhance the GetProjects and GetTasks handlers to support pagination and filtering based on query parameters.
-
-3. **Integrate Tests**: Write comprehensive tests for all CRUD operations in the handlers.
+1. Implement authentication and role-based access for the API.
+2. Add pagination and query filtering to the GetProjects and GetTasks endpoints.
+3. Integrate tests for all core endpoints to ensure functionality and reliability.

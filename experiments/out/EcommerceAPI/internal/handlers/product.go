@@ -21,13 +21,3 @@ func CreateProduct() {
 func GetProducts() {
 	// Implementation for fetching products
 }
-
-// UpdateProduct handles updating an existing product.
-func UpdateProduct() {
-	// Implementation for updating a product
-}
-
-// DeleteProduct handles deleting a product.
-func DeleteProduct() {
-	// Implementation for deleting a product
-}

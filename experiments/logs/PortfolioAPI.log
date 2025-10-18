@@ -1,21 +1,21 @@
 
 🚀 Starting generation for app: PortfolioAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/18 23:42:20 🧠 Starting ML-based code generation...
-⏱️  Initial model call took 14.769237965s
+2025/10/19 00:34:16 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 15.939089551s
 
 📊 Generation Summary:
-  • Duration: 14.769428514s
+  • Duration: 15.940515653s
   • Primary Success: true
   • Repair Attempts: 0
   • Final Success: true
   • Error: 
-2025/10/18 23:42:35 ✅ Generated 1 test file(s)
-2025/10/18 23:42:35 🔧 Detected module name: PortfolioAPI — fixing imports...
-2025/10/18 23:42:35 ✅ Import paths updated successfully.
+2025/10/19 00:34:32 ✅ Generated 3 test file(s)
+2025/10/19 00:34:32 🔧 Detected module name: PortfolioAPI — fixing imports...
+2025/10/19 00:34:32 ✅ Import paths updated successfully.
 🔧 Running go mod tidy...
 ✅ Dependencies tidied
-✅ ML generation completed (14.77s)
+✅ ML generation completed (15.94s)
 📁 Saved per-package coverage → experiments/out/PortfolioAPI/coverage.json
 🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
 
@@ -23,7 +23,7 @@
 
 --- experiments/out/PortfolioAPI/internal/handlers ---
 # PortfolioAPI/internal/handlers
-/home/marius/GolandProjects/hlabgen/experiments/out/PortfolioAPI/internal/handlers/handlers_test.go:10:1: wrong signature for TestCreateProject, must be: func TestCreateProject(t *testing.T)
+/home/marius/GolandProjects/hlabgen/experiments/out/PortfolioAPI/internal/handlers/handlers_test.go:10:1: wrong signature for TestCreateInvoice, must be: func TestCreateInvoice(t *testing.T)
 FAIL	PortfolioAPI/internal/handlers [setup failed]
 
 ------------------------

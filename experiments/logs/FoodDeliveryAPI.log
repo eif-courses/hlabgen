@@ -1,21 +1,21 @@
 
 🚀 Starting generation for app: FoodDeliveryAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/18 23:39:56 🧠 Starting ML-based code generation...
-⏱️  Initial model call took 19.601039304s
+2025/10/19 00:31:46 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 17.98030784s
 
 📊 Generation Summary:
-  • Duration: 19.601612225s
+  • Duration: 17.981600049s
   • Primary Success: true
   • Repair Attempts: 0
   • Final Success: true
   • Error: 
-2025/10/18 23:40:16 ✅ Generated 1 test file(s)
-2025/10/18 23:40:16 🔧 Detected module name: FoodDeliveryAPI — fixing imports...
-2025/10/18 23:40:16 ✅ Import paths updated successfully.
+2025/10/19 00:32:04 ✅ Generated 3 test file(s)
+2025/10/19 00:32:04 🔧 Detected module name: FoodDeliveryAPI — fixing imports...
+2025/10/19 00:32:04 ✅ Import paths updated successfully.
 🔧 Running go mod tidy...
 ✅ Dependencies tidied
-✅ ML generation completed (19.60s)
+✅ ML generation completed (17.98s)
 📁 Saved per-package coverage → experiments/out/FoodDeliveryAPI/coverage.json
 🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
 
@@ -23,7 +23,7 @@
 
 --- experiments/out/FoodDeliveryAPI/internal/handlers ---
 # FoodDeliveryAPI/internal/handlers
-/home/marius/GolandProjects/hlabgen/experiments/out/FoodDeliveryAPI/internal/handlers/handlers_test.go:10:1: wrong signature for TestCreateRestaurant, must be: func TestCreateRestaurant(t *testing.T)
+menu_item_handler_test.go:13:64: missing ',' before newline in composite literal
 FAIL	FoodDeliveryAPI/internal/handlers [setup failed]
 
 ------------------------

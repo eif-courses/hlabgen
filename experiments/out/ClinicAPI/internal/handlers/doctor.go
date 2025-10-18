@@ -6,7 +6,6 @@ import (
 	"net/http"
 )
 
-// CreateDoctor handles the creation of a new doctor.
 func CreateDoctor() {
 	var doctor models.Doctor
 	if err := json.NewDecoder(r.Body).Decode(&doctor); err != nil {
@@ -17,17 +16,12 @@ func CreateDoctor() {
 	json.NewEncoder(w).Encode(doctor)
 }
 
-// GetDoctors handles retrieving all doctors.
 func GetDoctors() {
-	// Implementation here
+	// Implementation for getting doctors
 }
-
-// UpdateDoctor handles updating an existing doctor.
 func UpdateDoctor() {
-	// Implementation here
+	// Implementation for updating a doctor
 }
-
-// DeleteDoctor handles deleting a doctor.
 func DeleteDoctor() {
-	// Implementation here
+	// Implementation for deleting a doctor
 }

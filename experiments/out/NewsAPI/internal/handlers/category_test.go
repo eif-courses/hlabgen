@@ -10,8 +10,8 @@ import (
 func TestCreateCategory() {
 	// Test implementation for CreateCategory
 }
-func TestGetCategory() {
-	// Test implementation for GetCategory
+func TestGetCategories() {
+	// Test implementation for GetCategories
 }
 func TestUpdateCategory() {
 	// Test implementation for UpdateCategory

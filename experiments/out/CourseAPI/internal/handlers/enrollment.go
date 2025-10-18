@@ -13,14 +13,24 @@ func CreateEnrollment() {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// Logic to save enrollment to database
+	// Logic to save enrollment to database goes here...
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(enrollment)
 }
 
-// GetEnrollments handles fetching all enrollments.
+// GetEnrollments handles retrieving all enrollments for a user.
 func GetEnrollments() {
-	// Logic to retrieve enrollments from database
+	// Logic to retrieve enrollments from database goes here...
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode([]models.Enrollment{})
+}
+
+// UpdateEnrollment handles updating an existing enrollment.
+func UpdateEnrollment() {
+	// Logic to update enrollment in database goes here...
+}
+
+// DeleteEnrollment handles deleting an enrollment.
+func DeleteEnrollment() {
+	// Logic to delete enrollment from database goes here...
 }

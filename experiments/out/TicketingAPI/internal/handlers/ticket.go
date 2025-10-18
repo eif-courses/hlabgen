@@ -15,13 +15,3 @@ func CreateTicket() {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(ticket)
 }
-
-func GetTickets() {
-	// Implementation for getting tickets
-}
-func UpdateTicket() {
-	// Implementation for updating a ticket
-}
-func DeleteTicket() {
-	// Implementation for deleting a ticket
-}

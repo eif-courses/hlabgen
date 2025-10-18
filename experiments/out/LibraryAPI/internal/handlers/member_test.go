@@ -8,8 +8,10 @@ import (
 )
 
 func TestCreateMember() {
-	// Test implementation for CreateMember handler
+	// Test implementation for CreateMember
 }
 func TestGetMembers() {
-	// Test implementation for GetMembers handler
+	// Test implementation for GetMembers
 }
+
+// Additional tests for UpdateMember and DeleteMember

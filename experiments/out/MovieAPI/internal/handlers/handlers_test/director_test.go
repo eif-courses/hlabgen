@@ -8,8 +8,8 @@ import (
 )
 
 func TestCreateDirector() {
-	// Implementation for testing CreateDirector
+	// Test implementation for CreateDirector
 }
 func TestGetDirectors() {
-	// Implementation for testing GetDirectors
+	// Test implementation for GetDirectors
 }

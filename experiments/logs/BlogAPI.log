@@ -1,21 +1,21 @@
 
 🚀 Starting generation for app: BlogAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/18 23:37:51 🧠 Starting ML-based code generation...
-⏱️  Initial model call took 16.690532234s
+2025/10/19 00:29:46 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 11.444846045s
 
 📊 Generation Summary:
-  • Duration: 16.690704695s
+  • Duration: 11.445193042s
   • Primary Success: true
   • Repair Attempts: 0
   • Final Success: true
   • Error: 
-2025/10/18 23:38:08 ✅ Generated 1 test file(s)
-2025/10/18 23:38:08 🔧 Detected module name: BlogAPI — fixing imports...
-2025/10/18 23:38:08 ✅ Import paths updated successfully.
+2025/10/19 00:29:57 ✅ Generated 1 test file(s)
+2025/10/19 00:29:57 🔧 Detected module name: BlogAPI — fixing imports...
+2025/10/19 00:29:57 ✅ Import paths updated successfully.
 🔧 Running go mod tidy...
 ✅ Dependencies tidied
-✅ ML generation completed (16.69s)
+✅ ML generation completed (11.45s)
 📁 Saved per-package coverage → experiments/out/BlogAPI/coverage.json
 🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
 

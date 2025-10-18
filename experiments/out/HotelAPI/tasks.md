@@ -1,5 +1,5 @@
 # Lab Tasks
 
-1. Implement the Read, Update, and Delete operations for Hotels, Rooms, and Reservations.
-2. Add validation for the input data in the Create handlers.
-3. Implement a simple search functionality for Hotels based on location.
+1. Implement the CRUD operations for the Room and Reservation entities in the handlers.
+2. Add validation for the Hotel, Room, and Reservation models to ensure data integrity.
+3. Write unit tests for all handler functions to ensure they work as expected.

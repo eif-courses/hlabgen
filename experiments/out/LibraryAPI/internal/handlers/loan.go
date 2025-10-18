@@ -17,7 +17,7 @@ func CreateLoan() {
 }
 
 func GetLoans() {
-	// Implementation for retrieving loans
+	// Implementation for getting all loans
 }
 func UpdateLoan() {
 	// Implementation for updating a loan

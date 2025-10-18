@@ -6,7 +6,6 @@ import (
 	"net/http"
 )
 
-// CreateAppointment handles the creation of a new appointment.
 func CreateAppointment() {
 	var appointment models.Appointment
 	if err := json.NewDecoder(r.Body).Decode(&appointment); err != nil {
@@ -17,17 +16,12 @@ func CreateAppointment() {
 	json.NewEncoder(w).Encode(appointment)
 }
 
-// GetAppointments handles retrieving all appointments.
 func GetAppointments() {
-	// Implementation here
+	// Implementation for getting appointments
 }
-
-// UpdateAppointment handles updating an existing appointment.
 func UpdateAppointment() {
-	// Implementation here
+	// Implementation for updating an appointment
 }
-
-// DeleteAppointment handles deleting an appointment.
 func DeleteAppointment() {
-	// Implementation here
+	// Implementation for deleting an appointment
 }

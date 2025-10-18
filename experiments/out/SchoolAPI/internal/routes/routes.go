@@ -6,18 +6,18 @@ import (
 )
 
 func Register() {
-	router.HandleFunc("/teachers", handlers.CreateTeacher).Methods("POST")
-	router.HandleFunc("/teachers", handlers.GetTeachers).Methods("GET")
-	router.HandleFunc("/teachers/{id}", handlers.UpdateTeacher).Methods("PUT")
-	router.HandleFunc("/teachers/{id}", handlers.DeleteTeacher).Methods("DELETE")
+	r.HandleFunc("/teachers", handlers.CreateTeacher).Methods("POST")
+	r.HandleFunc("/teachers", handlers.GetTeachers).Methods("GET")
+	r.HandleFunc("/teachers/{id}", handlers.UpdateTeacher).Methods("PUT")
+	r.HandleFunc("/teachers/{id}", handlers.DeleteTeacher).Methods("DELETE")
 
-	router.HandleFunc("/students", handlers.CreateStudent).Methods("POST")
-	router.HandleFunc("/students", handlers.GetStudents).Methods("GET")
-	router.HandleFunc("/students/{id}", handlers.UpdateStudent).Methods("PUT")
-	router.HandleFunc("/students/{id}", handlers.DeleteStudent).Methods("DELETE")
+	r.HandleFunc("/students", handlers.CreateStudent).Methods("POST")
+	r.HandleFunc("/students", handlers.GetStudents).Methods("GET")
+	r.HandleFunc("/students/{id}", handlers.UpdateStudent).Methods("PUT")
+	r.HandleFunc("/students/{id}", handlers.DeleteStudent).Methods("DELETE")
 
-	router.HandleFunc("/classes", handlers.CreateClass).Methods("POST")
-	router.HandleFunc("/classes", handlers.GetClasses).Methods("GET")
-	router.HandleFunc("/classes/{id}", handlers.UpdateClass).Methods("PUT")
-	router.HandleFunc("/classes/{id}", handlers.DeleteClass).Methods("DELETE")
+	r.HandleFunc("/classes", handlers.CreateClass).Methods("POST")
+	r.HandleFunc("/classes", handlers.GetClasses).Methods("GET")
+	r.HandleFunc("/classes/{id}", handlers.UpdateClass).Methods("PUT")
+	r.HandleFunc("/classes/{id}", handlers.DeleteClass).Methods("DELETE")
 }

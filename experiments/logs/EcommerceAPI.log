@@ -1,21 +1,21 @@
 
 🚀 Starting generation for app: EcommerceAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/18 23:39:06 🧠 Starting ML-based code generation...
-⏱️  Initial model call took 11.662819134s
+2025/10/19 00:30:58 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 17.90791716s
 
 📊 Generation Summary:
-  • Duration: 11.663020818s
+  • Duration: 17.908057055s
   • Primary Success: true
   • Repair Attempts: 0
   • Final Success: true
   • Error: 
-2025/10/18 23:39:18 ✅ Generated 1 test file(s)
-2025/10/18 23:39:18 🔧 Detected module name: EcommerceAPI — fixing imports...
-2025/10/18 23:39:18 ✅ Import paths updated successfully.
+2025/10/19 00:31:16 ✅ Generated 2 test file(s)
+2025/10/19 00:31:16 🔧 Detected module name: EcommerceAPI — fixing imports...
+2025/10/19 00:31:16 ✅ Import paths updated successfully.
 🔧 Running go mod tidy...
 ✅ Dependencies tidied
-✅ ML generation completed (11.66s)
+✅ ML generation completed (17.91s)
 📁 Saved per-package coverage → experiments/out/EcommerceAPI/coverage.json
 🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
 

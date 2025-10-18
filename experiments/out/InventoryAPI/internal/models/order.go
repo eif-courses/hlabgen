@@ -2,10 +2,10 @@ package models
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
-// Order represents an order in the inventory.
+// Order represents an order in the inventory system.
 type Order struct {
-	ID        primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
-	ProductID primitive.ObjectID `bson:"product_id" json:"product_id"`
-	Quantity  int                `bson:"quantity" json:"quantity"`
-	Total     float64            `bson:"total" json:"total"`
+	ID        primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	ProductID primitive.ObjectID `json:"product_id" bson:"product_id"`
+	Quantity  int                `json:"quantity" bson:"quantity"`
+	Status    string             `json:"status" bson:"status"`
 }

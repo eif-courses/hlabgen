@@ -12,13 +12,6 @@ func CreateAssignment() {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// Logic to save assignment to database
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(assignment)
-}
-
-func GetAssignments() {
-	// Logic to retrieve assignments from database
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode([]models.Assignment{})
 }

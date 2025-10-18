@@ -2,11 +2,10 @@ package models
 
 import "time"
 
-// Patient represents a patient in the clinic.
 type Patient struct {
 	ID        int       `json:"id"`
 	Name      string    `json:"name"`
-	Age       int       `json:"age"`
+	DOB       time.Time `json:"dob"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

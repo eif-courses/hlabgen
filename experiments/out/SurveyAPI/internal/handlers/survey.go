@@ -12,16 +12,19 @@ func CreateSurvey() {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	// Logic to save survey to database
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(survey)
 }
 
 func GetSurveys() {
-	// Implementation for getting surveys
+	// Logic to retrieve surveys from database
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode([]models.Survey{})
 }
 func UpdateSurvey() {
-	// Implementation for updating a survey
+	// Logic to update survey in database
 }
 func DeleteSurvey() {
-	// Implementation for deleting a survey
+	// Logic to delete survey from database
 }

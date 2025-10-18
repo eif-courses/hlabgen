@@ -16,8 +16,8 @@ func CreateArticle() {
 	json.NewEncoder(w).Encode(article)
 }
 
-func GetArticle() {
-	// Implementation for getting an article
+func GetArticles() {
+	// Implementation for fetching articles
 }
 func UpdateArticle() {
 	// Implementation for updating an article

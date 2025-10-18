@@ -1,23 +1,14 @@
 package handlers_test
 
 import (
-    "net/http"
-    "net/http/httptest"
-    "testing"
-    "FitnessAPI/internal/handlers"
+	"FitnessAPI/internal/handlers"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 )
 
 func TestCreateWorkout() {
-// Test implementation for CreateWorkout
-}
-func TestGetWorkout() {
-// Test implementation for GetWorkout
-}
+	// Test implementation here
 }
 
-func TestUpdateWorkout() {
-// Test implementation for UpdateWorkout
-}
-func TestDeleteWorkout() {
-// Test implementation for DeleteWorkout
-}
+// Other tests for handlers

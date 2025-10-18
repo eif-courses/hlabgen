@@ -16,8 +16,8 @@ func CreateCategory() {
 	json.NewEncoder(w).Encode(category)
 }
 
-func GetCategory() {
-	// Implementation for getting a category
+func GetCategories() {
+	// Implementation for fetching categories
 }
 func UpdateCategory() {
 	// Implementation for updating a category

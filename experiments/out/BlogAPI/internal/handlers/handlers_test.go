@@ -8,14 +8,14 @@ import (
 )
 
 func TestCreatePost() {
-	// Test implementation here
+	req, err := http.NewRequest("POST", "/posts", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(handlers.CreatePost)
+	handler.ServeHTTP(rr, req)
+	// Add assertions here
 }
-func TestGetPost() {
-	// Test implementation here
-}
-func TestUpdatePost() {
-	// Test implementation here
-}
-func TestDeletePost() {
-	// Test implementation here
-}
+
+// Additional tests would go here

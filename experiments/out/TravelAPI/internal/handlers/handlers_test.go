@@ -8,14 +8,11 @@ import (
 )
 
 func TestCreateTrip() {
-	// Test for CreateTrip handler
+	// Test implementation here
 }
-func TestGetTrip() {
-	// Test for GetTrip handler
+func TestCreateBooking() {
+	// Test implementation here
 }
-func TestUpdateTrip() {
-	// Test for UpdateTrip handler
-}
-func TestDeleteTrip() {
-	// Test for DeleteTrip handler
+func TestCreateDestination() {
+	// Test implementation here
 }

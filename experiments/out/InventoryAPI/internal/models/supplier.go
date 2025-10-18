@@ -2,9 +2,9 @@ package models
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
-// Supplier represents a supplier in the inventory.
+// Supplier represents a supplier in the inventory system.
 type Supplier struct {
-	ID      primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
-	Name    string             `bson:"name" json:"name"`
-	Contact string             `bson:"contact" json:"contact"`
+	ID      primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	Name    string             `json:"name" bson:"name"`
+	Contact string             `json:"contact" bson:"contact"`
 }

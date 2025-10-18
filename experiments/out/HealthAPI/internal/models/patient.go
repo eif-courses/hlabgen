@@ -2,6 +2,7 @@ package models
 
 import "time"
 
+// Patient represents a patient in the system.
 type Patient struct {
 	ID        int       `json:"id"`
 	Name      string    `json:"name"`

@@ -1,22 +1,22 @@
 
 🚀 Starting generation for app: LibraryAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/18 23:41:10 🧠 Starting ML-based code generation...
-⏱️  Initial model call took 16.745600545s
+2025/10/19 00:33:09 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 17.234964056s
 
 📊 Generation Summary:
-  • Duration: 16.747214784s
+  • Duration: 17.23531656s
   • Primary Success: true
   • Repair Attempts: 0
   • Final Success: true
   • Error: 
-2025/10/18 23:41:26 ✅ Generated 3 test file(s)
-2025/10/18 23:41:26 🔧 Detected module name: LibraryAPI — fixing imports...
-2025/10/18 23:41:26 ✅ Import paths updated successfully.
+2025/10/19 00:33:26 ✅ Generated 3 test file(s)
+2025/10/19 00:33:26 🔧 Detected module name: LibraryAPI — fixing imports...
+2025/10/19 00:33:26 ✅ Import paths updated successfully.
 🔧 Running go mod tidy...
 ✅ Dependencies tidied
-✅ ML generation completed (16.75s)
-2025/10/18 23:41:26 🧹 Removed fallback test file
+✅ ML generation completed (17.24s)
+2025/10/19 00:33:26 🧹 Removed fallback test file
 📁 Saved per-package coverage → experiments/out/LibraryAPI/coverage.json
 🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
 

@@ -17,11 +17,11 @@ func CreateClass() {
 }
 
 func GetClasses() {
-	// Implementation for getting classes
+	// Implementation here
 }
 func UpdateClass() {
-	// Implementation for updating a class
+	// Implementation here
 }
 func DeleteClass() {
-	// Implementation for deleting a class
+	// Implementation here
 }

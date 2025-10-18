@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+// CreateArtist handles the creation of a new artist.
 func CreateArtist() {
 	var artist models.Artist
 	if err := json.NewDecoder(r.Body).Decode(&artist); err != nil {
@@ -16,12 +17,7 @@ func CreateArtist() {
 	json.NewEncoder(w).Encode(artist)
 }
 
+// GetArtists handles fetching all artists.
 func GetArtists() {
 	// Implementation for fetching artists
-}
-func UpdateArtist() {
-	// Implementation for updating an artist
-}
-func DeleteArtist() {
-	// Implementation for deleting an artist
 }

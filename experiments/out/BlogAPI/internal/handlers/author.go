@@ -16,12 +16,4 @@ func CreateAuthor() {
 	json.NewEncoder(w).Encode(author)
 }
 
-func GetAuthor() {
-	// Implementation here
-}
-func UpdateAuthor() {
-	// Implementation here
-}
-func DeleteAuthor() {
-	// Implementation here
-}
+// Additional author handlers would go here

@@ -1,35 +1,29 @@
 package handlers
 
 import (
-	"InventoryAPI/internal/models"
-	"encoding/json"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"net/http"
+    "encoding/json"
+    "net/http"
+    "InventoryAPI/internal/models"
+    "go.mongodb.org/mongo-driver/mongo"
 )
 
-// CreateProduct handles the creation of a new product.
+var productCollection *mongo.Collection
+
 func CreateProduct() {
-	var product models.Product
-	if err := json.NewDecoder(r.Body).Decode(&product); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	product.ID = primitive.NewObjectID()
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(product)
+var product models.Product
+    if err := json.NewDecoder(r.Body).Decode(&product); err != nil {
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+}
+    // Insert product into the database (pseudo-code)
+    // productCollection.InsertOne(context.TODO(), product)
+    w.WriteHeader(http.StatusCreated)
+    json.NewEncoder(w).Encode(product)
 }
 
-// GetProducts handles fetching all products.
 func GetProducts() {
-	// Implementation for fetching products
+// Fetch products from the database (pseudo-code)
+    // products := []models.Product{
 }
-
-// UpdateProduct handles updating an existing product.
-func UpdateProduct() {
-	// Implementation for updating a product
-}
-
-// DeleteProduct handles deleting a product.
-func DeleteProduct() {
-	// Implementation for deleting a product
+    // json.NewEncoder(w).Encode(products)
 }

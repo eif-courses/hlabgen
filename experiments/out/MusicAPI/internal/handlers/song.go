@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+// CreateSong handles the creation of a new song.
 func CreateSong() {
 	var song models.Song
 	if err := json.NewDecoder(r.Body).Decode(&song); err != nil {
@@ -16,12 +17,7 @@ func CreateSong() {
 	json.NewEncoder(w).Encode(song)
 }
 
+// GetSongs handles fetching all songs.
 func GetSongs() {
 	// Implementation for fetching songs
-}
-func UpdateSong() {
-	// Implementation for updating a song
-}
-func DeleteSong() {
-	// Implementation for deleting a song
 }

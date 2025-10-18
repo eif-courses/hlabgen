@@ -6,7 +6,6 @@ import (
 	"net/http"
 )
 
-// CreateMovie handles the creation of a new movie.
 func CreateMovie() {
 	var movie models.Movie
 	if err := json.NewDecoder(r.Body).Decode(&movie); err != nil {
@@ -17,17 +16,12 @@ func CreateMovie() {
 	json.NewEncoder(w).Encode(movie)
 }
 
-// GetMovies handles retrieving all movies with pagination.
 func GetMovies() {
 	// Implementation for retrieving movies
 }
-
-// UpdateMovie handles updating an existing movie.
 func UpdateMovie() {
 	// Implementation for updating a movie
 }
-
-// DeleteMovie handles deleting a movie.
 func DeleteMovie() {
 	// Implementation for deleting a movie
 }

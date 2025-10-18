@@ -8,8 +8,10 @@ import (
 )
 
 func TestCreateLoan() {
-	// Test implementation for CreateLoan handler
+	// Test implementation for CreateLoan
 }
 func TestGetLoans() {
-	// Test implementation for GetLoans handler
+	// Test implementation for GetLoans
 }
+
+// Additional tests for UpdateLoan and DeleteLoan

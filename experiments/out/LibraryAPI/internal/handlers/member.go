@@ -17,7 +17,7 @@ func CreateMember() {
 }
 
 func GetMembers() {
-	// Implementation for retrieving members
+	// Implementation for getting all members
 }
 func UpdateMember() {
 	// Implementation for updating a member

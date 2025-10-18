@@ -17,7 +17,7 @@ func CreateProject() {
 }
 
 func GetProjects() {
-	// Implementation for getting projects
+	// Implementation for retrieving projects
 }
 func UpdateProject() {
 	// Implementation for updating a project

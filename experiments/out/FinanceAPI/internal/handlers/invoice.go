@@ -17,7 +17,7 @@ func CreateInvoice() {
 }
 
 func GetInvoices() {
-	// Implementation for getting invoices
+	// Implementation for fetching invoices
 }
 func UpdateInvoice() {
 	// Implementation for updating an invoice

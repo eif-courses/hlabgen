@@ -8,14 +8,8 @@ import (
 )
 
 func TestCreatePost() {
-	// Test implementation for CreatePost
+	// Test implementation for CreatePost handler
 }
 func TestGetPost() {
-	// Test implementation for GetPost
-}
-func TestUpdatePost() {
-	// Test implementation for UpdatePost
-}
-func TestDeletePost() {
-	// Test implementation for DeletePost
+	// Test implementation for GetPost handler
 }

@@ -15,13 +15,3 @@ func CreateAttendee() {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(attendee)
 }
-
-func GetAttendees() {
-	// Implementation for getting attendees
-}
-func UpdateAttendee() {
-	// Implementation for updating an attendee
-}
-func DeleteAttendee() {
-	// Implementation for deleting an attendee
-}

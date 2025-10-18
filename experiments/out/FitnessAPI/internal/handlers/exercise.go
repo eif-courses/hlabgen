@@ -16,12 +16,4 @@ func CreateExercise() {
 	json.NewEncoder(w).Encode(exercise)
 }
 
-func GetExercise() {
-	// Implementation for getting an exercise
-}
-func UpdateExercise() {
-	// Implementation for updating an exercise
-}
-func DeleteExercise() {
-	// Implementation for deleting an exercise
-}
+// Other CRUD functions for Exercise

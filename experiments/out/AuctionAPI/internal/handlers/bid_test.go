@@ -13,9 +13,3 @@ func TestCreateBid() {
 func TestGetBid() {
 	// Test implementation here
 }
-func TestUpdateBid() {
-	// Test implementation here
-}
-func TestDeleteBid() {
-	// Test implementation here
-}

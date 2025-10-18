@@ -17,11 +17,11 @@ func CreateUser() {
 }
 
 func GetUser() {
-	// Implementation for getting a user
+	// Implementation here
 }
 func UpdateUser() {
-	// Implementation for updating a user
+	// Implementation here
 }
 func DeleteUser() {
-	// Implementation for deleting a user
+	// Implementation here
 }

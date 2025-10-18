@@ -1,23 +1,23 @@
 
 🚀 Starting generation for app: NewsAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/18 23:41:58 🧠 Starting ML-based code generation...
-⏱️  Initial model call took 21.790080145s
+2025/10/19 00:33:56 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 19.627109553s
 
 📊 Generation Summary:
-  • Duration: 21.791377581s
+  • Duration: 19.629004178s
   • Primary Success: true
   • Repair Attempts: 0
   • Final Success: true
   • Error: 
-2025/10/18 23:42:20 ✅ Generated 3 test file(s)
-2025/10/18 23:42:20 🔧 Detected module name: NewsAPI — fixing imports...
-2025/10/18 23:42:20 ✅ Import paths updated successfully.
+2025/10/19 00:34:16 ✅ Generated 3 test file(s)
+2025/10/19 00:34:16 🔧 Detected module name: NewsAPI — fixing imports...
+2025/10/19 00:34:16 ✅ Import paths updated successfully.
 🔧 Running go mod tidy...
 go: finding module for package go.mongodb.org/mongo-driver/bson/primitive
 go: found go.mongodb.org/mongo-driver/bson/primitive in go.mongodb.org/mongo-driver v1.17.4
 ✅ Dependencies tidied
-✅ ML generation completed (21.79s)
+✅ ML generation completed (19.63s)
 📁 Saved per-package coverage → experiments/out/NewsAPI/coverage.json
 🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
 

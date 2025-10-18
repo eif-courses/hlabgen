@@ -6,7 +6,6 @@ import (
 	"net/http"
 )
 
-// CreateProduct handles the creation of a new product.
 func CreateProduct() {
 	var product models.Product
 	if err := json.NewDecoder(r.Body).Decode(&product); err != nil {
@@ -17,17 +16,12 @@ func CreateProduct() {
 	json.NewEncoder(w).Encode(product)
 }
 
-// GetProducts handles fetching all products.
 func GetProducts() {
-	// Implementation for fetching products
+	// Implementation for getting products
 }
-
-// UpdateProduct handles updating a product.
 func UpdateProduct() {
 	// Implementation for updating a product
 }
-
-// DeleteProduct handles deleting a product.
 func DeleteProduct() {
 	// Implementation for deleting a product
 }

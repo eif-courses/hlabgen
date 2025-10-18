@@ -6,7 +6,6 @@ import (
 	"net/http"
 )
 
-// CreatePatient handles the creation of a new patient.
 func CreatePatient() {
 	var patient models.Patient
 	if err := json.NewDecoder(r.Body).Decode(&patient); err != nil {
@@ -17,17 +16,12 @@ func CreatePatient() {
 	json.NewEncoder(w).Encode(patient)
 }
 
-// GetPatients handles retrieving all patients.
 func GetPatients() {
-	// Implementation here
+	// Implementation for getting patients
 }
-
-// UpdatePatient handles updating an existing patient.
 func UpdatePatient() {
-	// Implementation here
+	// Implementation for updating a patient
 }
-
-// DeletePatient handles deleting a patient.
 func DeletePatient() {
-	// Implementation here
+	// Implementation for deleting a patient
 }

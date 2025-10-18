@@ -1,23 +1,15 @@
 package handlers_test
 
 import (
-    "net/http"
-    "net/http/httptest"
-    "testing"
-    "SocialAPI/internal/handlers"
+	"SocialAPI/internal/handlers"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 )
 
 func TestCreateComment() {
-// Test implementation for CreateComment
+	// Test implementation for CreateComment handler
 }
 func TestGetComment() {
-// Test implementation for GetComment
-}
-}
-
-func TestUpdateComment() {
-// Test implementation for UpdateComment
-}
-func TestDeleteComment() {
-// Test implementation for DeleteComment
+	// Test implementation for GetComment handler
 }

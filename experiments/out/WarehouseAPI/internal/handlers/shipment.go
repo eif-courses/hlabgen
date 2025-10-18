@@ -19,15 +19,5 @@ func CreateShipment() {
 
 // GetShipments handles fetching all shipments.
 func GetShipments() {
-	// Implementation for fetching shipments will go here.
-}
-
-// UpdateShipment handles updating an existing shipment.
-func UpdateShipment() {
-	// Implementation for updating a shipment will go here.
-}
-
-// DeleteShipment handles deleting a shipment.
-func DeleteShipment() {
-	// Implementation for deleting a shipment will go here.
+	// Implementation for fetching shipments would go here.
 }

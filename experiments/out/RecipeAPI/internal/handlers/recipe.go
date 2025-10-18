@@ -12,16 +12,19 @@ func CreateRecipe() {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	// Logic to save recipe to database
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(recipe)
 }
 
 func GetRecipes() {
-	// Implementation for getting recipes
+	// Logic to retrieve recipes from database
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode([]models.Recipe{})
 }
 func UpdateRecipe() {
-	// Implementation for updating a recipe
+	// Logic to update recipe in database
 }
 func DeleteRecipe() {
-	// Implementation for deleting a recipe
+	// Logic to delete recipe from database
 }

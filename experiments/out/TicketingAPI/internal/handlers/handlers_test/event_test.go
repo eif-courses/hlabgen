@@ -1,0 +1,21 @@
+package handlers_test
+
+import (
+	"TicketingAPI/internal/handlers"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
+func TestCreateEvent() {
+	req, err := http.NewRequest("POST", "/events", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(handlers.CreateEvent)
+	handler.ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusCreated {
+		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusCreated)
+	}
+}

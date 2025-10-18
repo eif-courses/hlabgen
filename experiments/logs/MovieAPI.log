@@ -1,21 +1,21 @@
 
 🚀 Starting generation for app: MovieAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/18 23:41:27 🧠 Starting ML-based code generation...
-⏱️  Initial model call took 14.921787768s
+2025/10/19 00:33:26 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 14.29329254s
 
 📊 Generation Summary:
-  • Duration: 14.922378788s
+  • Duration: 14.293739464s
   • Primary Success: true
   • Repair Attempts: 0
   • Final Success: true
   • Error: 
-2025/10/18 23:41:42 ✅ Generated 3 test file(s)
-2025/10/18 23:41:42 🔧 Detected module name: MovieAPI — fixing imports...
-2025/10/18 23:41:42 ✅ Import paths updated successfully.
+2025/10/19 00:33:40 ✅ Generated 3 test file(s)
+2025/10/19 00:33:40 🔧 Detected module name: MovieAPI — fixing imports...
+2025/10/19 00:33:40 ✅ Import paths updated successfully.
 🔧 Running go mod tidy...
 ✅ Dependencies tidied
-✅ ML generation completed (14.92s)
+✅ ML generation completed (14.29s)
 📁 Saved per-package coverage → experiments/out/MovieAPI/coverage.json
 🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
 

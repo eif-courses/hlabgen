@@ -6,7 +6,6 @@ import (
 	"net/http"
 )
 
-// CreateReview handles the creation of a new review.
 func CreateReview() {
 	var review models.Review
 	if err := json.NewDecoder(r.Body).Decode(&review); err != nil {
@@ -17,7 +16,6 @@ func CreateReview() {
 	json.NewEncoder(w).Encode(review)
 }
 
-// GetReviews handles retrieving all reviews for a movie.
 func GetReviews() {
 	// Implementation for retrieving reviews
 }

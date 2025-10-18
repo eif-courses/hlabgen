@@ -19,15 +19,5 @@ func CreateItem() {
 
 // GetItems handles fetching all items.
 func GetItems() {
-	// Implementation for fetching items will go here.
-}
-
-// UpdateItem handles updating an existing item.
-func UpdateItem() {
-	// Implementation for updating an item will go here.
-}
-
-// DeleteItem handles deleting an item.
-func DeleteItem() {
-	// Implementation for deleting an item will go here.
+	// Implementation for fetching items would go here.
 }

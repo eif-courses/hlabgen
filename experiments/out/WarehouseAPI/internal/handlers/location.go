@@ -19,15 +19,5 @@ func CreateLocation() {
 
 // GetLocations handles fetching all locations.
 func GetLocations() {
-	// Implementation for fetching locations will go here.
-}
-
-// UpdateLocation handles updating an existing location.
-func UpdateLocation() {
-	// Implementation for updating a location will go here.
-}
-
-// DeleteLocation handles deleting a location.
-func DeleteLocation() {
-	// Implementation for deleting a location will go here.
+	// Implementation for fetching locations would go here.
 }

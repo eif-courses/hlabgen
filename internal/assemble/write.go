@@ -17,6 +17,37 @@ type File struct {
 	Content  string
 }
 
+// ValidateAndFixTestFunctions checks for invalid test signatures and fixes them
+func ValidateAndFixTestFunctions(code string) (string, bool) {
+	fixed := false
+
+	// Pattern 1: func TestXxx() { -> func TestXxx(t *testing.T) {
+	pattern1 := regexp.MustCompile(`func (Test\w+)\(\) {`)
+	if pattern1.MatchString(code) {
+		code = pattern1.ReplaceAllString(code, `func $1(t *testing.T) {`)
+		fixed = true
+		fmt.Println("🔧 Fixed test signature: added missing (t *testing.T) parameter")
+	}
+
+	// Pattern 2: func TestXxx(t testing.T) { -> func TestXxx(t *testing.T) {
+	pattern2 := regexp.MustCompile(`func (Test\w+)\(t testing\.T\) {`)
+	if pattern2.MatchString(code) {
+		code = pattern2.ReplaceAllString(code, `func $1(t *testing.T) {`)
+		fixed = true
+		fmt.Println("🔧 Fixed test signature: added missing pointer *")
+	}
+
+	// Pattern 3: Remove extra parameters from test functions
+	pattern3 := regexp.MustCompile(`func (Test\w+)\(t \*testing\.T[^)]+\) {`)
+	if pattern3.MatchString(code) {
+		code = pattern3.ReplaceAllString(code, `func $1(t *testing.T) {`)
+		fixed = true
+		fmt.Println("🔧 Fixed test signature: removed extra parameters")
+	}
+
+	return code, fixed
+}
+
 // WriteMany writes multiple generated files to disk,
 // applies rule-based safety fixes, and auto-fixes import paths.
 func WriteMany(base string, files []File, metrics *ml.GenerationMetrics) error {
@@ -71,6 +102,15 @@ func WriteMany(base string, files []File, metrics *ml.GenerationMetrics) error {
 		// ✅ Apply test-specific cleanups
 		if strings.HasSuffix(filename, "_test.go") {
 			before := content
+
+			// 🔧 NEW: Validate and fix test function signatures FIRST
+			content, wasFixed := ValidateAndFixTestFunctions(content)
+			if wasFixed {
+				metrics.RuleFixes++
+				fmt.Printf("✅ Auto-fixed test signatures in %s\n", filename)
+			}
+
+			// Then apply other test fixes
 			content = rules.FixTestImports(content)
 			content = rules.FixTestBodies(content)
 			content = CleanDuplicateImports(content)
@@ -144,98 +184,40 @@ func detectModule(base string) (string, error) {
 // and ensures the file ends with balanced braces.
 func CleanDuplicateImports(code string) string {
 	lines := strings.Split(code, "\n")
-	var out []string
-	inImportBlock := false
-	seenImports := make(map[string]bool)
+	seen := make(map[string]bool)
+	result := []string{}
 
+	inImport := false
 	for _, line := range lines {
-		trim := strings.TrimSpace(line)
+		trimmed := strings.TrimSpace(line)
 
-		if strings.HasPrefix(trim, "import (") {
-			inImportBlock = true
-			out = append(out, line)
-			continue
-		}
-
-		if inImportBlock && trim == ")" {
-			inImportBlock = false
-			out = append(out, line)
-			continue
-		}
-
-		if inImportBlock {
-			if strings.Contains(trim, `"`) {
-				start := strings.Index(trim, `"`)
-				end := strings.LastIndex(trim, `"`)
-				if start >= 0 && end > start {
-					importPath := trim[start : end+1]
-					if seenImports[importPath] {
-						continue
-					}
-					seenImports[importPath] = true
-				}
-			}
-		}
-
-		out = append(out, line)
-	}
-
-	code = strings.Join(out, "\n")
-
-	openCount := strings.Count(code, "{")
-	closeCount := strings.Count(code, "}")
-	if openCount > closeCount {
-		code += "\n}"
-	}
-
-	return code
-}
-
-// cleanUnusedImportsInModels removes unused imports from model files
-func cleanUnusedImportsInModels(code string) string {
-	if strings.Contains(code, `"encoding/json"`) && !strings.Contains(code, "json.") {
-		lines := strings.Split(code, "\n")
-		var result []string
-		for _, line := range lines {
-			if strings.Contains(line, `"encoding/json"`) {
-				continue
-			}
+		// Track when we enter/exit import blocks
+		if strings.HasPrefix(trimmed, "import (") {
+			inImport = true
 			result = append(result, line)
+			continue
 		}
-		code = strings.Join(result, "\n")
-	}
-	return code
-}
+		if inImport && trimmed == ")" {
+			inImport = false
+			result = append(result, line)
+			continue
+		}
 
-// ensureTimeImport adds time import if time.Time is used but not imported
-func ensureTimeImport(code string) string {
-	if !strings.Contains(code, "time.Time") {
-		return code
-	}
-	if strings.Contains(code, `"time"`) {
-		return code
-	}
-
-	lines := strings.Split(code, "\n")
-	var result []string
-	importAdded := false
-
-	for i, line := range lines {
-		result = append(result, line)
-		if !importAdded && strings.HasPrefix(strings.TrimSpace(line), "package ") {
-			if i+1 < len(lines) && strings.Contains(lines[i+1], "import") {
-				continue
+		// Deduplicate import statements
+		if inImport && trimmed != "" {
+			if seen[trimmed] {
+				continue // Skip duplicate
 			}
-			result = append(result, "")
-			result = append(result, `import "time"`)
-			importAdded = true
+			seen[trimmed] = true
 		}
+
+		result = append(result, line)
 	}
 
 	return strings.Join(result, "\n")
 }
 
-// removeUnusedModelsImport removes models import if not used in handlers
+// removeUnusedModelsImport removes "/internal/models" import if it's not used
 func removeUnusedModelsImport(code string) string {
 	if !strings.Contains(code, "models.") {
 		lines := strings.Split(code, "\n")
@@ -247,6 +229,47 @@ func removeUnusedModelsImport(code string) string {
 			result = append(result, line)
 		}
 		return strings.Join(result, "\n")
+	}
+	return code
+}
+
+// cleanUnusedImportsInModels removes unused imports in model files
+func cleanUnusedImportsInModels(code string) string {
+	// Remove "time" import if not used
+	if !strings.Contains(code, "time.") && !strings.Contains(code, "Time") {
+		lines := strings.Split(code, "\n")
+		var result []string
+		for _, line := range lines {
+			if strings.Contains(line, `"time"`) {
+				continue
+			}
+			result = append(result, line)
+		}
+		code = strings.Join(result, "\n")
+	}
+	return code
+}
+
+// ensureTimeImport adds "time" import if time.Time is used but not imported
+func ensureTimeImport(code string) string {
+	if strings.Contains(code, "time.Time") && !strings.Contains(code, `"time"`) {
+		// Find import block and add time
+		lines := strings.Split(code, "\n")
+		var result []string
+		added := false
+		for i, line := range lines {
+			result = append(result, line)
+			if !added && strings.Contains(line, "import (") {
+				// Add time import after "import ("
+				if i+1 < len(lines) {
+					result = append(result, "\t\"time\"")
+					added = true
+				}
+			}
+		}
+		if added {
+			code = strings.Join(result, "\n")
+		}
 	}
 	return code
 }

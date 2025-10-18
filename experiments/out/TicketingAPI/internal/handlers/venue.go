@@ -15,13 +15,3 @@ func CreateVenue() {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(venue)
 }
-
-func GetVenues() {
-	// Implementation for getting venues
-}
-func UpdateVenue() {
-	// Implementation for updating a venue
-}
-func DeleteVenue() {
-	// Implementation for deleting a venue
-}

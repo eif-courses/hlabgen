@@ -1,10 +1,7 @@
-# Lab Tasks for FoodDeliveryAPI
+# Lab Tasks
 
-1. **Implement Secure Authentication with JWT**  
-   - Create a user model and implement JWT-based authentication for secure access to the API.
+1. **Implement secure authentication with JWT**: Create a middleware that checks for a valid JWT token in the request headers before allowing access to certain routes.
 
-2. **Add Transactional Order Processing**  
-   - Implement workflow logic to handle order processing, including payment and notifications.
+2. **Add transactional order processing or workflow logic**: Implement a service that handles the order processing, ensuring that the order is created only if the menu item is available and the user has sufficient balance.
 
-3. **Implement Complex Search with Filters and Relations**  
-   - Enhance the API to support complex search queries for restaurants and menu items, including filters by location, price range, and cuisine type.
+3. **Implement complex search with filters and relations**: Create an endpoint that allows users to search for restaurants or menu items based on various filters such as cuisine type, price range, and ratings.

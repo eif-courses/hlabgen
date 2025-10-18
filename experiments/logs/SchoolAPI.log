@@ -1,21 +1,21 @@
 
 🚀 Starting generation for app: SchoolAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/18 23:43:23 🧠 Starting ML-based code generation...
-⏱️  Initial model call took 17.864620474s
+2025/10/19 00:35:20 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 14.891938511s
 
 📊 Generation Summary:
-  • Duration: 17.865114107s
+  • Duration: 14.893415543s
   • Primary Success: true
   • Repair Attempts: 0
   • Final Success: true
   • Error: 
-2025/10/18 23:43:41 ✅ Generated 3 test file(s)
-2025/10/18 23:43:41 🔧 Detected module name: SchoolAPI — fixing imports...
-2025/10/18 23:43:41 ✅ Import paths updated successfully.
+2025/10/19 00:35:35 ✅ Generated 1 test file(s)
+2025/10/19 00:35:35 🔧 Detected module name: SchoolAPI — fixing imports...
+2025/10/19 00:35:35 ✅ Import paths updated successfully.
 🔧 Running go mod tidy...
 ✅ Dependencies tidied
-✅ ML generation completed (17.87s)
+✅ ML generation completed (14.89s)
 📁 Saved per-package coverage → experiments/out/SchoolAPI/coverage.json
 🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
 
@@ -23,7 +23,7 @@
 
 --- experiments/out/SchoolAPI/internal/handlers ---
 # SchoolAPI/internal/handlers
-/home/marius/GolandProjects/hlabgen/experiments/out/SchoolAPI/internal/handlers/handlers_test.go:10:1: wrong signature for TestCreateClass, must be: func TestCreateClass(t *testing.T)
+/home/marius/GolandProjects/hlabgen/experiments/out/SchoolAPI/internal/handlers/handlers_test.go:10:1: wrong signature for TestCreateTeacher, must be: func TestCreateTeacher(t *testing.T)
 FAIL	SchoolAPI/internal/handlers [setup failed]
 
 ------------------------

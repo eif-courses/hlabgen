@@ -17,7 +17,7 @@ func CreateTransaction() {
 }
 
 func GetTransactions() {
-	// Implementation for getting transactions
+	// Implementation for fetching transactions
 }
 func UpdateTransaction() {
 	// Implementation for updating a transaction

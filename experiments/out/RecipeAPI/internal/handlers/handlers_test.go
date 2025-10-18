@@ -8,14 +8,16 @@ import (
 )
 
 func TestCreateRecipe() {
-	// Test implementation for CreateRecipe
+	req, err := http.NewRequest("POST", "/recipes", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(handlers.CreateRecipe)
+	handler.ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusCreated {
+		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusCreated)
+	}
 }
-func TestGetRecipes() {
-	// Test implementation for GetRecipes
-}
-func TestUpdateRecipe() {
-	// Test implementation for UpdateRecipe
-}
-func TestDeleteRecipe() {
-	// Test implementation for DeleteRecipe
-}
+
+// Additional tests for other handlers...

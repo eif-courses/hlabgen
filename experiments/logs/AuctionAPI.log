@@ -1,21 +1,21 @@
 
 🚀 Starting generation for app: AuctionAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/18 23:37:32 🧠 Starting ML-based code generation...
-⏱️  Initial model call took 18.854905495s
+2025/10/19 00:29:31 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 14.685881862s
 
 📊 Generation Summary:
-  • Duration: 18.856679254s
+  • Duration: 14.686263196s
   • Primary Success: true
   • Repair Attempts: 0
   • Final Success: true
   • Error: 
-2025/10/18 23:37:51 ✅ Generated 3 test file(s)
-2025/10/18 23:37:51 🔧 Detected module name: AuctionAPI — fixing imports...
-2025/10/18 23:37:51 ✅ Import paths updated successfully.
+2025/10/19 00:29:46 ✅ Generated 3 test file(s)
+2025/10/19 00:29:46 🔧 Detected module name: AuctionAPI — fixing imports...
+2025/10/19 00:29:46 ✅ Import paths updated successfully.
 🔧 Running go mod tidy...
 ✅ Dependencies tidied
-✅ ML generation completed (18.86s)
+✅ ML generation completed (14.69s)
 📁 Saved per-package coverage → experiments/out/AuctionAPI/coverage.json
 🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
 

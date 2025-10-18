@@ -8,14 +8,8 @@ import (
 )
 
 func TestCreateUser() {
-	// Test implementation for CreateUser
+	// Test implementation for CreateUser handler
 }
 func TestGetUser() {
-	// Test implementation for GetUser
-}
-func TestUpdateUser() {
-	// Test implementation for UpdateUser
-}
-func TestDeleteUser() {
-	// Test implementation for DeleteUser
+	// Test implementation for GetUser handler
 }

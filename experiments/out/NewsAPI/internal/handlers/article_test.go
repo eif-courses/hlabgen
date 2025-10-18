@@ -10,8 +10,8 @@ import (
 func TestCreateArticle() {
 	// Test implementation for CreateArticle
 }
-func TestGetArticle() {
-	// Test implementation for GetArticle
+func TestGetArticles() {
+	// Test implementation for GetArticles
 }
 func TestUpdateArticle() {
 	// Test implementation for UpdateArticle

@@ -1,30 +1,30 @@
 
 🚀 Starting generation for app: TicketingAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/18 23:45:08 🧠 Starting ML-based code generation...
-⏱️  Initial model call took 16.678457919s
+2025/10/19 00:37:04 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 22.863171045s
 
 📊 Generation Summary:
-  • Duration: 16.678929594s
+  • Duration: 22.865109568s
   • Primary Success: true
   • Repair Attempts: 0
   • Final Success: true
   • Error: 
-2025/10/18 23:45:25 ✅ Generated 2 test file(s)
-2025/10/18 23:45:25 🔧 Detected module name: TicketingAPI — fixing imports...
-2025/10/18 23:45:25 ✅ Import paths updated successfully.
+2025/10/19 00:37:27 ✅ Generated 4 test file(s)
+2025/10/19 00:37:27 🔧 Detected module name: TicketingAPI — fixing imports...
+2025/10/19 00:37:27 ✅ Import paths updated successfully.
 🔧 Running go mod tidy...
 ✅ Dependencies tidied
-✅ ML generation completed (16.68s)
+✅ ML generation completed (22.87s)
 📁 Saved per-package coverage → experiments/out/TicketingAPI/coverage.json
 🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
 
 --- go test summary ---
 
---- experiments/out/TicketingAPI/internal/handlers ---
-# TicketingAPI/internal/handlers
-/home/marius/GolandProjects/hlabgen/experiments/out/TicketingAPI/internal/handlers/event_test.go:10:1: wrong signature for TestCreateEvent, must be: func TestCreateEvent(t *testing.T)
-FAIL	TicketingAPI/internal/handlers [setup failed]
+--- experiments/out/TicketingAPI/internal/handlers/handlers_test ---
+# TicketingAPI/internal/handlers/handlers_test
+/home/marius/GolandProjects/hlabgen/experiments/out/TicketingAPI/internal/handlers/handlers_test/attendee_test.go:10:1: wrong signature for TestCreateAttendee, must be: func TestCreateAttendee(t *testing.T)
+FAIL	TicketingAPI/internal/handlers/handlers_test [setup failed]
 
 ------------------------
 

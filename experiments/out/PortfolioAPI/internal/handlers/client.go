@@ -17,7 +17,7 @@ func CreateClient() {
 }
 
 func GetClients() {
-	// Implementation for fetching clients
+	// Implementation for retrieving clients
 }
 func UpdateClient() {
 	// Implementation for updating a client

@@ -17,7 +17,7 @@ func CreateAccount() {
 }
 
 func GetAccounts() {
-	// Implementation for getting accounts
+	// Implementation for fetching accounts
 }
 func UpdateAccount() {
 	// Implementation for updating an account

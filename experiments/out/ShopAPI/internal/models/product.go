@@ -1,15 +1,13 @@
 package models
 
-import "encoding/json"
+import "time"
 
 // Product represents a product in the shop.
 type Product struct {
-	ID    int     `json:"id"`
-	Name  string  `json:"name"`
-	Price float64 `json:"price"`
-}
-
-// ToJSON converts a Product to JSON.
-func (p *Product) ToJSON() ([]byte, error) {
-	return json.Marshal(p)
+	ID          int       `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Price       float64   `json:"price"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }

@@ -10,12 +10,10 @@ func Register() {
 	r.HandleFunc("/projects", handlers.GetProjects).Methods("GET")
 	r.HandleFunc("/projects/{id}", handlers.UpdateProject).Methods("PUT")
 	r.HandleFunc("/projects/{id}", handlers.DeleteProject).Methods("DELETE")
-
 	r.HandleFunc("/tasks", handlers.CreateTask).Methods("POST")
 	r.HandleFunc("/tasks", handlers.GetTasks).Methods("GET")
 	r.HandleFunc("/tasks/{id}", handlers.UpdateTask).Methods("PUT")
 	r.HandleFunc("/tasks/{id}", handlers.DeleteTask).Methods("DELETE")
-
 	r.HandleFunc("/milestones", handlers.CreateMilestone).Methods("POST")
 	r.HandleFunc("/milestones", handlers.GetMilestones).Methods("GET")
 	r.HandleFunc("/milestones/{id}", handlers.UpdateMilestone).Methods("PUT")

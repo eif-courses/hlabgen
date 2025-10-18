@@ -8,20 +8,10 @@ import (
 )
 
 func TestCreateDoctor() {
-	// Test implementation here
+	// Test implementation for CreateDoctor
 }
 func TestGetDoctors() {
-	// Test implementation here
+	// Test implementation for GetDoctors
 }
-func TestCreatePatient() {
-	// Test implementation here
-}
-func TestGetPatients() {
-	// Test implementation here
-}
-func TestCreateAppointment() {
-	// Test implementation here
-}
-func TestGetAppointments() {
-	// Test implementation here
-}
+
+// Additional tests for Patient and Appointment handlers

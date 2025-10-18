@@ -1,24 +1,21 @@
 
 🚀 Starting generation for app: RecipeAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/18 23:42:50 🧠 Starting ML-based code generation...
-⏱️  Initial model call took 15.020432858s
-🧪 Injected synthetic JSON corruption for repair test
+2025/10/19 00:34:49 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 12.855400973s
 
 📊 Generation Summary:
-  • Duration: 15.020891921s
+  • Duration: 12.856036704s
   • Primary Success: true
   • Repair Attempts: 0
   • Final Success: true
   • Error: 
-🧩 Merged duplicate struct: Ingredient
-🧩 Merged duplicate struct: Step
-2025/10/18 23:43:05 ✅ Generated 1 test file(s)
-2025/10/18 23:43:05 🔧 Detected module name: RecipeAPI — fixing imports...
-2025/10/18 23:43:05 ✅ Import paths updated successfully.
+2025/10/19 00:35:02 ✅ Generated 1 test file(s)
+2025/10/19 00:35:02 🔧 Detected module name: RecipeAPI — fixing imports...
+2025/10/19 00:35:02 ✅ Import paths updated successfully.
 🔧 Running go mod tidy...
 ✅ Dependencies tidied
-✅ ML generation completed (15.02s)
+✅ ML generation completed (12.86s)
 📁 Saved per-package coverage → experiments/out/RecipeAPI/coverage.json
 🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
 

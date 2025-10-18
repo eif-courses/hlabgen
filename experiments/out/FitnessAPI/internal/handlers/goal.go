@@ -16,12 +16,4 @@ func CreateGoal() {
 	json.NewEncoder(w).Encode(goal)
 }
 
-func GetGoal() {
-	// Implementation for getting a goal
-}
-func UpdateGoal() {
-	// Implementation for updating a goal
-}
-func DeleteGoal() {
-	// Implementation for deleting a goal
-}
+// Other CRUD functions for Goal

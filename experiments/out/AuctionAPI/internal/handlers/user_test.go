@@ -13,9 +13,3 @@ func TestCreateUser() {
 func TestGetUser() {
 	// Test implementation here
 }
-func TestUpdateUser() {
-	// Test implementation here
-}
-func TestDeleteUser() {
-	// Test implementation here
-}

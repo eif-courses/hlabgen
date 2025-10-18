@@ -7,15 +7,15 @@ import (
 	"testing"
 )
 
-func TestCreateProject() {
-	// Test implementation for CreateProject
+func TestCreateInvoice() {
+	// Test implementation for CreateInvoice
 }
-func TestGetProjects() {
-	// Test implementation for GetProjects
+func TestGetInvoices() {
+	// Test implementation for GetInvoices
 }
-func TestUpdateProject() {
-	// Test implementation for UpdateProject
+func TestUpdateInvoice() {
+	// Test implementation for UpdateInvoice
 }
-func TestDeleteProject() {
-	// Test implementation for DeleteProject
+func TestDeleteInvoice() {
+	// Test implementation for DeleteInvoice
 }

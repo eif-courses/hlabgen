@@ -1,21 +1,21 @@
 
 🚀 Starting generation for app: ShopAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/18 23:43:41 🧠 Starting ML-based code generation...
-⏱️  Initial model call took 18.714170682s
+2025/10/19 00:35:35 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 26.394101673s
 
 📊 Generation Summary:
-  • Duration: 18.714871729s
+  • Duration: 26.395615739s
   • Primary Success: true
   • Repair Attempts: 0
   • Final Success: true
   • Error: 
-2025/10/18 23:44:00 ✅ Generated 1 test file(s)
-2025/10/18 23:44:00 🔧 Detected module name: ShopAPI — fixing imports...
-2025/10/18 23:44:00 ✅ Import paths updated successfully.
+2025/10/19 00:36:02 ✅ Generated 1 test file(s)
+2025/10/19 00:36:02 🔧 Detected module name: ShopAPI — fixing imports...
+2025/10/19 00:36:02 ✅ Import paths updated successfully.
 🔧 Running go mod tidy...
 ✅ Dependencies tidied
-✅ ML generation completed (18.71s)
+✅ ML generation completed (26.40s)
 📁 Saved per-package coverage → experiments/out/ShopAPI/coverage.json
 🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
 

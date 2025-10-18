@@ -10,8 +10,8 @@ import (
 func TestCreateAuthor() {
 	// Test implementation for CreateAuthor
 }
-func TestGetAuthor() {
-	// Test implementation for GetAuthor
+func TestGetAuthors() {
+	// Test implementation for GetAuthors
 }
 func TestUpdateAuthor() {
 	// Test implementation for UpdateAuthor

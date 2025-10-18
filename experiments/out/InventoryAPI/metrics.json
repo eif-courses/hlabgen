@@ -1,6 +1,6 @@
 {
   "build_success": false,
-  "vet_warnings": 13,
+  "vet_warnings": 5,
   "lint_warnings": 0,
   "tests_pass": false,
   "coverage_pct": 0,

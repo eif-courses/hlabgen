@@ -1,5 +1,5 @@
 # Lab Tasks
 
-1. Implement the `GetUser`, `UpdateUser`, and `DeleteUser` functions in `internal/handlers/user.go`.
-2. Implement the `GetPost`, `UpdatePost`, and `DeletePost` functions in `internal/handlers/post.go`.
-3. Write unit tests for the `CreatePost`, `GetPost`, `UpdatePost`, and `DeletePost` functions in `internal/handlers/post_test.go`.
+1. Implement the `GetUser` handler to retrieve a user by ID.
+2. Implement pagination for the `GetPost` handler to return a limited number of posts.
+3. Write unit tests for the `UpdateComment` handler to ensure it updates comments correctly.

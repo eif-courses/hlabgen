@@ -15,3 +15,13 @@ func CreateReservation() {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(reservation)
 }
+
+func GetReservations() {
+	// Implementation for fetching reservations
+}
+func UpdateReservation() {
+	// Implementation for updating a reservation
+}
+func DeleteReservation() {
+	// Implementation for deleting a reservation
+}

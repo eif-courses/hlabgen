@@ -17,11 +17,11 @@ func CreateStudent() {
 }
 
 func GetStudents() {
-	// Implementation for getting students
+	// Implementation here
 }
 func UpdateStudent() {
-	// Implementation for updating a student
+	// Implementation here
 }
 func DeleteStudent() {
-	// Implementation for deleting a student
+	// Implementation here
 }

@@ -11,7 +11,5 @@ func Register() {
 	r.HandleFunc("/tasks/{id}", handlers.UpdateTask).Methods("PUT")
 	r.HandleFunc("/tasks/{id}", handlers.DeleteTask).Methods("DELETE")
 	r.HandleFunc("/teams", handlers.CreateTeam).Methods("POST")
-	r.HandleFunc("/teams", handlers.GetTeams).Methods("GET")
 	r.HandleFunc("/assignments", handlers.CreateAssignment).Methods("POST")
-	r.HandleFunc("/assignments", handlers.GetAssignments).Methods("GET")
 }

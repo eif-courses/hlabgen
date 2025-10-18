@@ -12,9 +12,10 @@ func TestCreateCandidate() {
 	if err != nil {
 		t.Fatal(err)
 	}
-	w := httptest.NewRecorder()
-	handlers.CreateCandidate(w, req)
-	if w.Code != http.StatusCreated {
-		t.Errorf("Expected status 201, got %v", w.Code)
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(handlers.CreateCandidate)
+	handler.ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusCreated {
+		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusCreated)
 	}
 }

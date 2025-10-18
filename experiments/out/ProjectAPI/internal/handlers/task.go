@@ -17,7 +17,7 @@ func CreateTask() {
 }
 
 func GetTasks() {
-	// Implementation for getting tasks
+	// Implementation for retrieving tasks
 }
 func UpdateTask() {
 	// Implementation for updating a task

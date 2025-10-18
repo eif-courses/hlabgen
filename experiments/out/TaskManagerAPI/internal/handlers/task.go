@@ -12,21 +12,16 @@ func CreateTask() {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// Logic to save task to database
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(task)
 }
 
 func GetTasks() {
-	// Logic to retrieve tasks from database
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode([]models.Task{})
+	// Implementation for getting tasks
 }
 func UpdateTask() {
-	// Logic to update task in database
-	w.WriteHeader(http.StatusOK)
+	// Implementation for updating a task
 }
 func DeleteTask() {
-	// Logic to delete task from database
-	w.WriteHeader(http.StatusNoContent)
+	// Implementation for deleting a task
 }

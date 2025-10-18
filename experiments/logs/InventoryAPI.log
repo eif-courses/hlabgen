@@ -1,23 +1,36 @@
 
 🚀 Starting generation for app: InventoryAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/18 23:40:53 🧠 Starting ML-based code generation...
-⏱️  Initial model call took 16.392089325s
+2025/10/19 00:32:45 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 15.314257833s
 
 📊 Generation Summary:
-  • Duration: 16.394322032s
+  • Duration: 15.314977413s
   • Primary Success: true
   • Repair Attempts: 0
   • Final Success: true
   • Error: 
-2025/10/18 23:41:09 ✅ Generated 3 test file(s)
-2025/10/18 23:41:09 🔧 Detected module name: InventoryAPI — fixing imports...
-2025/10/18 23:41:09 ✅ Import paths updated successfully.
+2025/10/19 00:33:00 ✅ Generated 1 test file(s)
+2025/10/19 00:33:00 🔧 Detected module name: InventoryAPI — fixing imports...
+2025/10/19 00:33:00 ✅ Import paths updated successfully.
 🔧 Running go mod tidy...
 go: finding module for package go.mongodb.org/mongo-driver/bson/primitive
+go: finding module for package go.mongodb.org/mongo-driver/mongo
+go: found go.mongodb.org/mongo-driver/mongo in go.mongodb.org/mongo-driver v1.17.4
 go: found go.mongodb.org/mongo-driver/bson/primitive in go.mongodb.org/mongo-driver v1.17.4
+go: downloading github.com/google/go-cmp v0.6.0
+go: downloading github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78
+go: downloading github.com/golang/snappy v0.0.4
+go: downloading github.com/xdg-go/scram v1.1.2
+go: downloading github.com/klauspost/compress v1.16.7
+go: downloading github.com/xdg-go/stringprep v1.0.4
+go: downloading golang.org/x/sync v0.8.0
+go: downloading github.com/montanaflynn/stats v0.7.1
+go: downloading golang.org/x/crypto v0.26.0
+go: downloading golang.org/x/text v0.17.0
+go: downloading github.com/xdg-go/pbkdf2 v1.0.0
 ✅ Dependencies tidied
-✅ ML generation completed (16.39s)
+✅ ML generation completed (15.31s)
 📁 Saved per-package coverage → experiments/out/InventoryAPI/coverage.json
 🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
 
@@ -25,7 +38,7 @@ go: found go.mongodb.org/mongo-driver/bson/primitive in go.mongodb.org/mongo-dri
 
 --- experiments/out/InventoryAPI/internal/handlers ---
 # InventoryAPI/internal/handlers
-/home/marius/GolandProjects/hlabgen/experiments/out/InventoryAPI/internal/handlers/order_test.go:10:1: wrong signature for TestCreateOrder, must be: func TestCreateOrder(t *testing.T)
+/home/marius/GolandProjects/hlabgen/experiments/out/InventoryAPI/internal/handlers/handlers_test.go:10:1: wrong signature for TestCreateProduct, must be: func TestCreateProduct(t *testing.T)
 FAIL	InventoryAPI/internal/handlers [setup failed]
 
 ------------------------

@@ -8,7 +8,7 @@ type Location struct {
 	Name string `json:"name"`
 }
 
-// ToJSON converts a Location to JSON.
+// ToJSON converts the Location to JSON format.
 func (l *Location) ToJSON() ([]byte, error) {
 	return json.Marshal(l)
 }
