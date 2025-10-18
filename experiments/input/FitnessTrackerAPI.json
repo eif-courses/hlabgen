@@ -1,27 +1,27 @@
 {
-  "app_name": "SocialAPI",
+  "app_name": "FitnessTrackerAPI",
   "entities": [
     {
       "name": "User",
       "fields": {
         "id": "int",
-        "username": "string"
+        "name": "string"
       }
     },
     {
-      "name": "Post",
+      "name": "Activity",
       "fields": {
         "id": "int",
         "user_id": "int",
-        "content": "string"
+        "type": "string"
       }
     },
     {
-      "name": "Comment",
+      "name": "Goal",
       "fields": {
         "id": "int",
-        "post_id": "int",
-        "text": "string"
+        "user_id": "int",
+        "target": "int"
       }
     }
   ]

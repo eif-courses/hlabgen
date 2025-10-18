@@ -1,27 +1,27 @@
 {
-  "app_name": "TaskAPI",
+  "app_name": "ClinicAPI",
   "entities": [
     {
-      "name": "Task",
-      "fields": {
-        "id": "int",
-        "title": "string",
-        "status": "string"
-      }
-    },
-    {
-      "name": "Project",
+      "name": "Doctor",
       "fields": {
         "id": "int",
         "name": "string"
       }
     },
     {
-      "name": "Assignment",
+      "name": "Patient",
       "fields": {
         "id": "int",
-        "task_id": "int",
-        "user": "string"
+        "name": "string"
+      }
+    },
+    {
+      "name": "Appointment",
+      "fields": {
+        "id": "int",
+        "doctor_id": "int",
+        "patient_id": "int",
+        "date": "string"
       }
     }
   ]

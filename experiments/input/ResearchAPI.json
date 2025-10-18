@@ -1,27 +1,26 @@
 {
-  "app_name": "TaskAPI",
+  "app_name": "ResearchAPI",
   "entities": [
     {
-      "name": "Task",
+      "name": "Paper",
       "fields": {
         "id": "int",
-        "title": "string",
-        "status": "string"
+        "title": "string"
       }
     },
     {
-      "name": "Project",
+      "name": "Author",
       "fields": {
         "id": "int",
         "name": "string"
       }
     },
     {
-      "name": "Assignment",
+      "name": "Review",
       "fields": {
         "id": "int",
-        "task_id": "int",
-        "user": "string"
+        "paper_id": "int",
+        "score": "int"
       }
     }
   ]

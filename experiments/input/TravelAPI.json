@@ -1,24 +1,23 @@
 {
-  "app_name": "InventoryAPI",
+  "app_name": "TravelAPI",
   "entities": [
     {
-      "name": "Product",
+      "name": "Trip",
       "fields": {
         "id": "int",
-        "name": "string",
-        "price": "float"
+        "destination": "string"
       }
     },
     {
-      "name": "Order",
+      "name": "Booking",
       "fields": {
         "id": "int",
-        "product_id": "int",
-        "quantity": "int"
+        "trip_id": "int",
+        "traveler": "string"
       }
     },
     {
-      "name": "Supplier",
+      "name": "Destination",
       "fields": {
         "id": "int",
         "name": "string"

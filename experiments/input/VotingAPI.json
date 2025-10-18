@@ -1,27 +1,26 @@
 {
-  "app_name": "TaskAPI",
+  "app_name": "VotingAPI",
   "entities": [
     {
-      "name": "Task",
+      "name": "Election",
       "fields": {
         "id": "int",
-        "title": "string",
-        "status": "string"
+        "title": "string"
       }
     },
     {
-      "name": "Project",
+      "name": "Candidate",
       "fields": {
         "id": "int",
         "name": "string"
       }
     },
     {
-      "name": "Assignment",
+      "name": "Vote",
       "fields": {
         "id": "int",
-        "task_id": "int",
-        "user": "string"
+        "candidate_id": "int",
+        "voter": "string"
       }
     }
   ]

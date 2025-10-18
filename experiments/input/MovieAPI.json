@@ -1,27 +1,28 @@
 {
-  "app_name": "TaskAPI",
+  "app_name": "MovieAPI",
   "entities": [
     {
-      "name": "Task",
+      "name": "Movie",
       "fields": {
         "id": "int",
         "title": "string",
-        "status": "string"
+        "year": "int"
       }
     },
     {
-      "name": "Project",
+      "name": "Director",
       "fields": {
         "id": "int",
         "name": "string"
       }
     },
     {
-      "name": "Assignment",
+      "name": "Review",
       "fields": {
         "id": "int",
-        "task_id": "int",
-        "user": "string"
+        "movie_id": "int",
+        "rating": "int",
+        "comment": "string"
       }
     }
   ]

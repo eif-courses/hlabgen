@@ -1,16 +1,15 @@
 {
-  "app_name": "TaskAPI",
+  "app_name": "TaskManagerAPI",
   "entities": [
     {
       "name": "Task",
       "fields": {
         "id": "int",
-        "title": "string",
-        "status": "string"
+        "title": "string"
       }
     },
     {
-      "name": "Project",
+      "name": "Team",
       "fields": {
         "id": "int",
         "name": "string"
@@ -21,7 +20,7 @@
       "fields": {
         "id": "int",
         "task_id": "int",
-        "user": "string"
+        "team_id": "int"
       }
     }
   ]

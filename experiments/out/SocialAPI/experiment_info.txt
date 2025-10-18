@@ -1,9 +1,0 @@
-App: SocialAPI
-Mode: hybrid
-Timestamp: 2025-10-18T21:27:03+03:00
-OpenAI Model: gpt-4o-mini
-BuildSuccess: false
-TestsPass: false
-Coverage: 0.0%
-MLDuration: 0s
-RepairAttempts: 0

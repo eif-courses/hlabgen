@@ -1,28 +1,27 @@
 {
-  "app_name": "MusicAPI",
+  "app_name": "StudentAPI",
   "entities": [
     {
-      "name": "Artist",
+      "name": "Student",
       "fields": {
         "id": "int",
         "name": "string"
       }
     },
     {
-      "name": "Album",
+      "name": "Course",
       "fields": {
         "id": "int",
-        "artist_id": "int",
         "title": "string"
       }
     },
     {
-      "name": "Song",
+      "name": "Grade",
       "fields": {
         "id": "int",
-        "album_id": "int",
-        "title": "string",
-        "duration": "int"
+        "student_id": "int",
+        "course_id": "int",
+        "score": "float"
       }
     }
   ]

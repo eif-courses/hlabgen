@@ -1,13 +1,21 @@
 {
   "app_name": "RecipeAPI",
-  "entities": ["Recipe", "Ingredient", "Category"],
-  "features": ["CRUD", "search", "filtering"],
-  "database": "SQLite",
-  "difficulty": "Beginner",
-  "objectives": [
-    "Implement basic recipe management",
-    "Add ingredient search",
-    "Write simple CRUD tests"
-  ],
-  "api_pattern": "REST"
+  "entities": [
+    {
+      "name": "Recipe",
+      "fields": {
+        "id": "int",
+        "name": "string",
+        "instructions": "string"
+      }
+    },
+    {
+      "name": "Ingredient",
+      "fields": {
+        "id": "int",
+        "recipe_id": "int",
+        "name": "string"
+      }
+    }
+  ]
 }

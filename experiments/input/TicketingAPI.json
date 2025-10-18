@@ -1,27 +1,25 @@
 {
-  "app_name": "TaskAPI",
+  "app_name": "TicketingAPI",
   "entities": [
     {
-      "name": "Task",
+      "name": "Ticket",
       "fields": {
         "id": "int",
-        "title": "string",
-        "status": "string"
+        "price": "float"
       }
     },
     {
-      "name": "Project",
+      "name": "Venue",
       "fields": {
         "id": "int",
         "name": "string"
       }
     },
     {
-      "name": "Assignment",
+      "name": "Customer",
       "fields": {
         "id": "int",
-        "task_id": "int",
-        "user": "string"
+        "name": "string"
       }
     }
   ]

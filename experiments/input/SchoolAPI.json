@@ -1,27 +1,26 @@
 {
-  "app_name": "TaskAPI",
+  "app_name": "SchoolAPI",
   "entities": [
     {
-      "name": "Task",
-      "fields": {
-        "id": "int",
-        "title": "string",
-        "status": "string"
-      }
-    },
-    {
-      "name": "Project",
+      "name": "Teacher",
       "fields": {
         "id": "int",
         "name": "string"
       }
     },
     {
-      "name": "Assignment",
+      "name": "Student",
       "fields": {
         "id": "int",
-        "task_id": "int",
-        "user": "string"
+        "name": "string"
+      }
+    },
+    {
+      "name": "Class",
+      "fields": {
+        "id": "int",
+        "teacher_id": "int",
+        "title": "string"
       }
     }
   ]

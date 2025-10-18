@@ -1,27 +1,26 @@
 {
-  "app_name": "TaskAPI",
+  "app_name": "PortfolioAPI",
   "entities": [
     {
-      "name": "Task",
+      "name": "Project",
       "fields": {
         "id": "int",
-        "title": "string",
-        "status": "string"
+        "title": "string"
       }
     },
     {
-      "name": "Project",
+      "name": "Client",
       "fields": {
         "id": "int",
         "name": "string"
       }
     },
     {
-      "name": "Assignment",
+      "name": "Invoice",
       "fields": {
         "id": "int",
-        "task_id": "int",
-        "user": "string"
+        "client_id": "int",
+        "amount": "float"
       }
     }
   ]

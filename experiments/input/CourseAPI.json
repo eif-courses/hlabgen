@@ -1,27 +1,26 @@
 {
-  "app_name": "TaskAPI",
+  "app_name": "CourseAPI",
   "entities": [
     {
-      "name": "Task",
+      "name": "Course",
       "fields": {
         "id": "int",
-        "title": "string",
-        "status": "string"
+        "title": "string"
       }
     },
     {
-      "name": "Project",
+      "name": "Lecturer",
       "fields": {
         "id": "int",
         "name": "string"
       }
     },
     {
-      "name": "Assignment",
+      "name": "Enrollment",
       "fields": {
         "id": "int",
-        "task_id": "int",
-        "user": "string"
+        "course_id": "int",
+        "student_name": "string"
       }
     }
   ]

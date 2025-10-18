@@ -1,9 +1,0 @@
-App: BlogAPI
-Mode: hybrid
-Timestamp: 2025-10-18T21:23:43+03:00
-OpenAI Model: gpt-4o-mini
-BuildSuccess: true
-TestsPass: true
-Coverage: 20.0%
-MLDuration: 0s
-RepairAttempts: 0

@@ -1,27 +1,26 @@
 {
-  "app_name": "TaskAPI",
+  "app_name": "BookstoreAPI",
   "entities": [
     {
-      "name": "Task",
+      "name": "Book",
       "fields": {
         "id": "int",
-        "title": "string",
-        "status": "string"
+        "title": "string"
       }
     },
     {
-      "name": "Project",
+      "name": "Author",
       "fields": {
         "id": "int",
         "name": "string"
       }
     },
     {
-      "name": "Assignment",
+      "name": "Sale",
       "fields": {
         "id": "int",
-        "task_id": "int",
-        "user": "string"
+        "book_id": "int",
+        "price": "float"
       }
     }
   ]

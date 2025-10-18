@@ -1,14 +1,21 @@
 {
   "app_name": "EventAPI",
-  "entities": ["Event", "Ticket", "Attendee", "Venue", "Organizer"],
-  "features": ["CRUD", "booking", "payment", "notifications"],
-  "database": "PostgreSQL",
-  "difficulty": "Intermediate",
-  "objectives": [
-    "Implement ticket booking system",
-    "Add event capacity management",
-    "Send booking confirmations",
-    "Write ticket booking tests"
-  ],
-  "api_pattern": "REST"
+  "entities": [
+    {
+      "name": "Event",
+      "fields": {
+        "id": "int",
+        "name": "string",
+        "date": "string"
+      }
+    },
+    {
+      "name": "Ticket",
+      "fields": {
+        "id": "int",
+        "event_id": "int",
+        "price": "float"
+      }
+    }
+  ]
 }

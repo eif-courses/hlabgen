@@ -1,27 +1,27 @@
 {
-  "app_name": "BlogAPI",
+  "app_name": "SurveyAPI",
   "entities": [
     {
-      "name": "Post",
+      "name": "Survey",
       "fields": {
         "id": "int",
-        "title": "string",
-        "content": "string"
+        "title": "string"
       }
     },
     {
-      "name": "Comment",
+      "name": "Question",
       "fields": {
         "id": "int",
-        "post_id": "int",
+        "survey_id": "int",
         "text": "string"
       }
     },
     {
-      "name": "Author",
+      "name": "Response",
       "fields": {
         "id": "int",
-        "name": "string"
+        "question_id": "int",
+        "answer": "string"
       }
     }
   ]

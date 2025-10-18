@@ -1,0 +1,29 @@
+{
+  "app_name": "CarRentalAPI",
+  "entities": [
+    {
+      "name": "Car",
+      "fields": {
+        "id": "int",
+        "model": "string",
+        "year": "int"
+      }
+    },
+    {
+      "name": "Customer",
+      "fields": {
+        "id": "int",
+        "name": "string"
+      }
+    },
+    {
+      "name": "Rental",
+      "fields": {
+        "id": "int",
+        "car_id": "int",
+        "customer_id": "int",
+        "return_date": "string"
+      }
+    }
+  ]
+}

@@ -1,9 +1,0 @@
-App: TaskAPI
-Mode: hybrid
-Timestamp: 2025-10-18T21:27:23+03:00
-OpenAI Model: gpt-4o-mini
-BuildSuccess: true
-TestsPass: true
-Coverage: 0.0%
-MLDuration: 0s
-RepairAttempts: 0

@@ -1,13 +1,29 @@
 {
   "app_name": "LibraryAPI",
-  "entities": ["Book", "User", "Loan"],
-  "features": ["CRUD", "auth", "search"],
-  "database": "PostgreSQL",
-  "difficulty": "Intermediate",
-  "objectives": [
-    "Implement REST CRUD in Go",
-    "Use JSON encoders/decoders",
-    "Write handler tests"
-  ],
-  "api_pattern": "REST"
+  "entities": [
+    {
+      "name": "Book",
+      "fields": {
+        "id": "int",
+        "title": "string",
+        "author": "string"
+      }
+    },
+    {
+      "name": "Member",
+      "fields": {
+        "id": "int",
+        "name": "string"
+      }
+    },
+    {
+      "name": "Loan",
+      "fields": {
+        "id": "int",
+        "book_id": "int",
+        "member_id": "int",
+        "due_date": "string"
+      }
+    }
+  ]
 }

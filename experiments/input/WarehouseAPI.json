@@ -1,0 +1,27 @@
+{
+  "app_name": "WarehouseAPI",
+  "entities": [
+    {
+      "name": "Item",
+      "fields": {
+        "id": "int",
+        "name": "string"
+      }
+    },
+    {
+      "name": "Location",
+      "fields": {
+        "id": "int",
+        "code": "string"
+      }
+    },
+    {
+      "name": "Shipment",
+      "fields": {
+        "id": "int",
+        "item_id": "int",
+        "location_id": "int"
+      }
+    }
+  ]
+}

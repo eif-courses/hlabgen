@@ -1,14 +1,29 @@
 {
   "app_name": "FitnessAPI",
-  "entities": ["User", "Workout", "Exercise", "Goal", "Progress"],
-  "features": ["CRUD", "tracking", "analytics", "goals"],
-  "database": "PostgreSQL",
-  "difficulty": "Intermediate",
-  "objectives": [
-    "Track workout sessions and progress",
-    "Implement goal setting and tracking",
-    "Generate fitness analytics",
-    "Write progress tracking tests"
-  ],
-  "api_pattern": "REST"
+  "entities": [
+    {
+      "name": "User",
+      "fields": {
+        "id": "int",
+        "name": "string"
+      }
+    },
+    {
+      "name": "Workout",
+      "fields": {
+        "id": "int",
+        "user_id": "int",
+        "type": "string"
+      }
+    },
+    {
+      "name": "Exercise",
+      "fields": {
+        "id": "int",
+        "workout_id": "int",
+        "name": "string",
+        "reps": "int"
+      }
+    }
+  ]
 }

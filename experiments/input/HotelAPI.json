@@ -1,14 +1,29 @@
 {
   "app_name": "HotelAPI",
-  "entities": ["Hotel", "Room", "Booking", "Guest", "Review"],
-  "features": ["CRUD", "search", "availability", "pricing"],
-  "database": "PostgreSQL",
-  "difficulty": "Intermediate",
-  "objectives": [
-    "Implement room availability checking",
-    "Add booking date validation",
-    "Implement dynamic pricing",
-    "Write booking workflow tests"
-  ],
-  "api_pattern": "REST"
+  "entities": [
+    {
+      "name": "Hotel",
+      "fields": {
+        "id": "int",
+        "name": "string",
+        "city": "string"
+      }
+    },
+    {
+      "name": "Room",
+      "fields": {
+        "id": "int",
+        "hotel_id": "int",
+        "number": "string"
+      }
+    },
+    {
+      "name": "Reservation",
+      "fields": {
+        "id": "int",
+        "room_id": "int",
+        "guest_name": "string"
+      }
+    }
+  ]
 }

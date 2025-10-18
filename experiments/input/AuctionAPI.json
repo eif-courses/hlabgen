@@ -1,24 +1,24 @@
 {
-  "app_name": "InventoryAPI",
+  "app_name": "AuctionAPI",
   "entities": [
     {
-      "name": "Product",
+      "name": "Auction",
       "fields": {
         "id": "int",
-        "name": "string",
-        "price": "float"
+        "title": "string"
       }
     },
     {
-      "name": "Order",
+      "name": "Bid",
       "fields": {
         "id": "int",
-        "product_id": "int",
-        "quantity": "int"
+        "auction_id": "int",
+        "user": "string",
+        "amount": "float"
       }
     },
     {
-      "name": "Supplier",
+      "name": "User",
       "fields": {
         "id": "int",
         "name": "string"
