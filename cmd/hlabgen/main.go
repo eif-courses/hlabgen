@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"go/parser"
+	"go/token"
 	"io/fs"
 	"log"
 	"os"
@@ -46,11 +48,6 @@ func main() {
 	if _, err := rules.Scaffold(*out, schema.AppName); err != nil {
 		log.Fatalf("❌ Scaffold failed: %v", err)
 	}
-
-	// REMOVED: Don't create fallback tests - let ML generate everything
-	// if err := rules.GenerateFallbackTests(*out, schema.AppName); err != nil {
-	// 	log.Printf("⚠️  Failed to create fallback tests: %v\n", err)
-	// }
 
 	fmt.Println("✅ Rule-based scaffold created")
 
@@ -97,8 +94,29 @@ func main() {
 			if err := assemble.WriteMany(*out, files, &genMetrics); err != nil {
 				log.Fatalf("❌ Failed to write generated files: %v", err)
 			}
+			// 🔧 NEW: Auto-fix all generated files
+			fmt.Println("\n🔧 Running auto-fix on generated files...")
+			if err := assemble.FixAllGeneratedFiles(*out); err != nil {
+				log.Printf("⚠️  Some auto-fixes failed: %v", err)
+			} else {
+				fmt.Println("✅ Auto-fix completed successfully")
+			}
 
-			// 🔍 NEW: Check if tests were generated
+			// 🔍 NEW: Validate syntax immediately after generation
+			fmt.Println("\n🔍 Validating Go syntax...")
+			syntaxErrors := validateGoSyntax(*out)
+			if len(syntaxErrors) > 0 {
+				fmt.Println("⚠️  Syntax errors found:")
+				for _, err := range syntaxErrors {
+					fmt.Printf("  - %s\n", err)
+				}
+				fmt.Println("🔧 Note: Auto-repair was attempted during file writing")
+				fmt.Println("💡 Run 'go build ./...' in the output directory to see detailed errors")
+			} else {
+				fmt.Println("✅ All generated files have valid Go syntax")
+			}
+
+			// 🔍 Check if tests were generated
 			testCount := 0
 			for _, f := range files {
 				if strings.HasSuffix(f.Filename, "_test.go") {
@@ -112,6 +130,7 @@ func main() {
 			}
 
 			// 🔧 FIRST: Automatically fix imports based on go.mod
+			fmt.Println("\n🔧 Fixing import paths...")
 			fixImportsToModule(*out)
 
 			// 🔧 THEN: Run go mod tidy to clean up dependencies
@@ -124,6 +143,18 @@ func main() {
 				log.Printf("⚠️  go mod tidy failed: %v", err)
 			} else {
 				fmt.Println("✅ Dependencies tidied")
+			}
+
+			// 🔍 Run final syntax check after all fixes
+			fmt.Println("\n🔍 Final syntax validation after fixes...")
+			finalErrors := validateGoSyntax(*out)
+			if len(finalErrors) > 0 {
+				fmt.Println("⚠️  Remaining syntax errors:")
+				for _, err := range finalErrors {
+					fmt.Printf("  - %s\n", err)
+				}
+			} else {
+				fmt.Println("✅ All syntax errors resolved")
 			}
 
 			fmt.Printf("✅ ML generation completed (%.2fs)\n", genMetrics.Duration.Seconds())
@@ -151,6 +182,7 @@ func main() {
 	fmt.Printf("  • TestsPass    = %v\n", m.TestsPass)
 	fmt.Printf("  • Coverage     = %.1f%%\n", m.CoveragePct)
 	fmt.Printf("  • ML Duration  = %v (repair %d)\n", genMetrics.Duration, genMetrics.RepairAttempts)
+	fmt.Printf("  • Rule Fixes   = %d\n", genMetrics.RuleFixes)
 
 	// --- 6) Save metrics ---
 	_ = metrics.SaveResult(*out, m)
@@ -160,7 +192,7 @@ func main() {
 	// --- 6.5) Save experiment repeatability metadata ---
 	metaPath := filepath.Join(*out, "experiment_info.txt")
 	meta := fmt.Sprintf(
-		"App: %s\nMode: %s\nTimestamp: %s\nOpenAI Model: %s\nBuildSuccess: %v\nTestsPass: %v\nCoverage: %.1f%%\nMLDuration: %v\nRepairAttempts: %d\n",
+		"App: %s\nMode: %s\nTimestamp: %s\nOpenAI Model: %s\nBuildSuccess: %v\nTestsPass: %v\nCoverage: %.1f%%\nMLDuration: %v\nRepairAttempts: %d\nRuleFixes: %d\n",
 		schema.AppName,
 		*mode,
 		time.Now().Format(time.RFC3339),
@@ -170,6 +202,7 @@ func main() {
 		m.CoveragePct,
 		genMetrics.Duration,
 		genMetrics.RepairAttempts,
+		genMetrics.RuleFixes,
 	)
 	if err := os.WriteFile(metaPath, []byte(meta), 0o644); err != nil {
 		log.Printf("⚠️  Failed to write experiment metadata: %v\n", err)
@@ -224,6 +257,7 @@ func fixImportsToModule(projectDir string) {
 
 	log.Printf("🔧 Detected module name: %s — fixing imports...", moduleName)
 
+	fixCount := 0
 	filepath.WalkDir(projectDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil || d.IsDir() {
 			return nil
@@ -262,13 +296,19 @@ func fixImportsToModule(projectDir string) {
 		if newContent != original {
 			err = os.WriteFile(path, []byte(newContent), 0o644)
 			if err == nil {
-				log.Printf("  ✅ Updated imports in: %s", path)
+				fixCount++
+				relPath, _ := filepath.Rel(projectDir, path)
+				log.Printf("  ✅ Updated imports in: %s", relPath)
 			}
 		}
 		return nil
 	})
 
-	log.Println("✅ Import paths updated successfully.")
+	if fixCount > 0 {
+		log.Printf("✅ Fixed imports in %d file(s)", fixCount)
+	} else {
+		log.Println("✅ No import fixes needed")
+	}
 }
 
 // --- Helper: Get model name safely ---
@@ -278,4 +318,27 @@ func getModelName() string {
 		return "gpt-4o-mini"
 	}
 	return model
+}
+
+// --- Helper: Validate Go syntax for all .go files ---
+func validateGoSyntax(projectPath string) []string {
+	var errors []string
+
+	filepath.Walk(projectPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil || info.IsDir() || !strings.HasSuffix(path, ".go") {
+			return nil
+		}
+
+		fset := token.NewFileSet()
+		_, parseErr := parser.ParseFile(fset, path, nil, parser.AllErrors)
+
+		if parseErr != nil {
+			relPath, _ := filepath.Rel(projectPath, path)
+			errors = append(errors, fmt.Sprintf("%s: %v", relPath, parseErr))
+		}
+
+		return nil
+	})
+
+	return errors
 }

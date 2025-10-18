@@ -224,6 +224,17 @@ func FixRegisterFunction(code string) string {
 	return code
 }
 
+// FixRegisterParameter ensures Register function has the correct mux.Router parameter
+func FixRegisterParameter(code string) string {
+	// Fix Register() → Register(r *mux.Router)
+	registerPattern := regexp.MustCompile(`func\s+Register\s*\(\s*\)\s*{`)
+	if registerPattern.MatchString(code) {
+		code = registerPattern.ReplaceAllString(code, `func Register(r *mux.Router) {`)
+		fmt.Println("🔧 Fixed Register function signature (added r *mux.Router parameter)")
+	}
+	return code
+}
+
 // FixTestImports ensures generated test files include required imports like gorilla/mux.
 func FixTestImports(code string) string {
 	// Add strings import if strings.NewReader is used
@@ -635,7 +646,6 @@ func RemoveDuplicateHandlerImports(code string) string {
 }
 
 // removeUnusedImports strips imports that aren't used in the code (safe version)
-// removeUnusedImports strips imports that aren't used in the code (safe version)
 func removeUnusedImports(code string) string {
 	lines := strings.Split(code, "\n")
 	var result []string
@@ -696,90 +706,4 @@ func removeUnusedImports(code string) string {
 	}
 
 	return strings.Join(result, "\n")
-}
-
-// parseImportLine extracts package name, alias, and full path from an import line
-func parseImportLine(line string) struct{ pkg, alias, fullPath string } {
-	result := struct{ pkg, alias, fullPath string }{}
-
-	// Remove leading/trailing whitespace and quotes
-	line = strings.TrimSpace(line)
-
-	// Handle aliased imports: alias "path/to/package"
-	if strings.Contains(line, " ") && strings.Contains(line, `"`) {
-		parts := strings.Fields(line)
-		if len(parts) >= 2 {
-			result.alias = parts[0]
-			result.fullPath = strings.Trim(parts[1], `"`)
-			result.pkg = getPackageNameFromPath(result.fullPath)
-			return result
-		}
-	}
-
-	// Handle regular imports: "path/to/package"
-	if strings.Contains(line, `"`) {
-		result.fullPath = strings.Trim(line, `"`)
-		result.pkg = getPackageNameFromPath(result.fullPath)
-		return result
-	}
-
-	return result
-}
-
-// getPackageNameFromPath extracts the package name from an import path
-func getPackageNameFromPath(path string) string {
-	// Remove quotes if present
-	path = strings.Trim(path, `"`)
-
-	// Get the last part of the path
-	parts := strings.Split(path, "/")
-	if len(parts) > 0 {
-		lastPart := parts[len(parts)-1]
-		// Handle versioned paths like v2, v3
-		if strings.HasPrefix(lastPart, "v") && len(lastPart) > 1 {
-			if len(parts) > 1 {
-				return parts[len(parts)-2]
-			}
-		}
-		return lastPart
-	}
-
-	return path
-}
-
-// isPackageUsed checks if a package name is actually used in the code
-func isPackageUsed(code, pkgName string) bool {
-	// Special cases: these are always considered "used"
-	alwaysUsed := map[string]bool{
-		"testing":  true,
-		"net/http": true, // Even if only types are used
-		"http":     true,
-		"httptest": true,
-	}
-
-	if alwaysUsed[pkgName] {
-		return true
-	}
-
-	// Check for package usage patterns:
-	// 1. pkgName.Something (function/type calls)
-	// 2. pkgName.CONSTANT (constants)
-	// 3. &pkgName.Type{} (struct initialization)
-	usagePatterns := []string{
-		pkgName + ".",          // Most common: json.Marshal, models.Book, etc.
-		"&" + pkgName + ".",    // Pointer: &models.Book{}
-		"*" + pkgName + ".",    // Pointer type: *models.Book
-		"[]" + pkgName + ".",   // Slice: []models.Book
-		"[]*" + pkgName + ".",  // Slice of pointers: []*models.Book
-		"map[" + pkgName + ".", // Map key
-		"]" + pkgName + ".",    // Map value
-	}
-
-	for _, pattern := range usagePatterns {
-		if strings.Contains(code, pattern) {
-			return true
-		}
-	}
-
-	return false
 }

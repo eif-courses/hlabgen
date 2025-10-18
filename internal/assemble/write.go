@@ -2,6 +2,8 @@ package assemble
 
 import (
 	"fmt"
+	"go/parser"
+	"go/token"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -74,6 +76,84 @@ func ValidateAndFixTestFunctions(code string) (string, bool) {
 	return code, fixed
 }
 
+// FixHandlerSignatures ensures all handler functions have the correct signature
+func FixHandlerSignatures(code string) (string, bool) {
+	fixed := false
+	lines := strings.Split(code, "\n")
+
+	// Pattern to match handler functions without parameters
+	handlerPattern := regexp.MustCompile(`^func\s+(Create|Get|Update|Delete|List)\w+\(\s*\)\s*{`)
+
+	for i, line := range lines {
+		trimmed := strings.TrimSpace(line)
+
+		if handlerPattern.MatchString(trimmed) {
+			// Extract function name
+			match := regexp.MustCompile(`func\s+(\w+)`).FindStringSubmatch(trimmed)
+			if len(match) > 1 {
+				funcName := match[1]
+				// Replace with correct signature
+				oldLine := line
+				lines[i] = regexp.MustCompile(`func\s+`+regexp.QuoteMeta(funcName)+`\s*\(\s*\)\s*{`).
+					ReplaceAllString(line, `func `+funcName+`(w http.ResponseWriter, r *http.Request) {`)
+
+				if lines[i] != oldLine {
+					fixed = true
+					fmt.Printf("🔧 Fixed handler signature for %s\n", funcName)
+				}
+			}
+		}
+	}
+
+	code = strings.Join(lines, "\n")
+
+	// Ensure net/http import exists if we made changes
+	if fixed && !strings.Contains(code, `"net/http"`) {
+		code = ensureNetHTTPImport(code)
+		fmt.Println("🔧 Added missing net/http import")
+	}
+
+	return code, fixed
+}
+
+// ensureNetHTTPImport adds net/http import if missing
+func ensureNetHTTPImport(code string) string {
+	if strings.Contains(code, `"net/http"`) {
+		return code
+	}
+
+	lines := strings.Split(code, "\n")
+	for i, line := range lines {
+		if strings.Contains(line, "import (") {
+			// Check if net/http already exists
+			hasHTTP := false
+			for j := i + 1; j < len(lines) && j < i+15; j++ {
+				if strings.Contains(lines[j], `"net/http"`) {
+					hasHTTP = true
+					break
+				}
+				if strings.TrimSpace(lines[j]) == ")" {
+					break
+				}
+			}
+			if !hasHTTP {
+				lines = append(lines[:i+1], append([]string{"\t\"net/http\""}, lines[i+1:]...)...)
+			}
+			return strings.Join(lines, "\n")
+		}
+	}
+
+	// No import block found, create one
+	for i, line := range lines {
+		if strings.HasPrefix(strings.TrimSpace(line), "package ") {
+			lines = append(lines[:i+1], append([]string{"", "import (", "\t\"net/http\"", ")"}, lines[i+1:]...)...)
+			return strings.Join(lines, "\n")
+		}
+	}
+
+	return code
+}
+
 // fixMissingCommas adds missing trailing commas in struct literals
 func fixMissingCommas(code string) (string, bool) {
 	fixed := false
@@ -84,54 +164,67 @@ func fixMissingCommas(code string) (string, bool) {
 		trimmed := strings.TrimSpace(currentLine)
 		nextLineTrimmed := strings.TrimSpace(lines[i+1])
 
+		// Skip comments and empty lines
 		if strings.HasPrefix(trimmed, "//") || trimmed == "" {
 			continue
 		}
 
+		// Already has comma
 		if strings.HasSuffix(trimmed, ",") {
 			continue
 		}
 
+		// Opening braces - don't add comma
 		if strings.HasSuffix(trimmed, "{") ||
 			strings.HasSuffix(trimmed, "(") ||
 			strings.HasSuffix(trimmed, "[") {
 			continue
 		}
 
+		// Check if this is a closing statement that shouldn't have comma
+		if trimmed == "}" || trimmed == ")" || trimmed == "]" {
+			continue
+		}
+
+		// Check if next line is closing brace
 		if nextLineTrimmed == "}" || nextLineTrimmed == "}," ||
 			nextLineTrimmed == "})," || nextLineTrimmed == "})" {
+			// This is a field that needs a comma before closing brace
 			if strings.Contains(trimmed, ":") ||
-				strings.Contains(currentLine, "{") ||
-				(len(trimmed) > 0 && !strings.HasSuffix(trimmed, "{") && !strings.HasSuffix(trimmed, "}")) {
+				strings.Contains(trimmed, "=") ||
+				(strings.Contains(trimmed, "{") && strings.Contains(trimmed, "}")) {
 				lines[i] = currentLine + ","
 				fixed = true
 				fmt.Printf("🔧 Fixed missing comma at line %d (before closing brace)\n", i+1)
 			}
 		}
 
+		// Check if next line is another field (contains : and is not a label)
 		if strings.Contains(nextLineTrimmed, ":") &&
-			!strings.HasPrefix(nextLineTrimmed, "//") {
-			if strings.Contains(trimmed, ":") ||
-				strings.Contains(trimmed, "=") {
+			!strings.HasPrefix(nextLineTrimmed, "//") &&
+			!strings.HasSuffix(nextLineTrimmed, ":") { // exclude labels like "default:"
+			if strings.Contains(trimmed, ":") {
 				lines[i] = currentLine + ","
 				fixed = true
-				fmt.Printf("🔧 Fixed missing comma at line %d (before next field)\n", i+1)
+				fmt.Printf("🔧 Fixed missing comma between fields at line %d\n", i+1)
 			}
 		}
 
-		if strings.Contains(currentLine, "{") && !strings.HasSuffix(trimmed, "{") {
-			if !strings.Contains(trimmed, "}") {
-				if nextLineTrimmed == "}" || nextLineTrimmed == "}," {
-					lines[i] = currentLine + ","
-					fixed = true
-					fmt.Printf("🔧 Fixed missing comma at line %d (inline struct)\n", i+1)
-				}
+		// Special case: inline struct literal followed by closing brace
+		if strings.Contains(currentLine, "{") &&
+			strings.Contains(currentLine, "}") &&
+			!strings.HasSuffix(trimmed, "},") &&
+			(nextLineTrimmed == "}" || nextLineTrimmed == "},") {
+			if !strings.HasSuffix(trimmed, ",") {
+				lines[i] = currentLine + ","
+				fixed = true
+				fmt.Printf("🔧 Fixed missing comma after inline struct at line %d\n", i+1)
 			}
 		}
 	}
 
 	if fixed {
-		fmt.Println("✅ Fixed missing commas in composite literal")
+		fmt.Println("✅ Fixed missing commas in composite literals")
 	}
 
 	return strings.Join(lines, "\n"), fixed
@@ -173,6 +266,13 @@ func ensureTestingImport(code string) string {
 	return code
 }
 
+// ValidateGoSyntax checks if the code is valid Go
+func ValidateGoSyntax(code string) error {
+	fset := token.NewFileSet()
+	_, err := parser.ParseFile(fset, "temp.go", code, parser.AllErrors)
+	return err
+}
+
 // WriteMany writes multiple generated files to disk,
 // applies rule-based safety fixes, and auto-fixes import paths.
 func WriteMany(base string, files []File, metrics *ml.GenerationMetrics) error {
@@ -190,18 +290,37 @@ func WriteMany(base string, files []File, metrics *ml.GenerationMetrics) error {
 		content := f.Content
 		filename := f.Filename
 
+		fmt.Printf("📝 Processing: %s\n", filename)
+
 		// ✅ Move tests next to handlers and adjust package name
 		filename, content = rules.PlaceTestsWithHandlers(filename, content)
 		metrics.RuleFixes++
 
-		// ✅ Apply safety rule for handlers (decode + type mismatch fix)
+		// ✅ Fix handler signatures FIRST (missing w, r parameters)
 		if strings.Contains(filename, "handlers/") && !strings.HasSuffix(filename, "_test.go") {
 			before := content
+			var wasFixed bool
+			content, wasFixed = FixHandlerSignatures(content)
+			if wasFixed {
+				metrics.RuleFixes++
+			}
+
+			// Apply safety rule for handlers (decode + type mismatch fix)
 			content = rules.SafeDecode(content)
 			content = rules.FixIDTypeMismatch(content)
 			content = removeUnusedModelsImport(content)
 			if content != before {
 				metrics.RuleFixes++
+			}
+		}
+
+		// ✅ Fix routes Register function parameter
+		if strings.Contains(filename, "routes") && !strings.HasSuffix(filename, "_test.go") {
+			before := content
+			content = fixRegisterParameter(content)
+			if content != before {
+				metrics.RuleFixes++
+				fmt.Println("🔧 Fixed Register function parameter")
 			}
 		}
 
@@ -228,7 +347,7 @@ func WriteMany(base string, files []File, metrics *ml.GenerationMetrics) error {
 		if strings.HasSuffix(filename, "_test.go") {
 			before := content
 
-			// 🔧 NEW: Validate and fix test function signatures FIRST
+			// 🔧 Validate and fix test function signatures FIRST
 			content, wasFixed := ValidateAndFixTestFunctions(content)
 			if wasFixed {
 				metrics.RuleFixes++
@@ -239,6 +358,13 @@ func WriteMany(base string, files []File, metrics *ml.GenerationMetrics) error {
 			content = rules.FixTestImports(content)
 			content = rules.FixTestBodies(content)
 			content = CleanDuplicateImports(content)
+
+			// Ensure net/http import for httptest
+			if !strings.Contains(content, `"net/http"`) && strings.Contains(content, "httptest") {
+				content = ensureNetHTTPImport(content)
+				metrics.RuleFixes++
+			}
+
 			if content != before {
 				metrics.RuleFixes++
 			}
@@ -276,6 +402,24 @@ func WriteMany(base string, files []File, metrics *ml.GenerationMetrics) error {
 			metrics.RuleFixes++
 		}
 
+		// ✅ Validate syntax before writing
+		if err := ValidateGoSyntax(content); err != nil {
+			fmt.Printf("⚠️  Syntax validation failed for %s: %v\n", filename, err)
+			fmt.Println("🔧 Attempting additional fixes...")
+
+			// Try one more comma fix pass
+			content, _ = fixMissingCommas(content)
+
+			// Re-validate
+			if err := ValidateGoSyntax(content); err != nil {
+				fmt.Printf("❌ Could not auto-fix syntax errors in %s\n", filename)
+				// Continue anyway - go build will catch it
+			} else {
+				fmt.Printf("✅ Auto-fixed syntax errors in %s\n", filename)
+				metrics.RuleFixes++
+			}
+		}
+
 		// ✅ Normalize output paths (ensure /internal/ structure)
 		fullPath := filepath.Join(base, rules.NormalizePath(filename))
 		if err := os.MkdirAll(filepath.Dir(fullPath), 0o755); err != nil {
@@ -286,9 +430,237 @@ func WriteMany(base string, files []File, metrics *ml.GenerationMetrics) error {
 		if err := os.WriteFile(fullPath, []byte(content), 0o644); err != nil {
 			return fmt.Errorf("failed to write file %s: %w", fullPath, err)
 		}
+
+		fmt.Printf("✅ Written: %s\n", fullPath)
 	}
 
+	fmt.Printf("\n🔧 Total rule-based fixes applied: %d\n", metrics.RuleFixes)
 	return nil
+}
+
+// FixAllGeneratedFiles applies all fixes to already generated files
+func FixAllGeneratedFiles(projectDir string) error {
+	fmt.Printf("\n🔧 Auto-fixing all files in: %s\n", projectDir)
+
+	fixes := 0
+
+	// Fix 1: Test function signatures
+	fmt.Println("\n📝 Fixing test function signatures...")
+	err := filepath.Walk(filepath.Join(projectDir, "internal", "handlers"), func(path string, info os.FileInfo, err error) error {
+		if err != nil || info.IsDir() || !strings.HasSuffix(path, "_test.go") {
+			return nil
+		}
+
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		original := string(content)
+		fixed := original
+
+		// Fix: func TestXxx() { -> func TestXxx(t *testing.T) {
+		re := regexp.MustCompile(`func (Test\w+)\s*\(\s*\)\s*\{`)
+		fixed = re.ReplaceAllString(fixed, `func $1(t *testing.T) {`)
+
+		if fixed != original {
+			err = os.WriteFile(path, []byte(fixed), 0644)
+			if err == nil {
+				fixes++
+				fmt.Printf("  ✅ Fixed test signatures in %s\n", filepath.Base(path))
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	// Fix 2: Handler function signatures
+	fmt.Println("\n📝 Fixing handler function signatures...")
+	err = filepath.Walk(filepath.Join(projectDir, "internal", "handlers"), func(path string, info os.FileInfo, err error) error {
+		if err != nil || info.IsDir() || strings.HasSuffix(path, "_test.go") || !strings.HasSuffix(path, ".go") {
+			return nil
+		}
+
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		original := string(content)
+		fixed := original
+
+		// Fix: func CreateXxx() { -> func CreateXxx(w http.ResponseWriter, r *http.Request) {
+		re := regexp.MustCompile(`func (Create|Get|Update|Delete|List)\w+\s*\(\s*\)\s*\{`)
+		fixed = re.ReplaceAllString(fixed, `func $1(w http.ResponseWriter, r *http.Request) {`)
+
+		// Ensure net/http import
+		if fixed != original {
+			if !strings.Contains(fixed, `"net/http"`) {
+				fixed = ensureNetHTTPImport(fixed)
+			}
+			if !strings.Contains(fixed, `"encoding/json"`) {
+				fixed = ensureJSONImport(fixed)
+			}
+
+			err = os.WriteFile(path, []byte(fixed), 0644)
+			if err == nil {
+				fixes++
+				fmt.Printf("  ✅ Fixed handler signatures in %s\n", filepath.Base(path))
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	// Fix 3: Routes Register function
+	fmt.Println("\n📝 Fixing routes Register function...")
+	routesPath := filepath.Join(projectDir, "internal", "routes", "routes.go")
+	if _, err := os.Stat(routesPath); err == nil {
+		content, err := os.ReadFile(routesPath)
+		if err == nil {
+			original := string(content)
+			fixed := fixRegisterParameter(original)
+
+			if fixed != original {
+				err = os.WriteFile(routesPath, []byte(fixed), 0644)
+				if err == nil {
+					fixes++
+					fmt.Println("  ✅ Fixed Register function parameter")
+				}
+			}
+		}
+	}
+
+	// Fix 4: Missing commas in test files
+	fmt.Println("\n📝 Fixing missing commas in struct literals...")
+	err = filepath.Walk(filepath.Join(projectDir, "internal", "handlers"), func(path string, info os.FileInfo, err error) error {
+		if err != nil || info.IsDir() || !strings.HasSuffix(path, "_test.go") {
+			return nil
+		}
+
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		original := string(content)
+		fixed, wasFixed := fixMissingCommas(original)
+
+		if wasFixed {
+			err = os.WriteFile(path, []byte(fixed), 0644)
+			if err == nil {
+				fixes++
+				fmt.Printf("  ✅ Fixed missing commas in %s\n", filepath.Base(path))
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	// Fix 5: Ensure all test files have required imports
+	fmt.Println("\n📝 Ensuring test file imports...")
+	err = filepath.Walk(filepath.Join(projectDir, "internal", "handlers"), func(path string, info os.FileInfo, err error) error {
+		if err != nil || info.IsDir() || !strings.HasSuffix(path, "_test.go") {
+			return nil
+		}
+
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		original := string(content)
+		fixed := original
+
+		// Ensure required imports
+		if !strings.Contains(fixed, `"testing"`) {
+			fixed = ensureTestingImport(fixed)
+		}
+		if strings.Contains(fixed, "httptest.") && !strings.Contains(fixed, `"net/http/httptest"`) {
+			fixed = ensureHTTPTestImport(fixed)
+		}
+		if strings.Contains(fixed, "bytes.") && !strings.Contains(fixed, `"bytes"`) {
+			fixed = ensureBytesImport(fixed)
+		}
+
+		if fixed != original {
+			err = os.WriteFile(path, []byte(fixed), 0644)
+			if err == nil {
+				fixes++
+				fmt.Printf("  ✅ Fixed imports in %s\n", filepath.Base(path))
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("\n✅ Applied %d fixes total!\n", fixes)
+	return nil
+}
+
+// ensureJSONImport adds encoding/json import if missing
+func ensureJSONImport(code string) string {
+	if strings.Contains(code, `"encoding/json"`) {
+		return code
+	}
+
+	lines := strings.Split(code, "\n")
+	for i, line := range lines {
+		if strings.Contains(line, "import (") {
+			lines = append(lines[:i+1], append([]string{"\t\"encoding/json\""}, lines[i+1:]...)...)
+			return strings.Join(lines, "\n")
+		}
+	}
+	return code
+}
+
+// ensureHTTPTestImport adds net/http/httptest import if missing
+func ensureHTTPTestImport(code string) string {
+	if strings.Contains(code, `"net/http/httptest"`) {
+		return code
+	}
+
+	lines := strings.Split(code, "\n")
+	for i, line := range lines {
+		if strings.Contains(line, "import (") {
+			lines = append(lines[:i+1], append([]string{"\t\"net/http/httptest\""}, lines[i+1:]...)...)
+			return strings.Join(lines, "\n")
+		}
+	}
+	return code
+}
+
+// ensureBytesImport adds bytes import if missing
+func ensureBytesImport(code string) string {
+	if strings.Contains(code, `"bytes"`) {
+		return code
+	}
+
+	lines := strings.Split(code, "\n")
+	for i, line := range lines {
+		if strings.Contains(line, "import (") {
+			lines = append(lines[:i+1], append([]string{"\t\"bytes\""}, lines[i+1:]...)...)
+			return strings.Join(lines, "\n")
+		}
+	}
+	return code
+}
+
+// fixRegisterParameter ensures Register function has the correct mux.Router parameter
+func fixRegisterParameter(code string) string {
+	registerPattern := regexp.MustCompile(`func\s+Register\s*\(\s*\)\s*{`)
+	if registerPattern.MatchString(code) {
+		code = registerPattern.ReplaceAllString(code, `func Register(r *mux.Router) {`)
+	}
+	return code
 }
 
 // detectModule reads the go.mod file and extracts the module name.

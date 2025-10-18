@@ -1,22 +1,36 @@
 package handlers_test
 
 import (
-    "bytes"
-    "encoding/json"
-    "net/http/httptest"
-    "testing"
-    "EcommerceAPI/internal/handlers"
-    "EcommerceAPI/internal/models"
+	"EcommerceAPI/internal/handlers"
+	"EcommerceAPI/internal/models"
+	"bytes"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 )
 
 func TestCreateCart() {
-cart := models.Cart{UserID: 1, Items: []models.Item{{Name: "item1", Price: 10}}, Total: 10
+	cart := models.Cart{
+		UserID: 1,
+		Products: []models.Product{
+			{ID: 1, Name: "Test Product", Price: 10.0, Stock: 100},
+		},
+	}
+	body, _ := json.Marshal(cart)
+	req := httptest.NewRequest("POST", "/carts", bytes.NewBuffer(body))
+	w := httptest.NewRecorder()
+	handlers.CreateCart(w, req)
+	if w.Code != http.StatusCreated {
+		t.Errorf("Expected 201, got %d", w.Code)
+	}
 }
-    body, _ := json.Marshal(cart)
-    req := httptest.NewRequest("POST", "/carts", bytes.NewBuffer(body))
-    w := httptest.NewRecorder()
-    handlers.CreateCart(w, req)
-    if w.Code != http.StatusCreated {
-        t.Errorf("Expected 201, got %d", w.Code)
-    }
+
+func TestGetCarts() {
+	req := httptest.NewRequest("GET", "/carts", nil)
+	w := httptest.NewRecorder()
+	handlers.GetCarts(w, req)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected 200, got %d", w.Code)
+	}
 }
