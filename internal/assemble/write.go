@@ -28,9 +28,16 @@ func WriteMany(base string, files []File) error {
 	for _, f := range files {
 		content := f.Content
 
-		// ✅ Apply safety rule for handler files
+		// ✅ Apply safety rule first for handlers
 		if strings.Contains(f.Filename, "handlers") {
 			content = rules.SafeDecode(content)
+			content = rules.FixIDTypeMismatch(content)
+		}
+
+		// ✅ Apply test fixes (imports + JSON body)
+		if strings.Contains(f.Filename, "tests/") {
+			content = rules.FixTestImports(content)
+			content = rules.FixTestBodies(content)
 		}
 
 		// Remove unnecessary mux imports in handlers

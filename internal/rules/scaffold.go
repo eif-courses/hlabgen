@@ -3,6 +3,7 @@ package rules
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -86,6 +87,14 @@ require github.com/gorilla/mux v1.8.1
 		}
 	}
 
+	// --- Auto-run `go mod tidy` to resolve dependencies ---
+	goModDir := outDir
+	cmd := exec.Command("go", "mod", "tidy")
+	cmd.Dir = goModDir
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	_ = cmd.Run() // ignore error for now, purely best-effort
+
 	return files, nil
 }
 
@@ -93,58 +102,109 @@ require github.com/gorilla/mux v1.8.1
 // 🔧 Universal SafeDecode (no hardcoded entities)
 //
 
-// SafeDecode automatically injects JSON body validation and mock CRUD
-// for any entity handler. Works for all future projects.
+// SafeDecode replaces any `json.NewDecoder(r.Body).Decode(&X)` line
+// with a safe block that checks nil body and handles decode errors.
+// It also ensures "net/http" and "encoding/json" are imported.
+// It NEVER adds mux or extra write headers; it preserves the rest of the handler.
 func SafeDecode(code string) string {
-	// Add request body safety checks
-	code = strings.ReplaceAll(code,
-		"json.NewDecoder(r.Body).Decode(&",
-		`if r.Body == nil {
-	http.Error(w, "missing body", http.StatusBadRequest)
-	return
-}
-if err := json.NewDecoder(r.Body).Decode(&`)
+	lines := strings.Split(code, "\n")
+	var out []string
+	changed := false
 
-	// Detect which entity this handler works with
-	entity := detectEntityName(code)
-	if entity == "" {
-		return code
+	for _, line := range lines {
+		trim := strings.TrimSpace(line)
+
+		// Match a full line with a decode call (no trailing semicolon block)
+		// e.g., `json.NewDecoder(r.Body).Decode(&book)`
+		if strings.Contains(trim, "json.NewDecoder(r.Body).Decode(&") && !strings.Contains(trim, ";") {
+			// Detect var name between & and )
+			varName := "data"
+			if idx := strings.Index(trim, "Decode(&"); idx >= 0 {
+				rest := trim[idx+len("Decode(&"):]
+				if close := strings.Index(rest, ")"); close > 0 {
+					candidate := rest[:close]
+					// keep simple identifier only
+					for i := range candidate {
+						c := candidate[i]
+						if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_') {
+							candidate = candidate[:i]
+							break
+						}
+					}
+					if candidate != "" {
+						varName = candidate
+					}
+				}
+			}
+
+			block := fmt.Sprintf(`if r.Body == nil {
+		http.Error(w, "missing body", http.StatusBadRequest)
+		return
+	}
+	if err := json.NewDecoder(r.Body).Decode(&%s); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}`, varName)
+
+			out = append(out, block)
+			changed = true
+			continue
+		}
+
+		out = append(out, line)
 	}
 
-	lower := strings.ToLower(entity)
-	storeDecl := fmt.Sprintf("var %ss []models.%s\n\n", lower, entity)
-	code = strings.Replace(code, "package handlers", "package handlers\n\n"+storeDecl, 1)
+	fixed := strings.Join(out, "\n")
 
-	// Replace placeholder CRUD logic
-	code = strings.ReplaceAll(code,
-		fmt.Sprintf("// Logic to save %s to database", lower),
-		fmt.Sprintf("%ss = append(%ss, %s)\nw.WriteHeader(http.StatusCreated)\njson.NewEncoder(w).Encode(%s)",
-			lower, lower, lower, lower))
-
-	code = strings.ReplaceAll(code,
-		fmt.Sprintf("// Logic to fetch %ss from database", lower),
-		fmt.Sprintf("w.WriteHeader(http.StatusOK)\njson.NewEncoder(w).Encode(%ss)", lower))
-
-	return code
-}
-
-// detectEntityName tries to infer the entity (e.g., Book, Student, Loan) from models.<Entity>.
-func detectEntityName(code string) string {
-	if !strings.Contains(code, "models.") {
-		return ""
+	// Ensure handlers NEVER import mux (strip it if present)
+	if strings.Contains(fixed, "package handlers") && strings.Contains(fixed, `"github.com/gorilla/mux"`) {
+		// remove single-line import and also possible grouped import member
+		fixed = strings.ReplaceAll(fixed, "\n\t\"github.com/gorilla/mux\"", "")
+		fixed = strings.ReplaceAll(fixed, "\"github.com/gorilla/mux\"\n", "")
 	}
-	start := strings.Index(code, "models.")
-	if start == -1 {
-		return ""
-	}
-	name := code[start+len("models."):]
-	name = strings.TrimLeft(name, " *\t\n\r")
-	for i, r := range name {
-		if !(r >= 'A' && r <= 'Z' || r >= 'a' && r <= 'z') {
-			return name[:i]
+
+	// If we changed anything, ensure imports include net/http and encoding/json
+	if changed {
+		// add import block if missing
+		if !strings.Contains(fixed, "\nimport (") && !strings.Contains(fixed, "\nimport \"") {
+			// create a grouped import after package line
+			fixed = strings.Replace(fixed, "package handlers", "package handlers\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n)\n", 1)
+			return fixed
+		}
+
+		// ensure encoding/json present
+		if !strings.Contains(fixed, `"encoding/json"`) {
+			fixed = strings.Replace(fixed, "import (", "import (\n\t\"encoding/json\"", 1)
+		}
+		// ensure net/http present
+		if !strings.Contains(fixed, `"net/http"`) {
+			fixed = strings.Replace(fixed, "import (", "import (\n\t\"net/http\"", 1)
 		}
 	}
-	return name
+
+	return fixed
+}
+
+// FixIDTypeMismatch ensures route path variables are converted to int when comparing with struct IDs.
+func FixIDTypeMismatch(code string) string {
+	if strings.Contains(code, "vars := mux.Vars(r)") && strings.Contains(code, "user.ID == id") {
+		code = strings.ReplaceAll(code, "user.ID == id",
+			"user.ID == parseID(id)")
+		// Add parseID helper to file if missing
+		if !strings.Contains(code, "func parseID(") {
+			code += `
+
+func parseID(s string) int {
+	id, _ := strconv.Atoi(s)
+	return id
+}`
+		}
+		// Add strconv import if missing
+		if !strings.Contains(code, `"strconv"`) {
+			code = strings.Replace(code, "import (", "import (\n\t\"strconv\"", 1)
+		}
+	}
+	return code
 }
 
 // NormalizePath ensures all generated files are placed under /internal.
@@ -186,6 +246,34 @@ func FixTestImports(code string) string {
 			"import (\n\t\"net/http\"",
 			1,
 		)
+	}
+	return code
+}
+
+// FixTestBodies ensures POST/PUT requests in tests have valid JSON bodies.
+func FixTestBodies(code string) string {
+	if (strings.Contains(code, "http.NewRequest(\"POST\"") || strings.Contains(code, "http.NewRequest(\"PUT\"")) &&
+		strings.Contains(code, "nil)") {
+
+		// Properly insert a body declaration before the request line
+		code = strings.Replace(code,
+			"http.NewRequest(",
+			"body := strings.NewReader(`{\"id\":1}`)\n\treq, err := http.NewRequest(",
+			1)
+		code = strings.Replace(code, "nil)", "body)", 1)
+
+		// Add Content-Type header if missing
+		if !strings.Contains(code, "req.Header.Set(\"Content-Type\"") {
+			code = strings.Replace(code,
+				"req, err := http.NewRequest(",
+				"req, err := http.NewRequest(\n\treq.Header.Set(\"Content-Type\", \"application/json\")",
+				1)
+		}
+
+		// Add strings import if missing
+		if !strings.Contains(code, `"strings"`) {
+			code = strings.Replace(code, "import (", "import (\n\t\"strings\"", 1)
+		}
 	}
 	return code
 }
