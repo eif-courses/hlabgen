@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/eif-courses/hlabgen/internal/ml"
 	"github.com/eif-courses/hlabgen/internal/rules"
 )
 
@@ -18,7 +19,7 @@ type File struct {
 
 // WriteMany writes multiple generated files to disk,
 // applies rule-based safety fixes, and auto-fixes import paths.
-func WriteMany(base string, files []File) error {
+func WriteMany(base string, files []File, metrics *ml.GenerationMetrics) error {
 	// Detect Go module name from go.mod
 	moduleName, err := detectModule(base)
 	if err != nil {
@@ -50,13 +51,13 @@ func WriteMany(base string, files []File) error {
 			content = rules.FixRegisterFunction(content)
 		}
 
-		// ✅ Apply test fixes (imports + JSON body + cleanup)
 		if strings.HasSuffix(filename, "_test.go") {
 			content = rules.FixTestImports(content)
+			metrics.RuleFixes++
 			content = rules.FixTestBodies(content)
+			metrics.RuleFixes++
 			content = CleanDuplicateImports(content)
-			content = rules.RemoveDuplicateHandlerImports(content)
-			content = FixUnbalancedBraces(content)
+			metrics.RuleFixes++
 		}
 
 		// ✅ Remove unnecessary mux imports in handlers

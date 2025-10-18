@@ -16,6 +16,7 @@ import (
 	"github.com/eif-courses/hlabgen/internal/input"
 	"github.com/eif-courses/hlabgen/internal/metrics"
 	mlinternal "github.com/eif-courses/hlabgen/internal/ml"
+	"github.com/eif-courses/hlabgen/internal/report"
 	"github.com/eif-courses/hlabgen/internal/rules"
 	"github.com/eif-courses/hlabgen/internal/validate"
 	"github.com/joho/godotenv"
@@ -179,6 +180,9 @@ func main() {
 	_ = os.MkdirAll(filepath.Dir(summaryPath), 0o755)
 	if err := metrics.AggregateToCSV("experiments/out", summaryPath); err != nil {
 		log.Printf("⚠️  Failed to aggregate metrics: %v\n", err)
+	}
+	if err := report.GenerateSummary(); err != nil {
+		fmt.Println("⚠️ Failed to generate summary:", err)
 	}
 
 	fmt.Println("\n✅ Experiment complete.")

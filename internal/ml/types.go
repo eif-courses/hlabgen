@@ -1,6 +1,6 @@
 package ml
 
 type GenFile struct {
-	Filename string
-	Code     string
+	Filename string `json:"filename"`
+	Code     string `json:"code"`
 }
