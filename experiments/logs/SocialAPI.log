@@ -1,0 +1,59 @@
+
+🚀 Starting generation for app: SocialAPI (mode=hybrid)
+✅ Rule-based scaffold created
+2025/10/18 19:47:22 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 30.282461628s
+
+📊 Generation Summary:
+  • Duration: 30.283664779s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+🔧 Fixed imports in: handlers/user.go
+🔧 Fixed imports in: handlers/post.go
+🔧 Fixed imports in: handlers/comment.go
+🔧 Fixed imports in: handlers/like.go
+🔧 Fixed imports in: handlers/follow.go
+🔧 Fixed imports in: handlers/notification.go
+🔧 Fixed imports in: routes/routes.go
+🔧 Fixed imports in: internal/handlers/user_test.go
+🔧 Fixed imports in: internal/handlers/post_test.go
+🔧 Fixed imports in: internal/handlers/comment_test.go
+🔧 Running go mod tidy...
+go: finding module for package github.com/eif-courses/hlabgen/internal/handlers
+go: finding module for package github.com/gin-gonic/gin
+go: found github.com/gin-gonic/gin in github.com/gin-gonic/gin v1.11.0
+go: finding module for package github.com/eif-courses/hlabgen/internal/handlers
+go: SocialAPI/internal/handlers tested by
+	SocialAPI/internal/handlers.test imports
+	github.com/eif-courses/hlabgen/internal/handlers: module github.com/eif-courses/hlabgen@latest found (v0.0.0-20251018161011-98d4a82a676f), but does not contain package github.com/eif-courses/hlabgen/internal/handlers
+2025/10/18 19:47:53 ⚠️  go mod tidy failed: exit status 1
+2025/10/18 19:47:53 🔧 Detected module name: SocialAPI — fixing imports...
+2025/10/18 19:47:53   ✅ Updated imports in: experiments/out/SocialAPI/internal/handlers/comment_test.go
+2025/10/18 19:47:53   ✅ Updated imports in: experiments/out/SocialAPI/internal/handlers/post_test.go
+2025/10/18 19:47:53   ✅ Updated imports in: experiments/out/SocialAPI/internal/handlers/user_test.go
+2025/10/18 19:47:53 ✅ Import paths updated successfully.
+✅ ML generation completed (30.28s)
+📁 Saved per-package coverage → experiments/out/SocialAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/SocialAPI/internal/handlers ---
+# SocialAPI/internal/handlers
+comment.go:5:5: no required module provides package github.com/gin-gonic/gin; to add it:
+	go get github.com/gin-gonic/gin
+FAIL	SocialAPI/internal/handlers [setup failed]
+
+------------------------
+
+📊 Summary for SocialAPI:
+  • BuildSuccess = false
+  • LintWarnings = 0
+  • TestsPass    = false
+  • Coverage     = 0.0%
+  • ML Duration  = 0s (repair 0)
+🧾 Aggregated 10 experiments into experiments/logs/summary.csv
+
+✅ Experiment complete.

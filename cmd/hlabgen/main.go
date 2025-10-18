@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -94,6 +95,18 @@ func main() {
 		} else {
 			if err := assemble.WriteMany(*out, files); err != nil {
 				log.Fatalf("❌ Failed to write generated files: %v", err)
+			}
+
+			// 🔧 Run go mod tidy to clean up dependencies
+			fmt.Println("🔧 Running go mod tidy...")
+			tidyCmd := exec.Command("go", "mod", "tidy")
+			tidyCmd.Dir = *out
+			tidyCmd.Stdout = os.Stdout
+			tidyCmd.Stderr = os.Stderr
+			if err := tidyCmd.Run(); err != nil {
+				log.Printf("⚠️  go mod tidy failed: %v", err)
+			} else {
+				fmt.Println("✅ Dependencies tidied")
 			}
 
 			// 🔧 Automatically fix imports based on go.mod

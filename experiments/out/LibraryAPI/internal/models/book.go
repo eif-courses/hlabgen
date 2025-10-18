@@ -8,5 +8,4 @@ type Book struct {
 	Title       string    `json:"title"`
 	Author      string    `json:"author"`
 	PublishedAt time.Time `json:"published_at"`
-	ISBN        string    `json:"isbn"`
 }

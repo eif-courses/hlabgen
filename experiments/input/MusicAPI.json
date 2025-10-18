@@ -1,0 +1,14 @@
+{
+  "app_name": "MusicAPI",
+  "entities": ["Song", "Album", "Artist", "Playlist", "User", "Like"],
+  "features": ["CRUD", "search", "streaming", "playlists", "recommendations"],
+  "database": "PostgreSQL",
+  "difficulty": "Advanced",
+  "objectives": [
+    "Implement playlist management",
+    "Add music search and filtering",
+    "Create recommendation system",
+    "Write comprehensive API tests"
+  ],
+  "api_pattern": "REST"
+}

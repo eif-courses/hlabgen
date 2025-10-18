@@ -48,7 +48,7 @@ func WriteMany(base string, files []File) error {
 			content = rules.FixTestImports(content)
 			content = rules.FixTestBodies(content)
 			content = CleanDuplicateImports(content)
-			content = rules.RemoveDuplicateHandlerImports(content) // Extra safety
+			content = rules.RemoveDuplicateHandlerImports(content)
 			content = FixUnbalancedBraces(content)
 		}
 

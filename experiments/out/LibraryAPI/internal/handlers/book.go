@@ -9,6 +9,10 @@ import (
 // CreateBook handles the creation of a new book.
 func CreateBook(w http.ResponseWriter, r *http.Request) {
 	var book models.Book
+	if r.Body == nil {
+		http.Error(w, "missing body", http.StatusBadRequest)
+		return
+	}
 	if err := json.NewDecoder(r.Body).Decode(&book); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -21,16 +25,28 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 // GetBooks handles fetching all books.
 func GetBooks(w http.ResponseWriter, r *http.Request) {
 	// Logic to fetch books from database
-	var books []models.Book
-	json.NewEncoder(w).Encode(books)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode([]models.Book{})
 }
 
-// UpdateBook handles updating an existing book.
+// UpdateBook handles updating a book.
 func UpdateBook(w http.ResponseWriter, r *http.Request) {
+	var book models.Book
+	if r.Body == nil {
+		http.Error(w, "missing body", http.StatusBadRequest)
+		return
+	}
+	if err := json.NewDecoder(r.Body).Decode(&book); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 	// Logic to update book in database
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(book)
 }
 
 // DeleteBook handles deleting a book.
 func DeleteBook(w http.ResponseWriter, r *http.Request) {
 	// Logic to delete book from database
+	w.WriteHeader(http.StatusNoContent)
 }

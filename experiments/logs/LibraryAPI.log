@@ -1,0 +1,58 @@
+
+🚀 Starting generation for app: LibraryAPI (mode=hybrid)
+✅ Rule-based scaffold created
+2025/10/18 19:45:07 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 28.706599877s
+
+📊 Generation Summary:
+  • Duration: 28.707390075s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+🔧 Fixed imports in: handlers/book.go
+🔧 Fixed imports in: handlers/user.go
+🔧 Fixed imports in: handlers/loan.go
+🔧 Fixed imports in: routes/routes.go
+🔧 Fixed imports in: internal/handlers/book_test.go
+🔧 Fixed imports in: internal/handlers/user_test.go
+🔧 Fixed imports in: internal/handlers/loan_test.go
+🔧 Running go mod tidy...
+go: finding module for package github.com/eif-courses/hlabgen/internal/handlers
+go: LibraryAPI/internal/handlers tested by
+	LibraryAPI/internal/handlers.test imports
+	github.com/eif-courses/hlabgen/internal/handlers: module github.com/eif-courses/hlabgen@latest found (v0.0.0-20251018161011-98d4a82a676f), but does not contain package github.com/eif-courses/hlabgen/internal/handlers
+2025/10/18 19:45:36 ⚠️  go mod tidy failed: exit status 1
+2025/10/18 19:45:36 🔧 Detected module name: LibraryAPI — fixing imports...
+2025/10/18 19:45:36   ✅ Updated imports in: experiments/out/LibraryAPI/internal/handlers/book_test.go
+2025/10/18 19:45:36   ✅ Updated imports in: experiments/out/LibraryAPI/internal/handlers/loan_test.go
+2025/10/18 19:45:36   ✅ Updated imports in: experiments/out/LibraryAPI/internal/handlers/user_test.go
+2025/10/18 19:45:36 ✅ Import paths updated successfully.
+✅ ML generation completed (28.71s)
+📁 Saved per-package coverage → experiments/out/LibraryAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/LibraryAPI/internal/handlers ---
+=== RUN   TestCreateBook
+--- PASS: TestCreateBook (0.00s)
+=== RUN   TestCreateLoan
+--- PASS: TestCreateLoan (0.00s)
+=== RUN   TestCreateUser
+--- PASS: TestCreateUser (0.00s)
+PASS
+coverage: 23.8% of statements
+ok  	LibraryAPI/internal/handlers	0.003s
+
+------------------------
+
+📊 Summary for LibraryAPI:
+  • BuildSuccess = true
+  • LintWarnings = 0
+  • TestsPass    = true
+  • Coverage     = 23.8%
+  • ML Duration  = 0s (repair 0)
+🧾 Aggregated 6 experiments into experiments/logs/summary.csv
+
+✅ Experiment complete.

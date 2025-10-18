@@ -1,0 +1,56 @@
+
+🚀 Starting generation for app: FitnessAPI (mode=hybrid)
+✅ Rule-based scaffold created
+2025/10/18 19:43:31 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 34.574349245s
+
+📊 Generation Summary:
+  • Duration: 34.576193669s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+🔧 Fixed imports in: handlers/user.go
+🔧 Fixed imports in: handlers/workout.go
+🔧 Fixed imports in: handlers/exercise.go
+🔧 Fixed imports in: handlers/goal.go
+🔧 Fixed imports in: handlers/progress.go
+🔧 Fixed imports in: routes/routes.go
+🔧 Fixed imports in: internal/handlers/user_test.go
+🔧 Fixed imports in: internal/handlers/workout_test.go
+🔧 Running go mod tidy...
+go: finding module for package github.com/eif-courses/hlabgen/internal/handlers
+go: finding module for package github.com/gin-gonic/gin
+go: found github.com/gin-gonic/gin in github.com/gin-gonic/gin v1.11.0
+go: finding module for package github.com/eif-courses/hlabgen/internal/handlers
+go: FitnessAPI/internal/handlers tested by
+	FitnessAPI/internal/handlers.test imports
+	github.com/eif-courses/hlabgen/internal/handlers: module github.com/eif-courses/hlabgen@latest found (v0.0.0-20251018161011-98d4a82a676f), but does not contain package github.com/eif-courses/hlabgen/internal/handlers
+2025/10/18 19:44:06 ⚠️  go mod tidy failed: exit status 1
+2025/10/18 19:44:06 🔧 Detected module name: FitnessAPI — fixing imports...
+2025/10/18 19:44:06   ✅ Updated imports in: experiments/out/FitnessAPI/internal/handlers/user_test.go
+2025/10/18 19:44:06   ✅ Updated imports in: experiments/out/FitnessAPI/internal/handlers/workout_test.go
+2025/10/18 19:44:06 ✅ Import paths updated successfully.
+✅ ML generation completed (34.58s)
+📁 Saved per-package coverage → experiments/out/FitnessAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/FitnessAPI/internal/handlers ---
+# FitnessAPI/internal/handlers
+exercise.go:5:2: no required module provides package github.com/gin-gonic/gin; to add it:
+	go get github.com/gin-gonic/gin
+FAIL	FitnessAPI/internal/handlers [setup failed]
+
+------------------------
+
+📊 Summary for FitnessAPI:
+  • BuildSuccess = false
+  • LintWarnings = 0
+  • TestsPass    = false
+  • Coverage     = 0.0%
+  • ML Duration  = 0s (repair 0)
+🧾 Aggregated 3 experiments into experiments/logs/summary.csv
+
+✅ Experiment complete.

@@ -1,0 +1,14 @@
+{
+  "app_name": "InventoryAPI",
+  "entities": ["Product", "Warehouse", "Stock", "Supplier", "Order"],
+  "features": ["CRUD", "tracking", "alerts", "reports"],
+  "database": "PostgreSQL",
+  "difficulty": "Intermediate",
+  "objectives": [
+    "Implement stock level tracking",
+    "Add low-stock alerts",
+    "Generate inventory reports",
+    "Write stock management tests"
+  ],
+  "api_pattern": "REST"
+}

@@ -1,0 +1,65 @@
+
+🚀 Starting generation for app: MusicAPI (mode=hybrid)
+✅ Rule-based scaffold created
+2025/10/18 19:45:37 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 44.181746672s
+
+📊 Generation Summary:
+  • Duration: 44.184369775s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+🔧 Fixed imports in: handlers/song.go
+🔧 Fixed imports in: handlers/album.go
+🔧 Fixed imports in: handlers/artist.go
+🔧 Fixed imports in: handlers/playlist.go
+🔧 Fixed imports in: handlers/user.go
+🔧 Fixed imports in: handlers/like.go
+🔧 Fixed imports in: routes/routes.go
+🔧 Fixed imports in: internal/handlers/song_test.go
+🔧 Fixed imports in: internal/handlers/album_test.go
+🔧 Fixed imports in: internal/handlers/artist_test.go
+🔧 Fixed imports in: internal/handlers/playlist_test.go
+🔧 Fixed imports in: internal/handlers/user_test.go
+🔧 Fixed imports in: internal/handlers/like_test.go
+🔧 Running go mod tidy...
+go: finding module for package github.com/eif-courses/hlabgen/internal/handlers
+go: finding module for package github.com/gin-gonic/gin
+go: found github.com/gin-gonic/gin in github.com/gin-gonic/gin v1.11.0
+go: finding module for package github.com/eif-courses/hlabgen/internal/handlers
+go: MusicAPI/internal/handlers tested by
+	MusicAPI/internal/handlers.test imports
+	github.com/eif-courses/hlabgen/internal/handlers: module github.com/eif-courses/hlabgen@latest found (v0.0.0-20251018161011-98d4a82a676f), but does not contain package github.com/eif-courses/hlabgen/internal/handlers
+2025/10/18 19:46:22 ⚠️  go mod tidy failed: exit status 1
+2025/10/18 19:46:22 🔧 Detected module name: MusicAPI — fixing imports...
+2025/10/18 19:46:22   ✅ Updated imports in: experiments/out/MusicAPI/internal/handlers/album_test.go
+2025/10/18 19:46:22   ✅ Updated imports in: experiments/out/MusicAPI/internal/handlers/artist_test.go
+2025/10/18 19:46:22   ✅ Updated imports in: experiments/out/MusicAPI/internal/handlers/like_test.go
+2025/10/18 19:46:22   ✅ Updated imports in: experiments/out/MusicAPI/internal/handlers/playlist_test.go
+2025/10/18 19:46:22   ✅ Updated imports in: experiments/out/MusicAPI/internal/handlers/song_test.go
+2025/10/18 19:46:22   ✅ Updated imports in: experiments/out/MusicAPI/internal/handlers/user_test.go
+2025/10/18 19:46:22 ✅ Import paths updated successfully.
+✅ ML generation completed (44.18s)
+📁 Saved per-package coverage → experiments/out/MusicAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/MusicAPI/internal/handlers ---
+# MusicAPI/internal/handlers
+album.go:5:5: no required module provides package github.com/gin-gonic/gin; to add it:
+	go get github.com/gin-gonic/gin
+FAIL	MusicAPI/internal/handlers [setup failed]
+
+------------------------
+
+📊 Summary for MusicAPI:
+  • BuildSuccess = false
+  • LintWarnings = 0
+  • TestsPass    = false
+  • Coverage     = 0.0%
+  • ML Duration  = 0s (repair 0)
+🧾 Aggregated 7 experiments into experiments/logs/summary.csv
+
+✅ Experiment complete.

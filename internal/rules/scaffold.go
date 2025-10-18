@@ -371,7 +371,8 @@ func PlaceTestsWithHandlers(filename, content string) (string, string) {
 		handlerImport := fmt.Sprintf(`"%s/internal/handlers"`, module)
 
 		// Only add handler import if it doesn't exist at all
-		if !strings.Contains(content, handlerImport) {
+		// Check for any variation of the handler import path
+		if !strings.Contains(content, "/internal/handlers\"") {
 			if strings.Contains(content, "import (") {
 				// Find the import block and add to it
 				content = strings.Replace(content, "import (", "import (\n\t"+handlerImport, 1)
@@ -383,7 +384,7 @@ func PlaceTestsWithHandlers(filename, content string) (string, string) {
 			}
 		}
 
-		// Final cleanup
+		// Final cleanup - this is critical to remove any duplicates that slipped through
 		content = CleanDuplicateImports(content)
 		content = RemoveDuplicateHandlerImports(content)
 	}
@@ -489,13 +490,12 @@ func TestCreateBook(t *testing.T) {
 	return nil
 }
 
-// CleanDuplicateImports removes duplicate import lines (even if spacing differs)
-// and ensures the file ends with balanced braces.
+// CleanDuplicateImports removes duplicate import lines and normalizes spacing
 func CleanDuplicateImports(code string) string {
 	lines := strings.Split(code, "\n")
 	var out []string
 	inImportBlock := false
-	seenImports := make(map[string]bool)
+	seenImports := make(map[string]struct{}) // Use struct{} instead of bool for memory efficiency
 
 	for i := 0; i < len(lines); i++ {
 		line := lines[i]
@@ -504,7 +504,7 @@ func CleanDuplicateImports(code string) string {
 		// Detect import block start
 		if strings.HasPrefix(trim, "import (") {
 			inImportBlock = true
-			seenImports = make(map[string]bool) // Reset for this block
+			seenImports = make(map[string]struct{}) // Reset for this block
 			out = append(out, line)
 			continue
 		}
@@ -518,21 +518,20 @@ func CleanDuplicateImports(code string) string {
 
 		// Process imports inside the block
 		if inImportBlock {
-			// Extract the import path (everything between quotes)
-			if strings.Contains(trim, `"`) {
-				// Extract just the import path for comparison
-				start := strings.Index(trim, `"`)
-				end := strings.LastIndex(trim, `"`)
-				if start >= 0 && end > start {
-					importPath := trim[start : end+1] // Include quotes
-
-					if seenImports[importPath] {
-						// Skip this duplicate import
-						continue
-					}
-					seenImports[importPath] = true
-				}
+			// Skip empty lines in import block
+			if trim == "" {
+				continue
 			}
+
+			// Extract the import path for comparison (normalize it)
+			importKey := strings.TrimSpace(trim)
+
+			// Check if we've seen this exact import before
+			if _, exists := seenImports[importKey]; exists {
+				// Skip this duplicate import
+				continue
+			}
+			seenImports[importKey] = struct{}{}
 			out = append(out, line)
 			continue
 		}
@@ -547,13 +546,13 @@ func CleanDuplicateImports(code string) string {
 	openCount := strings.Count(code, "{")
 	closeCount := strings.Count(code, "}")
 	if openCount > closeCount {
-		code += "\n}"
+		code += strings.Repeat("\n}", openCount-closeCount)
 	}
 
 	return code
 }
 
-// RemoveDuplicateHandlerImports is a final safety check to remove duplicate handler imports
+// RemoveDuplicateHandlerImports removes ALL duplicate handler imports
 func RemoveDuplicateHandlerImports(code string) string {
 	lines := strings.Split(code, "\n")
 	var out []string
@@ -577,13 +576,15 @@ func RemoveDuplicateHandlerImports(code string) string {
 			continue
 		}
 
-		// Inside import block - check for handler import
-		if inImportBlock && strings.Contains(trim, "/internal/handlers\"") {
+		// Inside import block - check for ANY handler import
+		if inImportBlock && strings.Contains(trim, "/handlers\"") {
 			if handlerImportSeen {
 				// Skip this duplicate
 				continue
 			}
 			handlerImportSeen = true
+			out = append(out, line)
+			continue
 		}
 
 		out = append(out, line)

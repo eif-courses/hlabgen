@@ -1,9 +1,9 @@
 {
   "build_success": true,
-  "vet_warnings": 3,
+  "vet_warnings": 0,
   "lint_warnings": 0,
-  "tests_pass": false,
-  "coverage_pct": 0,
+  "tests_pass": true,
+  "coverage_pct": 23.8,
   "cyclomatic_avg": 0,
   "gen_time_sec": 0
 }

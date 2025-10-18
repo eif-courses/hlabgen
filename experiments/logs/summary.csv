@@ -1,2 +1,12 @@
 AppName,Mode,Timestamp,Model,BuildSuccess,TestsPass,CoveragePct,LintWarnings,MLDuration,RepairAttempts
-LibraryAPI,hybrid,2025-10-18T19:09:08+03:00,gpt-4o-mini,true,false,0.00,0,0s,0
+BlogAPI,hybrid,2025-10-18T19:43:06+03:00,gpt-4o-mini,false,false,0.00,0,0s,0
+EventAPI,hybrid,2025-10-18T19:43:31+03:00,gpt-4o-mini,false,false,0.00,0,0s,0
+FitnessAPI,hybrid,2025-10-18T19:44:06+03:00,gpt-4o-mini,false,false,0.00,0,0s,0
+HotelAPI,hybrid,2025-10-18T19:44:33+03:00,gpt-4o-mini,false,false,0.00,0,0s,0
+InventoryAPI,hybrid,2025-10-18T19:45:07+03:00,gpt-4o-mini,false,false,0.00,0,0s,0
+LibraryAPI,hybrid,2025-10-18T19:45:37+03:00,gpt-4o-mini,true,true,23.80,0,0s,0
+MusicAPI,hybrid,2025-10-18T19:46:22+03:00,gpt-4o-mini,false,false,0.00,0,0s,0
+RecipeAPI,hybrid,2025-10-18T19:46:49+03:00,gpt-4o-mini,false,false,0.00,0,0s,0
+ShopAPI,hybrid,2025-10-18T19:47:22+03:00,gpt-4o-mini,false,false,0.00,0,0s,0
+SocialAPI,hybrid,2025-10-18T19:47:53+03:00,gpt-4o-mini,false,false,0.00,0,0s,0
+TaskAPI,hybrid,2025-10-18T19:48:18+03:00,gpt-4o-mini,false,false,0.00,0,0s,0

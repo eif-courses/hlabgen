@@ -1,0 +1,57 @@
+
+🚀 Starting generation for app: EventAPI (mode=hybrid)
+✅ Rule-based scaffold created
+2025/10/18 19:43:07 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 23.433720664s
+
+📊 Generation Summary:
+  • Duration: 23.434829238s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+🔧 Fixed imports in: handlers/event.go
+🔧 Fixed imports in: handlers/ticket.go
+🔧 Fixed imports in: handlers/attendee.go
+🔧 Fixed imports in: handlers/venue.go
+🔧 Fixed imports in: handlers/organizer.go
+🔧 Fixed imports in: routes/routes.go
+🔧 Running go mod tidy...
+go: finding module for package github.com/eif-courses/hlabgen/internal/handlers
+go: EventAPI/internal/handlers tested by
+	EventAPI/internal/handlers.test imports
+	github.com/eif-courses/hlabgen/internal/handlers: module github.com/eif-courses/hlabgen@latest found (v0.0.0-20251018161011-98d4a82a676f), but does not contain package github.com/eif-courses/hlabgen/internal/handlers
+2025/10/18 19:43:30 ⚠️  go mod tidy failed: exit status 1
+2025/10/18 19:43:30 🔧 Detected module name: EventAPI — fixing imports...
+2025/10/18 19:43:30   ✅ Updated imports in: experiments/out/EventAPI/internal/handlers/attendee_test.go
+2025/10/18 19:43:30   ✅ Updated imports in: experiments/out/EventAPI/internal/handlers/event_test.go
+2025/10/18 19:43:30   ✅ Updated imports in: experiments/out/EventAPI/internal/handlers/organizer_test.go
+2025/10/18 19:43:30   ✅ Updated imports in: experiments/out/EventAPI/internal/handlers/ticket_test.go
+2025/10/18 19:43:30   ✅ Updated imports in: experiments/out/EventAPI/internal/handlers/venue_test.go
+2025/10/18 19:43:30 ✅ Import paths updated successfully.
+✅ ML generation completed (23.43s)
+📁 Saved per-package coverage → experiments/out/EventAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/EventAPI/internal/handlers ---
+# EventAPI/internal/handlers [EventAPI/internal/handlers.test]
+./attendee.go:5:2: "EventAPI/internal/models" imported and not used
+./event.go:5:2: "EventAPI/internal/models" imported and not used
+./organizer.go:5:2: "EventAPI/internal/models" imported and not used
+./ticket.go:5:2: "EventAPI/internal/models" imported and not used
+./venue.go:5:2: "EventAPI/internal/models" imported and not used
+FAIL	EventAPI/internal/handlers [build failed]
+
+------------------------
+
+📊 Summary for EventAPI:
+  • BuildSuccess = false
+  • LintWarnings = 0
+  • TestsPass    = false
+  • Coverage     = 0.0%
+  • ML Duration  = 0s (repair 0)
+🧾 Aggregated 2 experiments into experiments/logs/summary.csv
+
+✅ Experiment complete.

@@ -1,0 +1,13 @@
+{
+  "app_name": "BlogAPI",
+  "entities": ["Post", "Comment", "Author"],
+  "features": ["CRUD", "search", "pagination"],
+  "database": "SQLite",
+  "difficulty": "Beginner",
+  "objectives": [
+    "Implement basic REST CRUD operations",
+    "Add simple search functionality",
+    "Write unit tests for handlers"
+  ],
+  "api_pattern": "REST"
+}

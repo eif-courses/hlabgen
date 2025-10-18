@@ -1,2 +1,12 @@
 AppName,BuildSuccess,TestsPass,CoveragePct,MLDurationSec,RepairAttempts
-LibraryAPI,true,false,0.0,0.00,0
+BlogAPI,false,false,0.0,0.00,0
+EventAPI,false,false,0.0,0.00,0
+FitnessAPI,false,false,0.0,0.00,0
+HotelAPI,false,false,0.0,0.00,0
+InventoryAPI,false,false,0.0,0.00,0
+LibraryAPI,true,true,23.8,0.00,0
+MusicAPI,false,false,0.0,0.00,0
+RecipeAPI,false,false,0.0,0.00,0
+ShopAPI,false,false,0.0,0.00,0
+SocialAPI,false,false,0.0,0.00,0
+TaskAPI,false,false,0.0,0.00,0
