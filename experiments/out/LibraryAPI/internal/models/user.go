@@ -1,6 +1,5 @@
 package models
 
-// User represents a user of the library.
 type User struct {
 	ID       int    `json:"id"`
 	Username string `json:"username"`

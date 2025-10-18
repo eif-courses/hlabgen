@@ -6,31 +6,33 @@ import (
 	"net/http"
 )
 
-// CreateUser handles the creation of a new user.
 func CreateUser(w http.ResponseWriter, r *http.Request) {
 	var user models.User
+	if r.Body == nil {
+		http.Error(w, "missing body", http.StatusBadRequest)
+		return
+	}
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// Save user to database (omitted)
+	// Add logic to save user to database
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(user)
 }
 
-// GetUsers handles fetching all users.
 func GetUsers(w http.ResponseWriter, r *http.Request) {
-	// Fetch users from database (omitted)
-	var users []models.User
-	json.NewEncoder(w).Encode(users)
+	// Add logic to retrieve users from database
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode([]models.User{})
 }
 
-// UpdateUser handles updating a user.
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
-	// Update user logic (omitted)
+	// Add logic to update user in database
+	w.WriteHeader(http.StatusOK)
 }
 
-// DeleteUser handles deleting a user.
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
-	// Delete user logic (omitted)
+	// Add logic to delete user from database
+	w.WriteHeader(http.StatusNoContent)
 }

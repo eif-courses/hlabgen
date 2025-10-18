@@ -43,11 +43,12 @@ func WriteMany(base string, files []File) error {
 			content = rules.FixRegisterFunction(content)
 		}
 
-		// ✅ Apply test fixes (imports + JSON body)
+		// ✅ Apply test fixes (imports + JSON body + cleanup)
 		if strings.HasSuffix(filename, "_test.go") {
 			content = rules.FixTestImports(content)
 			content = rules.FixTestBodies(content)
-			content = rules.CleanDuplicateImports(content) // 🧹 strong dedupe
+			content = CleanDuplicateImports(content)
+			content = FixUnbalancedBraces(content)
 		}
 
 		// ✅ Remove unnecessary mux imports in handlers
@@ -70,8 +71,8 @@ func WriteMany(base string, files []File) error {
 			content = re.ReplaceAllString(content, fmt.Sprintf(`"%s/internal/`, moduleName))
 		}
 
-		// ✅ Final deduplication pass (catch anything that slipped through)
-		content = rules.CleanDuplicateImports(content)
+		// ✅ Final deduplication pass
+		content = CleanDuplicateImports(content)
 
 		// ✅ Normalize output paths (ensure /internal/ structure)
 		fullPath := filepath.Join(base, rules.NormalizePath(filename))
@@ -105,4 +106,63 @@ func detectModule(base string) (string, error) {
 		}
 	}
 	return "", nil
+}
+
+// CleanDuplicateImports removes duplicate import lines (even if spacing differs)
+// and ensures the file ends with balanced braces.
+func CleanDuplicateImports(code string) string {
+	lines := strings.Split(code, "\n")
+	seen := make(map[string]bool)
+	var out []string
+	importBlock := false
+
+	for _, line := range lines {
+		trim := strings.TrimSpace(line)
+
+		// Detect start/end of import block
+		if strings.HasPrefix(trim, "import (") {
+			importBlock = true
+			out = append(out, line)
+			continue
+		}
+		if importBlock && strings.HasPrefix(trim, ")") {
+			importBlock = false
+			out = append(out, line)
+			continue
+		}
+
+		// Skip duplicate imports (normalize spacing)
+		if importBlock && strings.HasPrefix(trim, `"`) {
+			key := strings.ReplaceAll(strings.ReplaceAll(trim, "\t", ""), " ", "")
+			if seen[key] {
+				continue
+			}
+			seen[key] = true
+		}
+
+		out = append(out, line)
+	}
+
+	code = strings.Join(out, "\n")
+
+	// ✅ Ensure exactly one closing brace at EOF if braces are unbalanced
+	openCount := strings.Count(code, "{")
+	closeCount := strings.Count(code, "}")
+	if openCount > closeCount {
+		code += "\n}"
+	}
+
+	return code
+}
+
+// FixUnbalancedBraces ensures generated Go files end with properly balanced braces.
+func FixUnbalancedBraces(code string) string {
+	openCount := strings.Count(code, "{")
+	closeCount := strings.Count(code, "}")
+	diff := openCount - closeCount
+
+	if diff > 0 {
+		code += strings.Repeat("\n}", diff)
+	}
+	return code
 }

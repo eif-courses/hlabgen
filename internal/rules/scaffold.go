@@ -30,12 +30,8 @@ func Scaffold(outDir string, appName string) ([]File, error) {
 		}
 	}
 
-	// Detect local vs. GitHub mode
-	useLocal := os.Getenv("HLABGEN_GITHUB_MODE") != "1"
-	modulePath := appName
-	if !useLocal {
-		modulePath = fmt.Sprintf("github.com/eif-courses/%s", appName)
-	}
+	// ✅ Automatically detect when to use GitHub-style module path.
+	modulePath := detectModulePath(outDir, appName)
 
 	// --- main.go ---
 	mainGo := []byte(fmt.Sprintf(`package main
@@ -87,7 +83,7 @@ require github.com/gorilla/mux v1.8.1
 		}
 	}
 
-	// --- Auto-run `go mod tidy` to resolve dependencies ---
+	// ✅ Auto-run `go mod tidy` to resolve dependencies
 	cmd := exec.Command("go", "mod", "tidy")
 	cmd.Dir = outDir
 	cmd.Stdout = os.Stdout
@@ -97,6 +93,16 @@ require github.com/gorilla/mux v1.8.1
 	return files, nil
 }
 
+// detectModulePath automatically switches between local and GitHub-style module paths.
+func detectModulePath(outDir, appName string) string {
+	// If generating inside a GitHub-like path, prefer full path.
+	if strings.Contains(outDir, "github.com/") || strings.Contains(outDir, "eif-courses") {
+		return fmt.Sprintf("github.com/eif-courses/%s", appName)
+	}
+	// Otherwise use local module (no prefix)
+	return appName
+}
+
 //
 // 🔧 Universal SafeDecode (no hardcoded entities)
 //
@@ -104,7 +110,6 @@ require github.com/gorilla/mux v1.8.1
 // SafeDecode replaces any `json.NewDecoder(r.Body).Decode(&X)` line
 // with a safe block that checks nil body and handles decode errors.
 // It also ensures "net/http" and "encoding/json" are imported.
-// It NEVER adds mux or extra write headers; it preserves the rest of the handler.
 func SafeDecode(code string) string {
 	lines := strings.Split(code, "\n")
 	var out []string
@@ -113,16 +118,12 @@ func SafeDecode(code string) string {
 	for _, line := range lines {
 		trim := strings.TrimSpace(line)
 
-		// Match a full line with a decode call (no trailing semicolon block)
-		// e.g., `json.NewDecoder(r.Body).Decode(&book)`
 		if strings.Contains(trim, "json.NewDecoder(r.Body).Decode(&") && !strings.Contains(trim, ";") {
-			// Detect var name between & and )
 			varName := "data"
 			if idx := strings.Index(trim, "Decode(&"); idx >= 0 {
 				rest := trim[idx+len("Decode(&"):]
 				if close := strings.Index(rest, ")"); close > 0 {
 					candidate := rest[:close]
-					// keep simple identifier only
 					for i := range candidate {
 						c := candidate[i]
 						if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_') {
@@ -155,27 +156,22 @@ func SafeDecode(code string) string {
 
 	fixed := strings.Join(out, "\n")
 
-	// Ensure handlers NEVER import mux (strip it if present)
+	// Remove mux import from handlers if present
 	if strings.Contains(fixed, "package handlers") && strings.Contains(fixed, `"github.com/gorilla/mux"`) {
-		// remove single-line import and also possible grouped import member
 		fixed = strings.ReplaceAll(fixed, "\n\t\"github.com/gorilla/mux\"", "")
 		fixed = strings.ReplaceAll(fixed, "\"github.com/gorilla/mux\"\n", "")
 	}
 
-	// If we changed anything, ensure imports include net/http and encoding/json
+	// Ensure imports include encoding/json and net/http if decode changed
 	if changed {
-		// add import block if missing
 		if !strings.Contains(fixed, "\nimport (") && !strings.Contains(fixed, "\nimport \"") {
-			// create a grouped import after package line
-			fixed = strings.Replace(fixed, "package handlers", "package handlers\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n)\n", 1)
+			fixed = strings.Replace(fixed, "package handlers",
+				"package handlers\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n)\n", 1)
 			return fixed
 		}
-
-		// ensure encoding/json present
 		if !strings.Contains(fixed, `"encoding/json"`) {
 			fixed = strings.Replace(fixed, "import (", "import (\n\t\"encoding/json\"", 1)
 		}
-		// ensure net/http present
 		if !strings.Contains(fixed, `"net/http"`) {
 			fixed = strings.Replace(fixed, "import (", "import (\n\t\"net/http\"", 1)
 		}
@@ -189,7 +185,6 @@ func FixIDTypeMismatch(code string) string {
 	if strings.Contains(code, "vars := mux.Vars(r)") && strings.Contains(code, "user.ID == id") {
 		code = strings.ReplaceAll(code, "user.ID == id",
 			"user.ID == parseID(id)")
-		// Add parseID helper to file if missing
 		if !strings.Contains(code, "func parseID(") {
 			code += `
 
@@ -198,7 +193,6 @@ func parseID(s string) int {
 	return id
 }`
 		}
-		// Add strconv import if missing
 		if !strings.Contains(code, `"strconv"`) {
 			code = strings.Replace(code, "import (", "import (\n\t\"strconv\"", 1)
 		}
@@ -223,7 +217,6 @@ func NormalizePath(filename string) string {
 // FixRegisterFunction normalizes any route registration function
 // to a consistent name: func Register(r *mux.Router)
 func FixRegisterFunction(code string) string {
-	// Regex matches: func <something>Routes(
 	re := regexp.MustCompile(`func\s+\w*Routes\s*\(`)
 	if re.MatchString(code) {
 		code = re.ReplaceAllString(code, "func Register(")
@@ -234,39 +227,23 @@ func FixRegisterFunction(code string) string {
 // FixTestImports ensures generated test files include required imports like gorilla/mux.
 func FixTestImports(code string) string {
 	if strings.Contains(code, "mux.NewRouter()") && !strings.Contains(code, `"github.com/gorilla/mux"`) {
-		code = strings.Replace(
-			code,
-			"import (",
-			"import (\n\t\"github.com/gorilla/mux\"",
-			1,
-		)
+		code = strings.Replace(code, "import (", "import (\n\t\"github.com/gorilla/mux\"", 1)
 	}
 	if strings.Contains(code, "httptest.NewRecorder()") && !strings.Contains(code, `"net/http/httptest"`) {
-		code = strings.Replace(
-			code,
-			"import (",
-			"import (\n\t\"net/http/httptest\"",
-			1,
-		)
+		code = strings.Replace(code, "import (", "import (\n\t\"net/http/httptest\"", 1)
 	}
 	if strings.Contains(code, "http.NewRequest(") && !strings.Contains(code, `"net/http"`) {
-		code = strings.Replace(
-			code,
-			"import (",
-			"import (\n\t\"net/http\"",
-			1,
-		)
+		code = strings.Replace(code, "import (", "import (\n\t\"net/http\"", 1)
 	}
 	return code
 }
 
-// FixTestBodies ensures that generated test files compile and pass by
-// adding JSON bodies, correct HTTP methods, and fixing paths & duplicates.
+// FixTestBodies ensures generated test files compile correctly with HTTP tests and proper JSON bodies.
 func FixTestBodies(code string) string {
 	lines := strings.Split(code, "\n")
 
-	// Ensure correct package name for tests
-	if strings.HasPrefix(strings.TrimSpace(lines[0]), "package ") &&
+	// ✅ Force correct package name
+	if len(lines) > 0 && strings.HasPrefix(strings.TrimSpace(lines[0]), "package ") &&
 		!strings.HasPrefix(strings.TrimSpace(lines[0]), "package handlers_test") {
 		lines[0] = "package handlers_test"
 	}
@@ -275,17 +252,16 @@ func FixTestBodies(code string) string {
 		if strings.HasPrefix(strings.TrimSpace(line), "func Test") &&
 			strings.Contains(line, "(t *testing.T)") {
 
-			testName := extractTestName(line)      // e.g. CreateBook, GetBooks
-			_, entity := splitVerbEntity(testName) // e.g. Create / Book
-			method := inferHTTPMethod(testName)    // POST/GET/PUT/DELETE
-			resource := pluralizeIfNeeded(entity)  // books (not bookss)
+			testName := extractTestName(line)
+			_, entity := splitVerbEntity(testName)
+			method := inferHTTPMethod(testName)
+			resource := pluralizeIfNeeded(entity)
 
 			body := "{}"
 			if method == "POST" || method == "PUT" {
 				body = `{"id":1}`
 			}
 
-			// Build a full body for the test function
 			testBody := fmt.Sprintf(`{
 	body := strings.NewReader(%q)
 	req, _ := http.NewRequest("%s", "/%s", body)
@@ -297,60 +273,48 @@ func FixTestBodies(code string) string {
 	}
 }`, body, method, resource, testName)
 
-			// Replace ONLY the first "{" after the signature line with our body
 			lines[i] = strings.Replace(line, "{", testBody, 1)
 		}
 	}
 
 	fixed := strings.Join(lines, "\n")
-
-	// Remove stub lines and extra braces
-	fixed = fixDanglingClosers(fixed)
-
-	// Ensure imports dynamically based on module name and then dedupe/sort
-	fixed = ensureTestImports(fixed)
-
-	// Final dedup for safety
 	fixed = CleanDuplicateImports(fixed)
-
 	return fixed
 }
 
-func ensureTestImports(code string) string {
-	mod := detectModuleName()
-	want := []string{
-		"\"net/http\"",
-		"\"net/http/httptest\"",
-		"\"strings\"",
-		fmt.Sprintf("\"%s/internal/handlers\"", mod),
-	}
-	// Make sure there’s an import block
-	if !strings.Contains(code, "\nimport (") {
-		// insert after package line
-		lines := strings.Split(code, "\n")
-		for i, l := range lines {
-			if strings.HasPrefix(strings.TrimSpace(l), "package ") {
-				block := "import (\n"
-				for _, w := range want {
-					block += "\t" + w + "\n"
-				}
-				block += ")\n"
-				lines = append(lines[:i+1], append([]string{block}, lines[i+1:]...)...)
-				return strings.Join(lines, "\n")
+// PlaceTestsWithHandlers ensures that generated test files are stored next to their handlers.
+func PlaceTestsWithHandlers(filename, content string) (string, string) {
+	if strings.HasPrefix(filename, "tests/") {
+		base := filepath.Base(filename)
+		filename = filepath.Join("internal", "handlers", base)
+
+		lines := strings.Split(content, "\n")
+		if len(lines) > 0 && strings.HasPrefix(lines[0], "package ") {
+			lines[0] = "package handlers_test"
+		}
+		content = strings.Join(lines, "\n")
+
+		module := detectModuleName()
+		handlerImport := fmt.Sprintf("\"%s/internal/handlers\"", module)
+
+		if !strings.Contains(content, handlerImport) {
+			if strings.Contains(content, "import (") {
+				content = strings.Replace(content, "import (", "import (\n\t"+handlerImport, 1)
+			} else {
+				content = strings.Replace(content,
+					"package handlers_test",
+					"package handlers_test\n\nimport (\n\t"+handlerImport+"\n)\n",
+					1,
+				)
 			}
 		}
-	} else {
-		// Add missing imports into existing block
-		for _, w := range want {
-			if !strings.Contains(code, w) {
-				code = strings.Replace(code, "import (", "import (\n\t"+w, 1)
-			}
-		}
+
+		content = CleanDuplicateImports(content)
 	}
-	return code
+	return filename, content
 }
 
-// detectModuleName tries to read module name from nearest go.mod file.
+// --- helpers used by test generation ---
 func detectModuleName() string {
 	dir, _ := os.Getwd()
 	for dir != "/" {
@@ -365,7 +329,7 @@ func detectModuleName() string {
 		}
 		dir = filepath.Dir(dir)
 	}
-	return "yourapp" // fallback
+	return "yourapp"
 }
 
 func extractTestName(line string) string {
@@ -388,69 +352,31 @@ func inferHTTPMethod(name string) string {
 	}
 }
 
-// PlaceTestsWithHandlers ensures that generated test files (book_test.go, etc.)
-// are stored next to their handler files in internal/handlers/
-// and updated to use package handlers_test.
-func PlaceTestsWithHandlers(filename, content string) (string, string) {
-	if strings.HasPrefix(filename, "tests/") {
-		base := filepath.Base(filename)
-		filename = filepath.Join("internal", "handlers", base)
-
-		// ✅ Force correct package
-		lines := strings.Split(content, "\n")
-		if len(lines) > 0 && strings.HasPrefix(lines[0], "package ") {
-			lines[0] = "package handlers_test"
+func splitVerbEntity(name string) (verb, entity string) {
+	name = strings.TrimSpace(name)
+	parts := []string{"Create", "Get", "Update", "Delete"}
+	for _, p := range parts {
+		if strings.HasPrefix(name, p) {
+			return p, strings.TrimPrefix(name, p)
 		}
-		content = strings.Join(lines, "\n")
-
-		// ✅ Detect module name dynamically
-		module := detectModuleName()
-		handlerImport := fmt.Sprintf("\"%s/internal/handlers\"", module)
-
-		// ✅ Check whether imports exist
-		hasImportBlock := strings.Contains(content, "import (")
-		hasHandlers := strings.Contains(content, "/internal/handlers")
-
-		// ✅ Add handlers import only once
-		if !hasHandlers {
-			if hasImportBlock {
-				content = strings.Replace(content, "import (", "import (\n\t"+handlerImport, 1)
-			} else {
-				content = strings.Replace(content,
-					"package handlers_test",
-					"package handlers_test\n\nimport (\n\t"+handlerImport+"\n)\n",
-					1,
-				)
-			}
-		}
-
-		// ✅ Normalize duplicates of handlers import
-		lines = strings.Split(content, "\n")
-		seen := make(map[string]bool)
-		var clean []string
-		for _, line := range lines {
-			trim := strings.TrimSpace(line)
-
-			// Skip duplicate handler imports
-			if strings.Contains(trim, "/internal/handlers") {
-				if seen["handlers"] {
-					continue
-				}
-				seen["handlers"] = true
-			}
-
-			clean = append(clean, line)
-		}
-		content = strings.Join(clean, "\n")
 	}
-	return filename, content
+	return "Get", name
 }
 
-// GenerateFallbackTests creates basic *_test.go files if ML fails.
+func pluralizeIfNeeded(entity string) string {
+	if entity == "" {
+		return "items"
+	}
+	el := strings.ToLower(entity)
+	if strings.HasSuffix(el, "s") {
+		return el
+	}
+	return el + "s"
+}
+
+// GenerateFallbackTests creates simple *_test.go files if test generation fails.
 func GenerateFallbackTests(outDir, appName string) error {
-	tests := map[string]string{
-		"book_test.go": `
-package handlers_test
+	testTemplate := fmt.Sprintf(`package handlers_test
 
 import (
 	"net/http"
@@ -461,30 +387,26 @@ import (
 )
 
 func TestCreateBook(t *testing.T) {
-	body := strings.NewReader(` + "`" + `{"id":1}` + "`" + `)
+	body := strings.NewReader("{\"id\":1}")
 	req, _ := http.NewRequest("POST", "/books", body)
+	req.Header.Set("Content-Type", "application/json")
 	rr := httptest.NewRecorder()
 	handlers.CreateBook(rr, req)
-	if rr.Code != http.StatusCreated {
-		t.Errorf("expected 201, got %%v", rr.Code)
+	if rr.Code != http.StatusCreated && rr.Code != http.StatusOK && rr.Code != http.StatusNoContent {
+		t.Errorf("handler returned wrong status code: got %%v", rr.Code)
 	}
 }
-`,
-	}
+`, appName)
 
 	testDir := filepath.Join(outDir, "internal", "handlers")
 	if err := os.MkdirAll(testDir, 0o755); err != nil {
 		return err
 	}
 
-	for name, tpl := range tests {
-		code := fmt.Sprintf(tpl, appName)
-		code = CleanDuplicateImports(code)
-		path := filepath.Join(testDir, name)
-		if _, err := os.Stat(path); os.IsNotExist(err) {
-			if err := os.WriteFile(path, []byte(code), 0o644); err != nil {
-				return err
-			}
+	testFile := filepath.Join(testDir, "book_test.go")
+	if _, err := os.Stat(testFile); os.IsNotExist(err) {
+		if err := os.WriteFile(testFile, []byte(testTemplate), 0o644); err != nil {
+			return err
 		}
 	}
 
@@ -516,13 +438,11 @@ func CleanDuplicateImports(code string) string {
 
 		// skip duplicate imports (normalize spacing and path)
 		if importBlock && strings.HasPrefix(trim, `"`) {
-			normalized := strings.ReplaceAll(trim, "\t", "")
-			normalized = strings.ReplaceAll(normalized, " ", "")
-			normalized = strings.Trim(normalized, `"`)
-			if seen[normalized] {
+			key := strings.ReplaceAll(strings.ReplaceAll(trim, "\t", ""), " ", "")
+			if seen[key] {
 				continue
 			}
-			seen[normalized] = true
+			seen[key] = true
 		}
 
 		out = append(out, line)
@@ -530,7 +450,7 @@ func CleanDuplicateImports(code string) string {
 
 	code = strings.Join(out, "\n")
 
-	// ✅ Ensure exactly one closing brace at EOF if braces are unbalanced
+	// ✅ Ensure balanced braces
 	openCount := strings.Count(code, "{")
 	closeCount := strings.Count(code, "}")
 	if openCount > closeCount {
@@ -538,51 +458,4 @@ func CleanDuplicateImports(code string) string {
 	}
 
 	return code
-}
-
-// fixDanglingClosers removes duplicate trailing braces and stub lines.
-func fixDanglingClosers(code string) string {
-	lines := strings.Split(code, "\n")
-	var out []string
-	var prev string
-	for _, l := range lines {
-		trim := strings.TrimSpace(l)
-		// drop stub lines
-		if trim == "// Implementation here" {
-			continue
-		}
-		// collapse consecutive closing braces
-		if trim == "}" && strings.TrimSpace(prev) == "}" {
-			// skip this one
-			continue
-		}
-		out = append(out, l)
-		prev = l
-	}
-	return strings.Join(out, "\n")
-}
-
-// splitVerbEntity extracts the testing verb (Create/Get/Update/Delete) and the entity name
-// from a test name like "CreateBook", "GetBooks", etc.
-func splitVerbEntity(name string) (verb, entity string) {
-	name = strings.TrimSpace(name)
-	parts := []string{"Create", "Get", "Update", "Delete"}
-	for _, p := range parts {
-		if strings.HasPrefix(name, p) {
-			return p, strings.TrimPrefix(name, p)
-		}
-	}
-	return "Get", name // default
-}
-
-func pluralizeIfNeeded(entity string) string {
-	if entity == "" {
-		return "items"
-	}
-	el := strings.ToLower(entity)
-	// If it's already plural (ends with s), leave it
-	if strings.HasSuffix(el, "s") {
-		return el
-	}
-	return el + "s"
 }

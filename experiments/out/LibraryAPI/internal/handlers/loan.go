@@ -6,31 +6,33 @@ import (
 	"net/http"
 )
 
-// CreateLoan handles the creation of a new loan.
 func CreateLoan(w http.ResponseWriter, r *http.Request) {
 	var loan models.Loan
+	if r.Body == nil {
+		http.Error(w, "missing body", http.StatusBadRequest)
+		return
+	}
 	if err := json.NewDecoder(r.Body).Decode(&loan); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// Save loan to database (omitted)
+	// Add logic to save loan to database
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(loan)
 }
 
-// GetLoans handles fetching all loans.
 func GetLoans(w http.ResponseWriter, r *http.Request) {
-	// Fetch loans from database (omitted)
-	var loans []models.Loan
-	json.NewEncoder(w).Encode(loans)
+	// Add logic to retrieve loans from database
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode([]models.Loan{})
 }
 
-// UpdateLoan handles updating a loan.
 func UpdateLoan(w http.ResponseWriter, r *http.Request) {
-	// Update loan logic (omitted)
+	// Add logic to update loan in database
+	w.WriteHeader(http.StatusOK)
 }
 
-// DeleteLoan handles deleting a loan.
 func DeleteLoan(w http.ResponseWriter, r *http.Request) {
-	// Delete loan logic (omitted)
+	// Add logic to delete loan from database
+	w.WriteHeader(http.StatusNoContent)
 }
