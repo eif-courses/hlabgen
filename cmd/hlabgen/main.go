@@ -24,7 +24,7 @@ func main() {
 	}
 
 	// --- 1) CLI Flags ---
-	in := flag.String("input", "experiments/input/library.json", "path to schema.json")
+	in := flag.String("input", "experiments/input/LibraryAPI.json", "path to schema.json")
 	mode := flag.String("mode", "hybrid", "rules|ml|hybrid")
 	out := flag.String("out", "experiments/out/LibraryAPI", "output directory")
 	flag.Parse()
@@ -41,23 +41,47 @@ func main() {
 	if _, err := rules.Scaffold(*out, schema.AppName); err != nil {
 		log.Fatalf("❌ Scaffold failed: %v", err)
 	}
+
+	// Always create placeholder tests in case ML fails
+	if err := rules.GenerateFallbackTests(*out, schema.AppName); err != nil {
+		log.Printf("⚠️  Failed to create fallback tests: %v\n", err)
+	}
+
 	fmt.Println("✅ Rule-based scaffold created")
 
-	// --- 4) ML Layer (if applicable) ---
+	// --- 4) ML Layer (with retry and relaxed mode) ---
 	var genMetrics mlinternal.GenerationMetrics
+	var files []assemble.File
+
 	if *mode == "ml" || *mode == "hybrid" {
-		files, metrics, err := callML(schema)
+		log.Println("🧠 Starting ML-based code generation...")
+
+		files, genMetrics, err = mlinternal.Generate(mlinternal.Schema{
+			AppName:    schema.AppName,
+			Database:   schema.Database,
+			APIPattern: schema.APIPattern,
+			Difficulty: schema.Difficulty,
+			Entities:   schema.Entities,
+			Features:   schema.Features,
+			Objectives: schema.Objectives,
+		})
+
 		if err != nil {
-			log.Printf("⚠️ ML generation failed: %v\nFalling back to rules-only structure.", err)
+			log.Printf("⚠️  ML generation failed once: %v", err)
+			log.Println("🔁 Retrying with relaxed mode...")
+			files, genMetrics, err = mlinternal.GenerateRelaxed(schema)
+		}
+
+		if err != nil {
+			log.Printf("❌ ML generation failed completely — falling back to rule-based only: %v", err)
 		} else {
-			genMetrics = metrics
 			if err := assemble.WriteMany(*out, files); err != nil {
 				log.Fatalf("❌ Failed to write generated files: %v", err)
 			}
-			fmt.Printf("✅ ML generation completed (%v)\n", metrics.Duration)
+			fmt.Printf("✅ ML generation completed (%.2fs)\n", genMetrics.Duration.Seconds())
 		}
 	} else {
-		fmt.Println("⚙️ Skipping ML layer (rules-only mode)")
+		fmt.Println("⚙️  Skipping ML layer (rules-only mode)")
 	}
 
 	// --- 5) Validate & Collect Build Metrics ---
@@ -93,39 +117,17 @@ func main() {
 		genMetrics.RepairAttempts,
 	)
 	if err := os.WriteFile(metaPath, []byte(meta), 0o644); err != nil {
-		log.Printf("⚠️ Failed to write experiment metadata: %v\n", err)
+		log.Printf("⚠️  Failed to write experiment metadata: %v\n", err)
 	}
 
 	// --- 7) Aggregate all results across experiments ---
 	summaryPath := "experiments/logs/summary.csv"
 	_ = os.MkdirAll(filepath.Dir(summaryPath), 0o755)
 	if err := metrics.AggregateToCSV("experiments/out", summaryPath); err != nil {
-		log.Printf("⚠️ Failed to aggregate metrics: %v\n", err)
+		log.Printf("⚠️  Failed to aggregate metrics: %v\n", err)
 	}
 
 	fmt.Println("\n✅ Experiment complete.")
-}
-
-// callML invokes ML generation and returns generated files + timing metrics.
-func callML(s input.Schema) ([]assemble.File, mlinternal.GenerationMetrics, error) {
-	files, metrics, err := mlinternal.Generate(mlinternal.Schema{
-		AppName:    s.AppName,
-		Database:   s.Database,
-		APIPattern: s.APIPattern,
-		Difficulty: s.Difficulty,
-		Entities:   s.Entities,
-		Features:   s.Features,
-		Objectives: s.Objectives,
-	})
-	if err != nil {
-		return nil, metrics, err
-	}
-
-	out := make([]assemble.File, len(files))
-	for i, f := range files {
-		out[i] = assemble.File{Filename: f.Filename, Content: f.Code}
-	}
-	return out, metrics, nil
 }
 
 // getModelName safely reads the model name (for metadata logs)

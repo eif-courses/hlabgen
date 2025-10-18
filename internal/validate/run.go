@@ -2,15 +2,18 @@ package validate
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
-	"github.com/eif-courses/hlabgen/internal/metrics"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/eif-courses/hlabgen/internal/metrics"
 )
 
+// Run performs validation and metrics extraction for a generated Go project.
 func Run(projectPath string) (metrics.Result, error) {
 	m := metrics.Result{}
 
@@ -49,6 +52,7 @@ func Run(projectPath string) (metrics.Result, error) {
 		var combinedOut strings.Builder
 		var coverValues []float64
 		passed := false
+		perPkg := make(map[string]float64)
 
 		for _, dir := range testDirs {
 			cmd := exec.Command("go", "test", "-v", "-cover")
@@ -64,16 +68,23 @@ func Run(projectPath string) (metrics.Result, error) {
 			}
 			if cov := parseCoverage(output); cov > 0 {
 				coverValues = append(coverValues, cov)
+				perPkg[filepath.Base(dir)] = cov
 			}
 		}
 
-		// ✅ Mark as passed if *any* directory reports PASS
 		m.TestsPass = passed
-
-		// ✅ Average coverage across testable packages
 		m.CoveragePct = average(coverValues)
 
-		// Optional debug print
+		// ✅ Save per-package coverage as JSON
+		covPath := filepath.Join(projectPath, "coverage.json")
+		if data, err := json.MarshalIndent(perPkg, "", "  "); err == nil {
+			_ = os.WriteFile(covPath, data, 0o644)
+			fmt.Printf("📁 Saved per-package coverage → %s\n", covPath)
+		}
+
+		// ✅ Append global coverage summary to CSV (with ML metrics)
+		_ = appendCoverageCSV(projectPath, m)
+
 		fmt.Println("\n--- go test summary ---")
 		fmt.Println(combinedOut.String())
 		fmt.Println("------------------------")
@@ -90,7 +101,55 @@ func Run(projectPath string) (metrics.Result, error) {
 	return m, nil
 }
 
-// findTestDirs scans for directories containing *_test.go files.
+// appendCoverageCSV appends project metrics + ML metrics to experiments/logs/coverage.csv.
+func appendCoverageCSV(projectPath string, m metrics.Result) error {
+	appName := filepath.Base(projectPath)
+	logDir := filepath.Join("experiments", "logs")
+	_ = os.MkdirAll(logDir, 0o755)
+	filePath := filepath.Join(logDir, "coverage.csv")
+
+	// Try reading gen_metrics.json if available
+	type genMetrics struct {
+		Duration       float64 `json:"duration_sec"`
+		RepairAttempts int     `json:"repair_attempts"`
+	}
+	var g genMetrics
+	genFile := filepath.Join(projectPath, "gen_metrics.json")
+	if data, err := os.ReadFile(genFile); err == nil {
+		_ = json.Unmarshal(data, &g)
+	}
+
+	// If new file, write header
+	_, err := os.Stat(filePath)
+	isNew := os.IsNotExist(err)
+	f, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	if isNew {
+		header := "AppName,BuildSuccess,TestsPass,CoveragePct,MLDurationSec,RepairAttempts\n"
+		if _, err := f.WriteString(header); err != nil {
+			return err
+		}
+	}
+
+	row := fmt.Sprintf("%s,%v,%v,%.1f,%.2f,%d\n",
+		appName,
+		m.BuildSuccess,
+		m.TestsPass,
+		m.CoveragePct,
+		g.Duration,
+		g.RepairAttempts,
+	)
+	_, _ = f.WriteString(row)
+	fmt.Printf("🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv\n")
+	return nil
+}
+
+// --- Helpers ---
+
 func findTestDirs(root string) []string {
 	var testDirs []string
 	filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
@@ -108,7 +167,6 @@ func findTestDirs(root string) []string {
 	return testDirs
 }
 
-// Helper to check slice membership.
 func contains(list []string, val string) bool {
 	for _, v := range list {
 		if v == val {
@@ -118,7 +176,6 @@ func contains(list []string, val string) bool {
 	return false
 }
 
-// Counts non-empty lines (used for vet/lint warnings).
 func countLines(s string) int {
 	if strings.TrimSpace(s) == "" {
 		return 0
@@ -126,7 +183,6 @@ func countLines(s string) int {
 	return len(strings.Split(strings.TrimSpace(s), "\n"))
 }
 
-// Extracts coverage percentage (e.g. "coverage: 38.5% of statements").
 func parseCoverage(out string) float64 {
 	for _, line := range strings.Split(out, "\n") {
 		if strings.Contains(line, "coverage:") && strings.Contains(line, "%") {
@@ -144,7 +200,6 @@ func parseCoverage(out string) float64 {
 	return 0
 }
 
-// Calculates the average of float slice values.
 func average(values []float64) float64 {
 	if len(values) == 0 {
 		return 0
@@ -156,7 +211,6 @@ func average(values []float64) float64 {
 	return sum / float64(len(values))
 }
 
-// Computes average cyclomatic complexity (if gocyclo is available).
 func avgCyclo(out string) float64 {
 	var sum, n float64
 	for _, line := range strings.Split(strings.TrimSpace(out), "\n") {
