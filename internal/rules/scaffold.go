@@ -21,7 +21,6 @@ func Scaffold(outDir string, appName string) ([]File, error) {
 		filepath.Join(outDir, "internal", "handlers"),
 		filepath.Join(outDir, "internal", "models"),
 		filepath.Join(outDir, "internal", "routes"),
-		filepath.Join(outDir, "tests"),
 	}
 
 	for _, dir := range dirs {
@@ -88,9 +87,8 @@ require github.com/gorilla/mux v1.8.1
 	}
 
 	// --- Auto-run `go mod tidy` to resolve dependencies ---
-	goModDir := outDir
 	cmd := exec.Command("go", "mod", "tidy")
-	cmd.Dir = goModDir
+	cmd.Dir = outDir
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	_ = cmd.Run() // ignore error for now, purely best-effort
@@ -303,7 +301,7 @@ func FixTestBodies(code string) string {
 			fixed = strings.Replace(fixed, "import (", "import (\n\t"+imp, 1)
 		}
 	}
-
+	fixed = CleanDuplicateImports(fixed)
 	return fixed
 }
 
@@ -425,6 +423,7 @@ func TestCreateBook(t *testing.T) {
 
 	for name, tpl := range tests {
 		code := fmt.Sprintf(tpl, appName)
+		code = CleanDuplicateImports(code)
 		path := filepath.Join(testDir, name)
 		if _, err := os.Stat(path); os.IsNotExist(err) {
 			if err := os.WriteFile(path, []byte(code), 0o644); err != nil {
@@ -434,4 +433,40 @@ func TestCreateBook(t *testing.T) {
 	}
 
 	return nil
+}
+
+// CleanDuplicateImports removes repeated import lines and keeps imports tidy.
+func CleanDuplicateImports(code string) string {
+	lines := strings.Split(code, "\n")
+	seen := map[string]bool{}
+	var result []string
+	inImports := false
+
+	for _, line := range lines {
+		trim := strings.TrimSpace(line)
+
+		// Detect start and end of import block
+		if strings.HasPrefix(trim, "import (") {
+			inImports = true
+			result = append(result, line)
+			continue
+		}
+		if inImports && trim == ")" {
+			inImports = false
+			result = append(result, line)
+			continue
+		}
+
+		// Skip duplicate imports within the block
+		if inImports && strings.HasPrefix(trim, "\"") {
+			if seen[trim] {
+				continue
+			}
+			seen[trim] = true
+		}
+
+		result = append(result, line)
+	}
+
+	return strings.Join(result, "\n")
 }
