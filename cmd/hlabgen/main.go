@@ -1,4 +1,4 @@
-package hlabgen
+package main
 
 import (
 	"encoding/json"
@@ -12,13 +12,20 @@ import (
 	mlinternal "github.com/eif-courses/hlabgen/internal/ml"
 	"github.com/eif-courses/hlabgen/internal/rules"
 	"github.com/eif-courses/hlabgen/internal/validate"
+	"github.com/joho/godotenv"
 
 	"log"
 	"path/filepath"
 )
 
 func main() {
-	in := flag.String("input", "expiriments/input/library.json", "path to schema.json")
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	in := flag.String("input", "experiments/input/library.json", "path to schema.json")
 	mode := flag.String("mode", "hybrid", "rules|ml|hybrid")
 	out := flag.String("out", "experiments/out/LibraryAPI", "output directory")
 	flag.Parse()
