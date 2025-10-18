@@ -2,8 +2,11 @@ package validate
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/eif-courses/hlabgen/internal/metrics"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -11,25 +14,24 @@ import (
 func Run(projectPath string) (metrics.Result, error) {
 	m := metrics.Result{}
 
-	// go fmt (non-fatal)
+	// --- go fmt (non-fatal)
 	_ = exec.Command("go", "fmt", "./...").Run()
 
-	// go build
+	// --- go build
 	build := exec.Command("go", "build", "./...")
 	build.Dir = projectPath
 	err := build.Run()
 	m.BuildSuccess = (err == nil)
 
-	// go vet (count warnings)
+	// --- go vet
 	vet := exec.Command("go", "vet", "./...")
 	vet.Dir = projectPath
 	var vetOut bytes.Buffer
-	vet.Stderr = &vetOut
-	vet.Stdout = &vetOut
+	vet.Stdout, vet.Stderr = &vetOut, &vetOut
 	_ = vet.Run()
 	m.VetWarnings = countLines(vetOut.String())
 
-	// golangci-lint (optional)
+	// --- golangci-lint (optional)
 	lint := exec.Command("golangci-lint", "run", "--out-format=tab")
 	lint.Dir = projectPath
 	var lintOut bytes.Buffer
@@ -37,17 +39,29 @@ func Run(projectPath string) (metrics.Result, error) {
 	_ = lint.Run()
 	m.LintWarnings = countLines(lintOut.String())
 
-	// go test -cover
-	test := exec.Command("go", "test", "./...", "-cover")
-	test.Dir = projectPath
-	var testOut bytes.Buffer
-	test.Stdout = &testOut
-	_ = test.Run()
-	out := testOut.String()
-	m.TestsPass = strings.Contains(out, "ok\t")
-	m.CoveragePct = parseCoverage(out)
+	// --- go test -cover (smart detection)
+	testDirs := findTestDirs(projectPath)
+	if len(testDirs) == 0 {
+		fmt.Println("⚠️  No test files detected — skipping tests.")
+		m.TestsPass = false
+		m.CoveragePct = 0
+	} else {
+		var combinedOut strings.Builder
+		for _, dir := range testDirs {
+			cmd := exec.Command("go", "test", "-cover")
+			cmd.Dir = dir
+			var out bytes.Buffer
+			cmd.Stdout, cmd.Stderr = &out, &out
+			_ = cmd.Run()
+			combinedOut.WriteString(out.String() + "\n")
+		}
 
-	// gocyclo average (if installed)
+		out := combinedOut.String()
+		m.TestsPass = strings.Contains(out, "PASS")
+		m.CoveragePct = parseCoverage(out)
+	}
+
+	// --- gocyclo (if available)
 	cyclo := exec.Command("gocyclo", "-over", "0", ".")
 	cyclo.Dir = projectPath
 	var cycloOut bytes.Buffer
@@ -58,14 +72,42 @@ func Run(projectPath string) (metrics.Result, error) {
 	return m, nil
 }
 
+// findTestDirs scans for directories containing *_test.go files.
+func findTestDirs(root string) []string {
+	var testDirs []string
+	filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil || info.IsDir() {
+			return nil
+		}
+		if strings.HasSuffix(info.Name(), "_test.go") {
+			dir := filepath.Dir(path)
+			if !contains(testDirs, dir) {
+				testDirs = append(testDirs, dir)
+			}
+		}
+		return nil
+	})
+	return testDirs
+}
+
+// Helper to check slice membership.
+func contains(list []string, val string) bool {
+	for _, v := range list {
+		if v == val {
+			return true
+		}
+	}
+	return false
+}
+
 func countLines(s string) int {
 	if strings.TrimSpace(s) == "" {
 		return 0
 	}
 	return len(strings.Split(strings.TrimSpace(s), "\n"))
 }
+
 func parseCoverage(out string) float64 {
-	// find last 'coverage: XX.X% of statements'
 	for _, line := range strings.Split(out, "\n") {
 		if strings.Contains(line, "coverage:") && strings.Contains(line, "%") {
 			f := strings.Fields(line)
@@ -81,11 +123,9 @@ func parseCoverage(out string) float64 {
 	}
 	return 0
 }
+
 func avgCyclo(out string) float64 {
-	// gocyclo prints lines like: "  5 some/file.go:funcName"
-	// very simple average by first field if numeric
-	var sum float64
-	var n float64
+	var sum, n float64
 	for _, line := range strings.Split(strings.TrimSpace(out), "\n") {
 		fs := strings.Fields(line)
 		if len(fs) > 0 {

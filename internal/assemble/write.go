@@ -27,32 +27,30 @@ func WriteMany(base string, files []File) error {
 
 	for _, f := range files {
 		content := f.Content
+		filename := f.Filename
 
-		// ✅ Apply safety rule first for handlers
-		if strings.Contains(f.Filename, "handlers") {
+		// ✅ Move tests next to handlers and adjust package name
+		filename, content = rules.PlaceTestsWithHandlers(filename, content)
+
+		// ✅ Apply safety rule for handlers (decode + type mismatch fix)
+		if strings.Contains(filename, "handlers/") {
 			content = rules.SafeDecode(content)
 			content = rules.FixIDTypeMismatch(content)
 		}
 
 		// ✅ Apply test fixes (imports + JSON body)
-		if strings.Contains(f.Filename, "tests/") {
+		if strings.Contains(filename, "_test.go") {
 			content = rules.FixTestImports(content)
 			content = rules.FixTestBodies(content)
 		}
 
-		// Remove unnecessary mux imports in handlers
-		if strings.Contains(f.Filename, "handlers/") && strings.Contains(content, `"github.com/gorilla/mux"`) {
+		// ✅ Remove unnecessary mux imports in handlers
+		if strings.Contains(filename, "handlers/") && strings.Contains(content, `"github.com/gorilla/mux"`) {
 			content = strings.ReplaceAll(content, "\t\"github.com/gorilla/mux\"\n", "")
-		}
-
-		// ✅ Apply test import fixes for test files
-		if strings.Contains(f.Filename, "test") {
-			content = rules.FixTestImports(content)
 		}
 
 		// ✅ Auto-fix placeholder import paths like "yourapp/", "your_project/", etc.
 		if moduleName != "" {
-			// Explicit corrections for common folders
 			content = strings.ReplaceAll(content, `"yourapp/routes"`, fmt.Sprintf(`"%s/internal/routes"`, moduleName))
 			content = strings.ReplaceAll(content, `"yourapp/handlers"`, fmt.Sprintf(`"%s/internal/handlers"`, moduleName))
 			content = strings.ReplaceAll(content, `"yourapp/models"`, fmt.Sprintf(`"%s/internal/models"`, moduleName))
@@ -66,21 +64,23 @@ func WriteMany(base string, files []File) error {
 			content = re.ReplaceAllString(content, fmt.Sprintf(`"%s/internal/`, moduleName))
 		}
 
-		// ✅ Normalize output paths to internal/ structure
-		fullPath := filepath.Join(base, rules.NormalizePath(f.Filename))
+		// ✅ Clean duplicate imports (e.g. handlers imported twice)
+		content = cleanDuplicateImports(content)
 
+		// ✅ Normalize output paths (ensure /internal/ structure)
+		fullPath := filepath.Join(base, rules.NormalizePath(filename))
 		if err := os.MkdirAll(filepath.Dir(fullPath), 0o755); err != nil {
 			return fmt.Errorf("failed to create directory %s: %w", filepath.Dir(fullPath), err)
 		}
 
-		// ✅ Write fixed content to disk
+		// ✅ Write file to disk
 		if err := os.WriteFile(fullPath, []byte(content), 0o644); err != nil {
 			return fmt.Errorf("failed to write file %s: %w", fullPath, err)
 		}
 
 		// ✅ Log fixes for visibility
 		if strings.Contains(f.Content, "yourapp/") || strings.Contains(f.Content, "your_project/") {
-			fmt.Printf("🔧 Fixed imports in: %s\n", f.Filename)
+			fmt.Printf("🔧 Fixed imports in: %s\n", filename)
 		}
 	}
 
@@ -99,4 +99,37 @@ func detectModule(base string) (string, error) {
 		}
 	}
 	return "", nil
+}
+
+// cleanDuplicateImports removes repeated identical import lines.
+func cleanDuplicateImports(code string) string {
+	lines := strings.Split(code, "\n")
+	seen := make(map[string]bool)
+	var cleaned []string
+	inImport := false
+
+	for _, line := range lines {
+		trim := strings.TrimSpace(line)
+
+		if strings.HasPrefix(trim, "import (") {
+			inImport = true
+			cleaned = append(cleaned, line)
+			continue
+		}
+		if inImport && strings.HasPrefix(trim, ")") {
+			inImport = false
+			cleaned = append(cleaned, line)
+			continue
+		}
+		if inImport && strings.HasPrefix(trim, "\"") {
+			if seen[trim] {
+				continue // skip duplicate
+			}
+			seen[trim] = true
+		}
+
+		cleaned = append(cleaned, line)
+	}
+
+	return strings.Join(cleaned, "\n")
 }

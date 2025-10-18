@@ -255,18 +255,21 @@ func FixTestBodies(code string) string {
 	if (strings.Contains(code, "http.NewRequest(\"POST\"") || strings.Contains(code, "http.NewRequest(\"PUT\"")) &&
 		strings.Contains(code, "nil)") {
 
-		// Properly insert a body declaration before the request line
-		code = strings.Replace(code,
-			"http.NewRequest(",
+		// Insert a proper body declaration before the request creation
+		code = strings.Replace(
+			code,
+			"req, err := http.NewRequest(",
 			"body := strings.NewReader(`{\"id\":1}`)\n\treq, err := http.NewRequest(",
-			1)
+			1,
+		)
+
 		code = strings.Replace(code, "nil)", "body)", 1)
 
 		// Add Content-Type header if missing
 		if !strings.Contains(code, "req.Header.Set(\"Content-Type\"") {
 			code = strings.Replace(code,
-				"req, err := http.NewRequest(",
-				"req, err := http.NewRequest(\n\treq.Header.Set(\"Content-Type\", \"application/json\")",
+				"rr := httptest.NewRecorder()",
+				"req.Header.Set(\"Content-Type\", \"application/json\")\n\trr := httptest.NewRecorder()",
 				1)
 		}
 
@@ -275,5 +278,53 @@ func FixTestBodies(code string) string {
 			code = strings.Replace(code, "import (", "import (\n\t\"strings\"", 1)
 		}
 	}
+
 	return code
+}
+
+// PlaceTestsWithHandlers ensures that generated test files (book_test.go, etc.)
+// are stored next to their handler files in internal/handlers/
+// and updated to use package handlers_test.
+func PlaceTestsWithHandlers(filename, content string) (string, string) {
+	if strings.HasPrefix(filename, "tests/") {
+		base := filepath.Base(filename)
+		filename = filepath.Join("internal", "handlers", base)
+
+		lines := strings.Split(content, "\n")
+		if len(lines) > 0 && strings.HasPrefix(lines[0], "package ") {
+			lines[0] = "package handlers_test"
+		}
+		content = strings.Join(lines, "\n")
+
+		// ✅ Ensure "handlers" import is present only once
+		if !strings.Contains(content, `"LibraryAPI/internal/handlers"`) {
+			if strings.Contains(content, "import (") {
+				content = strings.Replace(
+					content,
+					"import (",
+					"import (\n\t\"LibraryAPI/internal/handlers\"",
+					1,
+				)
+			} else {
+				// If somehow import block missing entirely
+				content = "import (\n\t\"LibraryAPI/internal/handlers\"\n)\n" + content
+			}
+		}
+
+		// ✅ Remove duplicate handler imports if any (cleanup)
+		lines = strings.Split(content, "\n")
+		seen := make(map[string]bool)
+		var clean []string
+		for _, line := range lines {
+			if strings.Contains(line, "\"LibraryAPI/internal/handlers\"") {
+				if seen["handlers"] {
+					continue
+				}
+				seen["handlers"] = true
+			}
+			clean = append(clean, line)
+		}
+		content = strings.Join(clean, "\n")
+	}
+	return filename, content
 }
