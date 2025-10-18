@@ -226,15 +226,31 @@ func FixRegisterFunction(code string) string {
 
 // FixTestImports ensures generated test files include required imports like gorilla/mux.
 func FixTestImports(code string) string {
+	// Add strings import if strings.NewReader is used
+	if strings.Contains(code, "strings.NewReader") && !strings.Contains(code, `"strings"`) {
+		if strings.Contains(code, "import (") {
+			code = strings.Replace(code, "import (", "import (\n\t\"strings\"", 1)
+		}
+	}
+
 	if strings.Contains(code, "mux.NewRouter()") && !strings.Contains(code, `"github.com/gorilla/mux"`) {
-		code = strings.Replace(code, "import (", "import (\n\t\"github.com/gorilla/mux\"", 1)
+		if strings.Contains(code, "import (") {
+			code = strings.Replace(code, "import (", "import (\n\t\"github.com/gorilla/mux\"", 1)
+		}
 	}
+
 	if strings.Contains(code, "httptest.NewRecorder()") && !strings.Contains(code, `"net/http/httptest"`) {
-		code = strings.Replace(code, "import (", "import (\n\t\"net/http/httptest\"", 1)
+		if strings.Contains(code, "import (") {
+			code = strings.Replace(code, "import (", "import (\n\t\"net/http/httptest\"", 1)
+		}
 	}
+
 	if strings.Contains(code, "http.NewRequest(") && !strings.Contains(code, `"net/http"`) {
-		code = strings.Replace(code, "import (", "import (\n\t\"net/http\"", 1)
+		if strings.Contains(code, "import (") {
+			code = strings.Replace(code, "import (", "import (\n\t\"net/http\"", 1)
+		}
 	}
+
 	return code
 }
 
@@ -248,10 +264,15 @@ func FixTestBodies(code string) string {
 		lines[0] = "package handlers_test"
 	}
 
-	for i, line := range lines {
-		if strings.HasPrefix(strings.TrimSpace(line), "func Test") &&
-			strings.Contains(line, "(t *testing.T)") {
+	var result []string
+	i := 0
 
+	for i < len(lines) {
+		line := lines[i]
+		trim := strings.TrimSpace(line)
+
+		// Detect test function start
+		if strings.HasPrefix(trim, "func Test") && strings.Contains(line, "(t *testing.T)") {
 			testName := extractTestName(line)
 			_, entity := splitVerbEntity(testName)
 			method := inferHTTPMethod(testName)
@@ -262,7 +283,8 @@ func FixTestBodies(code string) string {
 				body = `{"id":1}`
 			}
 
-			testBody := fmt.Sprintf(`{
+			// Generate complete test function with Test prefix
+			testFunc := fmt.Sprintf(`func Test%s(t *testing.T) {
 	body := strings.NewReader(%q)
 	req, _ := http.NewRequest("%s", "/%s", body)
 	req.Header.Set("Content-Type", "application/json")
@@ -271,14 +293,63 @@ func FixTestBodies(code string) string {
 	if rr.Code != http.StatusCreated && rr.Code != http.StatusOK && rr.Code != http.StatusNoContent {
 		t.Errorf("handler returned wrong status code: got %%v", rr.Code)
 	}
-}`, body, method, resource, testName)
+}`, testName, body, method, resource, testName)
 
-			lines[i] = strings.Replace(line, "{", testBody, 1)
+			result = append(result, testFunc)
+
+			// Skip until end of this test function
+			i++
+			braceCount := 1
+			for i < len(lines) && braceCount > 0 {
+				currentLine := strings.TrimSpace(lines[i])
+				if currentLine == "}" && !strings.HasPrefix(lines[i], "\t") && !strings.HasPrefix(lines[i], " ") {
+					braceCount--
+					if braceCount == 0 {
+						break
+					}
+				}
+				i++
+			}
+		} else {
+			result = append(result, line)
+		}
+		i++
+	}
+
+	fixed := strings.Join(result, "\n")
+
+	// Ensure required imports are present
+	if !strings.Contains(fixed, "import (") {
+		// No import block at all, create one
+		module := detectModuleName()
+		importBlock := fmt.Sprintf(`
+
+import (
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+	"%s/internal/handlers"
+)`, module)
+		fixed = strings.Replace(fixed, "package handlers_test", "package handlers_test"+importBlock, 1)
+	} else {
+		// Add missing imports to existing block
+		if strings.Contains(fixed, "strings.NewReader") && !strings.Contains(fixed, `"strings"`) {
+			fixed = strings.Replace(fixed, "import (", "import (\n\t\"strings\"", 1)
+		}
+		if strings.Contains(fixed, "http.NewRequest") && !strings.Contains(fixed, `"net/http"`) {
+			fixed = strings.Replace(fixed, "import (", "import (\n\t\"net/http\"", 1)
+		}
+		if strings.Contains(fixed, "httptest.") && !strings.Contains(fixed, `"net/http/httptest"`) {
+			fixed = strings.Replace(fixed, "import (", "import (\n\t\"net/http/httptest\"", 1)
+		}
+		if !strings.Contains(fixed, `"testing"`) {
+			fixed = strings.Replace(fixed, "import (", "import (\n\t\"testing\"", 1)
 		}
 	}
 
-	fixed := strings.Join(lines, "\n")
 	fixed = CleanDuplicateImports(fixed)
+	fixed = RemoveDuplicateHandlerImports(fixed)
 	return fixed
 }
 
@@ -288,28 +359,33 @@ func PlaceTestsWithHandlers(filename, content string) (string, string) {
 		base := filepath.Base(filename)
 		filename = filepath.Join("internal", "handlers", base)
 
+		// Change package name
 		lines := strings.Split(content, "\n")
 		if len(lines) > 0 && strings.HasPrefix(lines[0], "package ") {
 			lines[0] = "package handlers_test"
 		}
 		content = strings.Join(lines, "\n")
 
+		// Get module name
 		module := detectModuleName()
-		handlerImport := fmt.Sprintf("\"%s/internal/handlers\"", module)
+		handlerImport := fmt.Sprintf(`"%s/internal/handlers"`, module)
 
+		// Only add handler import if it doesn't exist at all
 		if !strings.Contains(content, handlerImport) {
 			if strings.Contains(content, "import (") {
+				// Find the import block and add to it
 				content = strings.Replace(content, "import (", "import (\n\t"+handlerImport, 1)
 			} else {
-				content = strings.Replace(content,
-					"package handlers_test",
-					"package handlers_test\n\nimport (\n\t"+handlerImport+"\n)\n",
-					1,
-				)
+				// No import block exists, create one
+				packageLine := "package handlers_test"
+				replacement := packageLine + "\n\nimport (\n\t" + handlerImport + "\n)\n"
+				content = strings.Replace(content, packageLine, replacement, 1)
 			}
 		}
 
+		// Final cleanup
 		content = CleanDuplicateImports(content)
+		content = RemoveDuplicateHandlerImports(content)
 	}
 	return filename, content
 }
@@ -413,38 +489,55 @@ func TestCreateBook(t *testing.T) {
 	return nil
 }
 
-// CleanDuplicateImports removes duplicate import lines (even if spacing or order differ)
+// CleanDuplicateImports removes duplicate import lines (even if spacing differs)
 // and ensures the file ends with balanced braces.
 func CleanDuplicateImports(code string) string {
 	lines := strings.Split(code, "\n")
-	seen := make(map[string]bool)
 	var out []string
-	importBlock := false
+	inImportBlock := false
+	seenImports := make(map[string]bool)
 
-	for _, line := range lines {
+	for i := 0; i < len(lines); i++ {
+		line := lines[i]
 		trim := strings.TrimSpace(line)
 
-		// detect start/end of import block
+		// Detect import block start
 		if strings.HasPrefix(trim, "import (") {
-			importBlock = true
-			out = append(out, line)
-			continue
-		}
-		if importBlock && strings.HasPrefix(trim, ")") {
-			importBlock = false
+			inImportBlock = true
+			seenImports = make(map[string]bool) // Reset for this block
 			out = append(out, line)
 			continue
 		}
 
-		// skip duplicate imports (normalize spacing and path)
-		if importBlock && strings.HasPrefix(trim, `"`) {
-			key := strings.ReplaceAll(strings.ReplaceAll(trim, "\t", ""), " ", "")
-			if seen[key] {
-				continue
+		// Detect import block end
+		if inImportBlock && trim == ")" {
+			inImportBlock = false
+			out = append(out, line)
+			continue
+		}
+
+		// Process imports inside the block
+		if inImportBlock {
+			// Extract the import path (everything between quotes)
+			if strings.Contains(trim, `"`) {
+				// Extract just the import path for comparison
+				start := strings.Index(trim, `"`)
+				end := strings.LastIndex(trim, `"`)
+				if start >= 0 && end > start {
+					importPath := trim[start : end+1] // Include quotes
+
+					if seenImports[importPath] {
+						// Skip this duplicate import
+						continue
+					}
+					seenImports[importPath] = true
+				}
 			}
-			seen[key] = true
+			out = append(out, line)
+			continue
 		}
 
+		// Not in import block
 		out = append(out, line)
 	}
 
@@ -458,4 +551,43 @@ func CleanDuplicateImports(code string) string {
 	}
 
 	return code
+}
+
+// RemoveDuplicateHandlerImports is a final safety check to remove duplicate handler imports
+func RemoveDuplicateHandlerImports(code string) string {
+	lines := strings.Split(code, "\n")
+	var out []string
+	inImportBlock := false
+	handlerImportSeen := false
+
+	for _, line := range lines {
+		trim := strings.TrimSpace(line)
+
+		// Track import block
+		if strings.HasPrefix(trim, "import (") {
+			inImportBlock = true
+			handlerImportSeen = false
+			out = append(out, line)
+			continue
+		}
+
+		if inImportBlock && trim == ")" {
+			inImportBlock = false
+			out = append(out, line)
+			continue
+		}
+
+		// Inside import block - check for handler import
+		if inImportBlock && strings.Contains(trim, "/internal/handlers\"") {
+			if handlerImportSeen {
+				// Skip this duplicate
+				continue
+			}
+			handlerImportSeen = true
+		}
+
+		out = append(out, line)
+	}
+
+	return strings.Join(out, "\n")
 }

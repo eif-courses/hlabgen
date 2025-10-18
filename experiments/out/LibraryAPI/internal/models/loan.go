@@ -2,6 +2,7 @@ package models
 
 import "time"
 
+// Loan represents a loan of a book to a user.
 type Loan struct {
 	ID       int       `json:"id"`
 	BookID   int       `json:"book_id"`

@@ -1,7 +1,9 @@
 package models
 
+// User represents a user of the library.
 type User struct {
 	ID       int    `json:"id"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"-"` // Password should not be exposed
 }

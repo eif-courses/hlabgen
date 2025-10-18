@@ -48,6 +48,7 @@ func WriteMany(base string, files []File) error {
 			content = rules.FixTestImports(content)
 			content = rules.FixTestBodies(content)
 			content = CleanDuplicateImports(content)
+			content = rules.RemoveDuplicateHandlerImports(content) // Extra safety
 			content = FixUnbalancedBraces(content)
 		}
 
@@ -112,40 +113,57 @@ func detectModule(base string) (string, error) {
 // and ensures the file ends with balanced braces.
 func CleanDuplicateImports(code string) string {
 	lines := strings.Split(code, "\n")
-	seen := make(map[string]bool)
 	var out []string
-	importBlock := false
+	inImportBlock := false
+	seenImports := make(map[string]bool)
 
-	for _, line := range lines {
+	for i := 0; i < len(lines); i++ {
+		line := lines[i]
 		trim := strings.TrimSpace(line)
 
-		// Detect start/end of import block
+		// Detect import block start
 		if strings.HasPrefix(trim, "import (") {
-			importBlock = true
-			out = append(out, line)
-			continue
-		}
-		if importBlock && strings.HasPrefix(trim, ")") {
-			importBlock = false
+			inImportBlock = true
+			seenImports = make(map[string]bool) // Reset for this block
 			out = append(out, line)
 			continue
 		}
 
-		// Skip duplicate imports (normalize spacing)
-		if importBlock && strings.HasPrefix(trim, `"`) {
-			key := strings.ReplaceAll(strings.ReplaceAll(trim, "\t", ""), " ", "")
-			if seen[key] {
-				continue
+		// Detect import block end
+		if inImportBlock && trim == ")" {
+			inImportBlock = false
+			out = append(out, line)
+			continue
+		}
+
+		// Process imports inside the block
+		if inImportBlock {
+			// Extract the import path (everything between quotes)
+			if strings.Contains(trim, `"`) {
+				// Extract just the import path for comparison
+				start := strings.Index(trim, `"`)
+				end := strings.LastIndex(trim, `"`)
+				if start >= 0 && end > start {
+					importPath := trim[start : end+1] // Include quotes
+
+					if seenImports[importPath] {
+						// Skip this duplicate import
+						continue
+					}
+					seenImports[importPath] = true
+				}
 			}
-			seen[key] = true
+			out = append(out, line)
+			continue
 		}
 
+		// Not in import block
 		out = append(out, line)
 	}
 
 	code = strings.Join(out, "\n")
 
-	// ✅ Ensure exactly one closing brace at EOF if braces are unbalanced
+	// ✅ Ensure balanced braces
 	openCount := strings.Count(code, "{")
 	closeCount := strings.Count(code, "}")
 	if openCount > closeCount {

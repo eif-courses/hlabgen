@@ -5,19 +5,20 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func Register(r *mux.Router) {
-	r.HandleFunc("/books", handlers.CreateBook).Methods("POST")
-	r.HandleFunc("/books", handlers.GetBooks).Methods("GET")
-	r.HandleFunc("/books/{id}", handlers.UpdateBook).Methods("PUT")
-	r.HandleFunc("/books/{id}", handlers.DeleteBook).Methods("DELETE")
+// Register sets up the routes for the API.
+func Register(router *mux.Router) {
+	router.HandleFunc("/books", handlers.CreateBook).Methods("POST")
+	router.HandleFunc("/books", handlers.GetBooks).Methods("GET")
+	router.HandleFunc("/books/{id}", handlers.UpdateBook).Methods("PUT")
+	router.HandleFunc("/books/{id}", handlers.DeleteBook).Methods("DELETE")
 
-	r.HandleFunc("/users", handlers.CreateUser).Methods("POST")
-	r.HandleFunc("/users", handlers.GetUsers).Methods("GET")
-	r.HandleFunc("/users/{id}", handlers.UpdateUser).Methods("PUT")
-	r.HandleFunc("/users/{id}", handlers.DeleteUser).Methods("DELETE")
+	router.HandleFunc("/users", handlers.CreateUser).Methods("POST")
+	router.HandleFunc("/users", handlers.GetUsers).Methods("GET")
+	router.HandleFunc("/users/{id}", handlers.UpdateUser).Methods("PUT")
+	router.HandleFunc("/users/{id}", handlers.DeleteUser).Methods("DELETE")
 
-	r.HandleFunc("/loans", handlers.CreateLoan).Methods("POST")
-	r.HandleFunc("/loans", handlers.GetLoans).Methods("GET")
-	r.HandleFunc("/loans/{id}", handlers.UpdateLoan).Methods("PUT")
-	r.HandleFunc("/loans/{id}", handlers.DeleteLoan).Methods("DELETE")
+	router.HandleFunc("/loans", handlers.CreateLoan).Methods("POST")
+	router.HandleFunc("/loans", handlers.GetLoans).Methods("GET")
+	router.HandleFunc("/loans/{id}", handlers.UpdateLoan).Methods("PUT")
+	router.HandleFunc("/loans/{id}", handlers.DeleteLoan).Methods("DELETE")
 }
