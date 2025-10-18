@@ -1,118 +1,132 @@
 package metrics
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
-	"time"
-
-	mlinternal "github.com/eif-courses/hlabgen/internal/ml"
+	"strings"
 )
 
-// CombinedMetrics represents both validation and ML generation metrics merged.
-type CombinedMetrics struct {
-	AppName        string
-	OutPath        string
-	BuildSuccess   bool
-	TestsPass      bool
-	CoveragePct    float64
-	LintWarnings   int
-	MLDuration     time.Duration
-	RepairAttempts int
-	PrimarySuccess bool
-	FinalSuccess   bool
-	ErrorMessage   string
-	Timestamp      string
-}
-
-// AggregateToCSV scans all experiment output folders and builds a summary CSV.
-func AggregateToCSV(baseDir string, csvPath string) error {
+// AggregateToCSV scans all experiment result folders under baseDir
+// and writes a reproducibility summary CSV with metrics + metadata.
+func AggregateToCSV(baseDir, outputPath string) error {
 	rows := [][]string{
-		{"AppName", "BuildSuccess", "TestsPass", "CoveragePct", "LintWarnings", "MLDurationSec", "RepairAttempts", "PrimarySuccess", "FinalSuccess", "ErrorMessage", "Timestamp"},
+		{
+			"AppName",
+			"Mode",
+			"Timestamp",
+			"Model",
+			"BuildSuccess",
+			"TestsPass",
+			"CoveragePct",
+			"LintWarnings",
+			"MLDuration",
+			"RepairAttempts",
+		},
 	}
 
-	// Walk through all experiment subfolders
-	err := filepath.WalkDir(baseDir, func(path string, d os.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if !d.IsDir() {
-			return nil
-		}
+	entries, err := os.ReadDir(baseDir)
+	if err != nil {
+		return fmt.Errorf("failed to read baseDir: %w", err)
+	}
 
-		metricsPath := filepath.Join(path, "metrics.json")
-		genMetricsPath := filepath.Join(path, "gen_metrics.json")
-
-		if _, err := os.Stat(metricsPath); err != nil {
-			return nil // skip folders without metrics
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
 		}
+		appDir := filepath.Join(baseDir, e.Name())
 
-		var val Result
-		data, err := os.ReadFile(metricsPath)
-		if err != nil {
-			return nil
-		}
-		_ = json.Unmarshal(data, &val)
-
-		var gen mlinternal.GenerationMetrics
-		if b, err := os.ReadFile(genMetricsPath); err == nil {
-			_ = json.Unmarshal(b, &gen)
+		// --- Load metrics.json ---
+		var res Result
+		if data, err := os.ReadFile(filepath.Join(appDir, "metrics.json")); err == nil {
+			_ = json.Unmarshal(data, &res)
 		}
 
-		appName := filepath.Base(path)
+		// --- Load gen_metrics.json ---
+		var gen map[string]interface{}
+		if data, err := os.ReadFile(filepath.Join(appDir, "gen_metrics.json")); err == nil {
+			_ = json.Unmarshal(data, &gen)
+		}
+
+		// --- Load experiment_info.txt (metadata) ---
+		meta := parseMeta(filepath.Join(appDir, "experiment_info.txt"))
+
+		// --- Build row ---
 		row := []string{
-			appName,
-			fmt.Sprintf("%v", val.BuildSuccess),
-			fmt.Sprintf("%v", val.TestsPass),
-			fmt.Sprintf("%.1f", val.CoveragePct),
-			fmt.Sprintf("%d", val.LintWarnings),
-			fmt.Sprintf("%.2f", gen.Duration.Seconds()),
-			fmt.Sprintf("%d", gen.RepairAttempts),
-			fmt.Sprintf("%v", gen.PrimarySuccess),
-			fmt.Sprintf("%v", gen.FinalSuccess),
-			fmt.Sprintf("\"%s\"", gen.ErrorMessage),
-			time.Now().Format(time.RFC3339),
+			e.Name(),
+			meta["Mode"],
+			meta["Timestamp"],
+			meta["Model"],
+			fmt.Sprintf("%v", res.BuildSuccess),
+			fmt.Sprintf("%v", res.TestsPass),
+			fmt.Sprintf("%.2f", res.CoveragePct),
+			fmt.Sprintf("%d", res.LintWarnings),
+			meta["MLDuration"],
+			meta["RepairAttempts"],
 		}
-
 		rows = append(rows, row)
-		return nil
-	})
-	if err != nil {
-		return err
 	}
 
-	// Ensure logs directory exists
-	if err := os.MkdirAll(filepath.Dir(csvPath), 0o755); err != nil {
-		return err
+	// --- Ensure output dir exists ---
+	if err := os.MkdirAll(filepath.Dir(outputPath), 0o755); err != nil {
+		return fmt.Errorf("failed to create output dir: %w", err)
 	}
 
-	f, err := os.Create(csvPath)
+	// --- Write CSV ---
+	f, err := os.Create(outputPath)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create CSV: %w", err)
 	}
 	defer f.Close()
 
-	for _, r := range rows {
-		fmt.Fprintln(f, joinCSV(r))
+	writer := csv.NewWriter(f)
+	defer writer.Flush()
+
+	for _, row := range rows {
+		if err := writer.Write(row); err != nil {
+			return err
+		}
 	}
 
-	fmt.Printf("📊 Aggregated %d experiments → %s\n", len(rows)-1, csvPath)
+	fmt.Printf("🧾 Aggregated %d experiments into %s\n", len(rows)-1, outputPath)
 	return nil
 }
 
-// joinCSV formats CSV-safe lines.
-func joinCSV(fields []string) string {
-	return fmt.Sprintf("%s", joinWithComma(fields))
-}
+// parseMeta reads key:value pairs from experiment_info.txt.
+func parseMeta(path string) map[string]string {
+	result := map[string]string{
+		"Mode":           "",
+		"Timestamp":      "",
+		"Model":          "",
+		"MLDuration":     "",
+		"RepairAttempts": "",
+	}
 
-func joinWithComma(items []string) string {
-	if len(items) == 0 {
-		return ""
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return result
 	}
-	out := items[0]
-	for _, v := range items[1:] {
-		out += "," + v
+
+	lines := strings.Split(string(data), "\n")
+	for _, l := range lines {
+		if parts := strings.SplitN(l, ":", 2); len(parts) == 2 {
+			key := strings.TrimSpace(parts[0])
+			val := strings.TrimSpace(parts[1])
+			switch key {
+			case "Mode":
+				result["Mode"] = val
+			case "Timestamp":
+				result["Timestamp"] = val
+			case "OpenAI Model":
+				result["Model"] = val
+			case "MLDuration":
+				result["MLDuration"] = val
+			case "RepairAttempts":
+				result["RepairAttempts"] = val
+			}
+		}
 	}
-	return out
+	return result
 }

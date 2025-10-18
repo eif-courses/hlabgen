@@ -8,9 +8,13 @@ import (
 )
 
 func TestCreateBook(t *testing.T) {
-	// Test logic here
-}
-
-func TestGetBooks(t *testing.T) {
-	// Test logic here
+	req, err := http.NewRequest("POST", "/books", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handlers.CreateBook(rr, req)
+	if status := rr.Code; status != http.StatusCreated {
+		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusCreated)
+	}
 }

@@ -33,6 +33,11 @@ func WriteMany(base string, files []File) error {
 			content = rules.SafeDecode(content)
 		}
 
+		// Remove unnecessary mux imports in handlers
+		if strings.Contains(f.Filename, "handlers/") && strings.Contains(content, `"github.com/gorilla/mux"`) {
+			content = strings.ReplaceAll(content, "\t\"github.com/gorilla/mux\"\n", "")
+		}
+
 		// ✅ Apply test import fixes for test files
 		if strings.Contains(f.Filename, "test") {
 			content = rules.FixTestImports(content)

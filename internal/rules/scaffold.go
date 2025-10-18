@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 )
 
@@ -30,17 +29,10 @@ func Scaffold(outDir string, appName string) ([]File, error) {
 		}
 	}
 
-	// detect local vs. github module mode
-	useLocal := true
-	if os.Getenv("HLABGEN_GITHUB_MODE") == "1" {
-		useLocal = false
-	}
-
-	// module name and import root
-	var modulePath string
-	if useLocal {
-		modulePath = appName
-	} else {
+	// Detect local vs. GitHub mode
+	useLocal := os.Getenv("HLABGEN_GITHUB_MODE") != "1"
+	modulePath := appName
+	if !useLocal {
 		modulePath = fmt.Sprintf("github.com/eif-courses/%s", appName)
 	}
 
@@ -97,26 +89,62 @@ require github.com/gorilla/mux v1.8.1
 	return files, nil
 }
 
-// SafeDecode adds body nil-checks and Decode error handling for all handlers.
-func SafeDecode(code string) string {
-	targets := []string{"book", "user", "loan", "item", "entity"}
+//
+// 🔧 Universal SafeDecode (no hardcoded entities)
+//
 
-	for _, t := range targets {
-		pattern := fmt.Sprintf(`json.NewDecoder\(r.Body\)\.Decode\(&%s\)`, t)
-		replacement := fmt.Sprintf(`if r.Body == nil {
+// SafeDecode automatically injects JSON body validation and mock CRUD
+// for any entity handler. Works for all future projects.
+func SafeDecode(code string) string {
+	// Add request body safety checks
+	code = strings.ReplaceAll(code,
+		"json.NewDecoder(r.Body).Decode(&",
+		`if r.Body == nil {
 	http.Error(w, "missing body", http.StatusBadRequest)
 	return
 }
-if err := json.NewDecoder(r.Body).Decode(&%s); err != nil {
-	http.Error(w, err.Error(), http.StatusBadRequest)
-	return
-}`, t)
+if err := json.NewDecoder(r.Body).Decode(&`)
 
-		re := regexp.MustCompile(pattern)
-		code = re.ReplaceAllString(code, replacement)
+	// Detect which entity this handler works with
+	entity := detectEntityName(code)
+	if entity == "" {
+		return code
 	}
 
+	lower := strings.ToLower(entity)
+	storeDecl := fmt.Sprintf("var %ss []models.%s\n\n", lower, entity)
+	code = strings.Replace(code, "package handlers", "package handlers\n\n"+storeDecl, 1)
+
+	// Replace placeholder CRUD logic
+	code = strings.ReplaceAll(code,
+		fmt.Sprintf("// Logic to save %s to database", lower),
+		fmt.Sprintf("%ss = append(%ss, %s)\nw.WriteHeader(http.StatusCreated)\njson.NewEncoder(w).Encode(%s)",
+			lower, lower, lower, lower))
+
+	code = strings.ReplaceAll(code,
+		fmt.Sprintf("// Logic to fetch %ss from database", lower),
+		fmt.Sprintf("w.WriteHeader(http.StatusOK)\njson.NewEncoder(w).Encode(%ss)", lower))
+
 	return code
+}
+
+// detectEntityName tries to infer the entity (e.g., Book, Student, Loan) from models.<Entity>.
+func detectEntityName(code string) string {
+	if !strings.Contains(code, "models.") {
+		return ""
+	}
+	start := strings.Index(code, "models.")
+	if start == -1 {
+		return ""
+	}
+	name := code[start+len("models."):]
+	name = strings.TrimLeft(name, " *\t\n\r")
+	for i, r := range name {
+		if !(r >= 'A' && r <= 'Z' || r >= 'a' && r <= 'z') {
+			return name[:i]
+		}
+	}
+	return name
 }
 
 // NormalizePath ensures all generated files are placed under /internal.
@@ -135,7 +163,6 @@ func NormalizePath(filename string) string {
 
 // FixTestImports ensures generated test files include required imports like gorilla/mux.
 func FixTestImports(code string) string {
-	// Add mux import if using mux.NewRouter() but not imported yet
 	if strings.Contains(code, "mux.NewRouter()") && !strings.Contains(code, `"github.com/gorilla/mux"`) {
 		code = strings.Replace(
 			code,
@@ -144,8 +171,6 @@ func FixTestImports(code string) string {
 			1,
 		)
 	}
-
-	// Optional: ensure http and httptest exist (good rule for completeness)
 	if strings.Contains(code, "httptest.NewRecorder()") && !strings.Contains(code, `"net/http/httptest"`) {
 		code = strings.Replace(
 			code,
@@ -162,6 +187,5 @@ func FixTestImports(code string) string {
 			1,
 		)
 	}
-
 	return code
 }
