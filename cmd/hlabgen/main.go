@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/eif-courses/hlabgen/internal/assemble"
@@ -56,7 +59,8 @@ func main() {
 	if *mode == "ml" || *mode == "hybrid" {
 		log.Println("🧠 Starting ML-based code generation...")
 
-		files, genMetrics, err = mlinternal.Generate(mlinternal.Schema{
+		// --- first try ---
+		genFiles, genMetrics, err := mlinternal.Generate(mlinternal.Schema{
 			AppName:    schema.AppName,
 			Database:   schema.Database,
 			APIPattern: schema.APIPattern,
@@ -66,10 +70,23 @@ func main() {
 			Objectives: schema.Objectives,
 		})
 
+		files = convertGenFiles(genFiles)
+
 		if err != nil {
 			log.Printf("⚠️  ML generation failed once: %v", err)
 			log.Println("🔁 Retrying with relaxed mode...")
-			files, genMetrics, err = mlinternal.GenerateRelaxed(schema)
+
+			genFiles, genMetrics, err = mlinternal.GenerateRelaxed(mlinternal.Schema{
+				AppName:    schema.AppName,
+				Database:   schema.Database,
+				APIPattern: schema.APIPattern,
+				Difficulty: schema.Difficulty,
+				Entities:   schema.Entities,
+				Features:   schema.Features,
+				Objectives: schema.Objectives,
+			})
+
+			files = convertGenFiles(genFiles)
 		}
 
 		if err != nil {
@@ -78,6 +95,10 @@ func main() {
 			if err := assemble.WriteMany(*out, files); err != nil {
 				log.Fatalf("❌ Failed to write generated files: %v", err)
 			}
+
+			// 🔧 Automatically fix imports based on go.mod
+			fixImportsToModule(*out)
+
 			fmt.Printf("✅ ML generation completed (%.2fs)\n", genMetrics.Duration.Seconds())
 		}
 	} else {
@@ -130,7 +151,75 @@ func main() {
 	fmt.Println("\n✅ Experiment complete.")
 }
 
-// getModelName safely reads the model name (for metadata logs)
+// --- Helper: Convert []GenFile → []assemble.File ---
+func convertGenFiles(in []mlinternal.GenFile) []assemble.File {
+	out := make([]assemble.File, len(in))
+	for i, f := range in {
+		out[i] = assemble.File{Filename: f.Filename, Content: f.Code}
+	}
+	return out
+}
+
+// --- Helper: Detect module name and fix imports automatically ---
+func fixImportsToModule(projectDir string) {
+	goMod := filepath.Join(projectDir, "go.mod")
+	f, err := os.Open(goMod)
+	if err != nil {
+		log.Printf("⚠️  No go.mod found in %s (skipping import fix)", projectDir)
+		return
+	}
+	defer f.Close()
+
+	// Detect module name
+	scanner := bufio.NewScanner(f)
+	moduleName := ""
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if strings.HasPrefix(line, "module ") {
+			moduleName = strings.TrimSpace(strings.TrimPrefix(line, "module "))
+			break
+		}
+	}
+	if moduleName == "" {
+		log.Printf("⚠️  Could not detect module name in go.mod (skipping import fix)")
+		return
+	}
+
+	log.Printf("🔧 Detected module name: %s — fixing imports...", moduleName)
+
+	filepath.WalkDir(projectDir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
+			return nil
+		}
+		if !strings.HasSuffix(path, ".go") {
+			return nil
+		}
+
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return nil
+		}
+
+		old := `"github.com/eif-courses/hlabgen/internal/`
+		new := fmt.Sprintf(`"%s/internal/`, moduleName)
+
+		newContent := strings.ReplaceAll(string(content), old, new)
+		newContent = strings.ReplaceAll(newContent, `"yourapp/`, fmt.Sprintf(`"%s/`, moduleName))
+		newContent = strings.ReplaceAll(newContent, `"your_project/`, fmt.Sprintf(`"%s/`, moduleName))
+
+		if newContent != string(content) {
+			err = os.WriteFile(path, []byte(newContent), 0o644)
+			if err == nil {
+				log.Printf("  ✅ Updated imports in: %s", path)
+			}
+		}
+		return nil
+	})
+
+	log.Println("✅ Import paths updated successfully.")
+}
+
+// --- Helper: Get model name safely ---
 func getModelName() string {
 	model := os.Getenv("OPENAI_MODEL")
 	if model == "" {
