@@ -96,11 +96,11 @@ all-experiments:
 		echo "🚀 Experiment $$current/$$total_count: $$app"; \
 		echo "==========================================$(COLOR_RESET)"; \
 		if go run ./cmd/hlabgen -input $$file -mode $(MODE) -out $(OUT_DIR)/$$app 2>&1 | tee $(LOG_DIR)/$$app.log; then \
-			cov=$$(grep "Coverage" $(LOG_DIR)/$$app.log | tail -1 | awk '{print $$4}' | tr -d '%'); \
-			dur=$$(grep "ML Duration" $(LOG_DIR)/$$app.log | awk '{print $$5}'); \
-			build=$$(grep "BuildSuccess" $(LOG_DIR)/$$app.log | awk '{print $$4}'); \
-			tests=$$(grep "TestsPass" $(LOG_DIR)/$$app.log | awk '{print $$4}'); \
-			repairs=$$(grep "repair" $(LOG_DIR)/$$app.log | awk '{print $$6}' | tr -d ')'); \
+			cov=$$(grep "Coverage" $(LOG_DIR)/$$app.log | tail -1 | awk '{print $$4}' | tr -d '%' || echo "0.0"); \
+			dur=$$(grep "ML Duration" $(LOG_DIR)/$$app.log | awk '{print $$5}' || echo "0.0"); \
+			build=$$(grep "BuildSuccess" $(LOG_DIR)/$$app.log | awk '{print $$4}' || echo "false"); \
+			tests=$$(grep "TestsPass" $(LOG_DIR)/$$app.log | awk '{print $$4}' || echo "false"); \
+			repairs=$$(grep "repair" $(LOG_DIR)/$$app.log | awk '{print $$6}' | tr -d ')' || echo "0"); \
 			[ -z "$$cov" ] && cov="0.0"; \
 			[ -z "$$dur" ] && dur="0.0"; \
 			[ -z "$$build" ] && build="false"; \
@@ -120,18 +120,21 @@ all-experiments:
 	echo "📊 Computing Summary Statistics..."; \
 	echo "==========================================$(COLOR_RESET)"; \
 	total=$$(grep -v "App" $(RESULTS_MD) | grep -v "^$$" | awk -F'|' 'BEGIN{cov=0;dur=0;count=0;durcount=0} {gsub(/^[ \t]+|[ \t]+$$/, "", $$4); gsub(/^[ \t]+|[ \t]+$$/, "", $$5); if($$4+0>0){cov+=$$4;count++} if($$5+0>0){dur+=$$5;durcount++}} END {if(count>0) printf "Mean Coverage: %.1f%%\n", cov/count; else printf "Mean Coverage: 0.0%%\n"; if(durcount>0) printf "Mean Duration: %.2fs\n", dur/durcount; else printf "Mean Duration: 0.00s\n"}'); \
-	passrate=$$(grep -c "| true | true |" $(RESULTS_MD) || echo "0"); \
-	buildrate=$$(grep -c "| true |" $(RESULTS_MD) || echo "0"); \
-	totalapps=$$(grep -c "^|" $(RESULTS_MD)); \
+	passrate=$$(grep -c "| true | true |" $(RESULTS_MD) 2>/dev/null || echo "0"); \
+	buildrate=$$(grep -c "| true |" $(RESULTS_MD) 2>/dev/null || echo "0"); \
+	totalapps=$$(grep -c "^|" $(RESULTS_MD) 2>/dev/null || echo "2"); \
 	totalapps=$$((totalapps - 2)); \
+	if [ $$totalapps -le 0 ]; then totalapps=1; fi; \
+	buildpct=$$((buildrate * 100 / totalapps)); \
+	passpct=$$((passrate * 100 / totalapps)); \
 	echo "" >> $(RESULTS_MD); \
 	echo "---" >> $(RESULTS_MD); \
 	echo "" >> $(RESULTS_MD); \
 	echo "## 📊 Summary Statistics" >> $(RESULTS_MD); \
 	echo "" >> $(RESULTS_MD); \
 	echo "$$total" >> $(RESULTS_MD); \
-	echo "Build Success Rate: $$buildrate / $$totalapps projects ($$((buildrate * 100 / totalapps))%)" >> $(RESULTS_MD); \
-	echo "Test Pass Rate: $$passrate / $$totalapps projects ($$((passrate * 100 / totalapps))%)" >> $(RESULTS_MD); \
+	echo "Build Success Rate: $$buildrate / $$totalapps projects ($$buildpct%)" >> $(RESULTS_MD); \
+	echo "Test Pass Rate: $$passrate / $$totalapps projects ($$passpct%)" >> $(RESULTS_MD); \
 	if [ $$failed -gt 0 ]; then \
 		echo "" >> $(RESULTS_MD); \
 		echo "## ⚠️ Failed Experiments" >> $(RESULTS_MD); \
@@ -185,7 +188,7 @@ quick-test:
 	@echo "$(COLOR_BLUE)🧪 Running quick test (3 experiments)...$(COLOR_RESET)"
 	@$(MAKE) experiment APP=LibraryAPI
 	@$(MAKE) experiment APP=BlogAPI
-	@$(MAKE) experiment APP=TaskAPI
+	@$(MAKE) experiment APP=TaskManagerAPI
 	@$(MAKE) analyze
 	@echo "$(COLOR_GREEN)✅ Quick test complete$(COLOR_RESET)"
 
@@ -217,10 +220,14 @@ stats:
 			if($$6=="true") tests++; \
 			cov+=$$7; \
 		} END { \
-			print "Total Projects:", total; \
-			print "Build Success:", builds"/"total, "("int(builds*100/total)"%)"; \
-			print "Test Pass:", tests"/"total, "("int(tests*100/total)"%)"; \
-			print "Avg Coverage:", sprintf("%.1f%%", cov/total); \
+			if(total>0) { \
+				print "Total Projects:", total; \
+				print "Build Success:", builds"/"total, "("int(builds*100/total)"%)"; \
+				print "Test Pass:", tests"/"total, "("int(tests*100/total)"%)"; \
+				print "Avg Coverage:", sprintf("%.1f%%", cov/total); \
+			} else { \
+				print "No data available yet."; \
+			} \
 		}'; \
 	else \
 		echo "$(COLOR_RED)❌ No statistics available. Run experiments first.$(COLOR_RESET)"; \
