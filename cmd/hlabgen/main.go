@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/eif-courses/hlabgen/internal/assemble"
 	"github.com/eif-courses/hlabgen/internal/input"
@@ -13,16 +15,12 @@ import (
 	"github.com/eif-courses/hlabgen/internal/rules"
 	"github.com/eif-courses/hlabgen/internal/validate"
 	"github.com/joho/godotenv"
-
-	"log"
-	"path/filepath"
 )
 
 func main() {
-
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	// --- Load environment variables ---
+	if err := godotenv.Load(); err != nil {
+		log.Println("⚠️  Warning: .env not found (using system environment)")
 	}
 
 	in := flag.String("input", "experiments/input/library.json", "path to schema.json")
@@ -34,47 +32,82 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// 1) rule-based scaffold (always)
+
+	// --- 1) Rule-based scaffold ---
 	if _, err := rules.Scaffold(*out, schema.AppName); err != nil {
 		log.Fatal(err)
 	}
 
-	// 2) ML layer (if ml-only or hybrid)
+	// --- 2) ML Layer (optional) ---
+	var genMetrics mlinternal.GenerationMetrics
 	if *mode == "ml" || *mode == "hybrid" {
-		files, err := callML(schema) // implement in M1
+		files, metrics, err := callML(schema)
 		if err != nil {
 			log.Fatal(err)
 		}
+		genMetrics = metrics
+
 		if err := assemble.WriteMany(*out, files); err != nil {
 			log.Fatal(err)
 		}
+
+		// Save ML generation metrics next to output
+		if err := saveGenMetrics(filepath.Join(*out, "gen_metrics.json"), metrics); err != nil {
+			log.Printf("⚠️ Failed to write generation metrics: %v\n", err)
+		}
 	}
 
-	// 3) validate & metrics
+	// --- 3) Validation & Runtime metrics ---
 	m, err := validate.Run(*out)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("BuildSuccess=%v Lint=%d TestsPass=%v Coverage=%.1f%%\n", m.BuildSuccess, m.LintWarnings, m.TestsPass, m.CoveragePct)
-	_ = saveMetrics(filepath.Join(*out, "metrics.json"), m) // implement shortly
+
+	fmt.Printf("\n✅ Summary:\n")
+	fmt.Printf("  • BuildSuccess = %v\n", m.BuildSuccess)
+	fmt.Printf("  • LintWarnings = %d\n", m.LintWarnings)
+	fmt.Printf("  • TestsPass    = %v\n", m.TestsPass)
+	fmt.Printf("  • Coverage     = %.1f%%\n", m.CoveragePct)
+	fmt.Printf("  • ML Duration  = %v (repair %d)\n", genMetrics.Duration, genMetrics.RepairAttempts)
+
+	// Save validation + runtime metrics
+	if err := saveMetrics(filepath.Join(*out, "metrics.json"), m); err != nil {
+		log.Printf("⚠️ Failed to save validation metrics: %v\n", err)
+	}
+
+	// 4) Aggregate all metrics across experiments for summary
+	summaryPath := "experiments/logs/summary.csv"
+	if err := metrics.AggregateToCSV("experiments/out", summaryPath); err != nil {
+		log.Printf("⚠️ Failed to aggregate metrics: %v\n", err)
+	}
+
 }
 
-func callML(s input.Schema) ([]assemble.File, error) {
-	files, err := mlinternal.Generate(mlinternal.Schema{
+// callML invokes the ML generation and returns generated files + timing metrics.
+func callML(s input.Schema) ([]assemble.File, mlinternal.GenerationMetrics, error) {
+	files, metrics, err := mlinternal.Generate(mlinternal.Schema{
 		AppName: s.AppName, Database: s.Database, APIPattern: s.APIPattern,
 		Difficulty: s.Difficulty, Entities: s.Entities, Features: s.Features, Objectives: s.Objectives,
 	})
 	if err != nil {
-		return nil, err
+		return nil, metrics, err
 	}
+
 	out := make([]assemble.File, 0, len(files))
 	for _, f := range files {
 		out = append(out, assemble.File{Filename: f.Filename, Content: f.Code})
 	}
-	return out, nil
+	return out, metrics, nil
 }
 
+// saveMetrics saves validation metrics after build/test.
 func saveMetrics(path string, m metrics.Result) error {
+	b, _ := json.MarshalIndent(m, "", "  ")
+	return os.WriteFile(path, b, 0o644)
+}
+
+// saveGenMetrics saves ML generation timing & reliability metrics.
+func saveGenMetrics(path string, m mlinternal.GenerationMetrics) error {
 	b, _ := json.MarshalIndent(m, "", "  ")
 	return os.WriteFile(path, b, 0o644)
 }

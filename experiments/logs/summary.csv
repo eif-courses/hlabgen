@@ -1,0 +1,2 @@
+AppName,BuildSuccess,TestsPass,CoveragePct,LintWarnings,MLDurationSec,RepairAttempts,PrimarySuccess,FinalSuccess,ErrorMessage,Timestamp
+LibraryAPI,false,false,0.0,0,19.41,0,true,true,"",2025-10-18T12:46:12+03:00

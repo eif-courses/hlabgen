@@ -17,11 +17,10 @@ type Schema struct {
 }
 
 func BuildPrompt(s Schema) string {
-
 	var buf bytes.Buffer
 	b, _ := json.Marshal(s)
 
-	fmt.Fprintf(&buf, `Generate Go REST API files as JSON array of {"filename","code"}.
+	fmt.Fprintf(&buf, `Generate Go REST API files as a JSON array of objects with "filename" and "code" fields.
 Requirements: %s
 Include:
 - models with JSON tags
@@ -29,6 +28,7 @@ Include:
 - routes glue (append to internal/routes/routes.go Register)
 - tests in /tests
 - tasks.md with 3 lab tasks (statement, hints, expected output)
-Return ONLY valid JSON array.`, string(b))
+
+CRITICAL: Return ONLY a valid JSON array. Do NOT wrap the response in markdown code blocks or any other formatting. Start directly with [ and end with ].`, string(b))
 	return buf.String()
 }

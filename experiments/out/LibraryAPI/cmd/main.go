@@ -1,14 +1,15 @@
 package main
 
 import (
-	"github.com/eif-courses/LibraryAPI/internal/routes"
+	"LibraryAPI/internal/routes"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 )
 
 func main() {
-	mux := http.NewServeMux()
-	routes.Register(mux)
-	log.Println("listening on :8080")
-	log.Fatal(http.ListenAndServe(":8080", mux))
+	r := mux.NewRouter()
+	routes.Register(r)
+	log.Println("Server listening on :8080")
+	log.Fatal(http.ListenAndServe(":8080", r))
 }
