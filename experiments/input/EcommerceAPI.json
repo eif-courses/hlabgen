@@ -1,9 +1,10 @@
 {
-  "app_name": "HotelAPI",
+  "app_name": "EcommerceAPI",
   "entities": [
-    "Hotel",
-    "Room",
-    "Reservation"
+    "Product",
+    "User",
+    "Cart",
+    "Order"
   ],
   "features": [
     "CRUD",

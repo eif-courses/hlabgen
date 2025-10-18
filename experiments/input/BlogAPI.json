@@ -1,28 +1,21 @@
 {
   "app_name": "BlogAPI",
   "entities": [
-    {
-      "name": "Post",
-      "fields": {
-        "id": "int",
-        "title": "string",
-        "content": "string"
-      }
-    },
-    {
-      "name": "Comment",
-      "fields": {
-        "id": "int",
-        "post_id": "int",
-        "text": "string"
-      }
-    },
-    {
-      "name": "Author",
-      "fields": {
-        "id": "int",
-        "name": "string"
-      }
-    }
-  ]
+    "Post",
+    "Comment",
+    "Author"
+  ],
+  "features": [
+    "CRUD",
+    "notifications",
+    "analytics"
+  ],
+  "database": "PostgreSQL",
+  "difficulty": "Intermediate",
+  "objectives": [
+    "Implement authentication and role-based access",
+    "Add pagination and query filtering",
+    "Integrate tests for core endpoints"
+  ],
+  "api_pattern": "REST"
 }

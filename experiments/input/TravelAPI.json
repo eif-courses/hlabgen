@@ -1,27 +1,21 @@
 {
   "app_name": "TravelAPI",
   "entities": [
-    {
-      "name": "Trip",
-      "fields": {
-        "id": "int",
-        "destination": "string"
-      }
-    },
-    {
-      "name": "Booking",
-      "fields": {
-        "id": "int",
-        "trip_id": "int",
-        "traveler": "string"
-      }
-    },
-    {
-      "name": "Destination",
-      "fields": {
-        "id": "int",
-        "name": "string"
-      }
-    }
-  ]
+    "Trip",
+    "Booking",
+    "Destination"
+  ],
+  "features": [
+    "CRUD",
+    "transactions",
+    "payment"
+  ],
+  "database": "MongoDB",
+  "difficulty": "Beginner",
+  "objectives": [
+    "Implement basic REST CRUD operations",
+    "Add simple search functionality",
+    "Write unit tests for handlers"
+  ],
+  "api_pattern": "REST"
 }

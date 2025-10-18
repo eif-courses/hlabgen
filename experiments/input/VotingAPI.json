@@ -1,27 +1,22 @@
 {
   "app_name": "VotingAPI",
   "entities": [
-    {
-      "name": "Election",
-      "fields": {
-        "id": "int",
-        "title": "string"
-      }
-    },
-    {
-      "name": "Candidate",
-      "fields": {
-        "id": "int",
-        "name": "string"
-      }
-    },
-    {
-      "name": "Vote",
-      "fields": {
-        "id": "int",
-        "candidate_id": "int",
-        "voter": "string"
-      }
-    }
-  ]
+    "Election",
+    "Candidate",
+    "Vote"
+  ],
+  "features": [
+    "CRUD",
+    "transactions",
+    "payment"
+  ],
+  "database": "MongoDB",
+  "difficulty": "Advanced",
+  "objectives": [
+    "Implement secure authentication with JWT",
+    "Add transactional order processing or workflow logic",
+    "Implement complex search with filters and relations",
+    "Write integration and load tests"
+  ],
+  "api_pattern": "REST"
 }

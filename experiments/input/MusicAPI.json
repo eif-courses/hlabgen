@@ -1,29 +1,21 @@
 {
   "app_name": "MusicAPI",
   "entities": [
-    {
-      "name": "Artist",
-      "fields": {
-        "id": "int",
-        "name": "string"
-      }
-    },
-    {
-      "name": "Album",
-      "fields": {
-        "id": "int",
-        "artist_id": "int",
-        "title": "string"
-      }
-    },
-    {
-      "name": "Song",
-      "fields": {
-        "id": "int",
-        "album_id": "int",
-        "title": "string",
-        "duration": "int"
-      }
-    }
-  ]
+    "Artist",
+    "Album",
+    "Song"
+  ],
+  "features": [
+    "CRUD",
+    "auth",
+    "filtering"
+  ],
+  "database": "PostgreSQL",
+  "difficulty": "Beginner",
+  "objectives": [
+    "Implement basic REST CRUD operations",
+    "Add simple search functionality",
+    "Write unit tests for handlers"
+  ],
+  "api_pattern": "REST"
 }

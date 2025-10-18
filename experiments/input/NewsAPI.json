@@ -1,16 +1,16 @@
 {
-  "app_name": "SchoolAPI",
+  "app_name": "NewsAPI",
   "entities": [
-    "Teacher",
-    "Student",
-    "Class"
+    "Article",
+    "Category",
+    "Author"
   ],
   "features": [
     "CRUD",
-    "notifications",
-    "analytics"
+    "validation",
+    "reporting"
   ],
-  "database": "MySQL",
+  "database": "MongoDB",
   "difficulty": "Advanced",
   "objectives": [
     "Implement secure authentication with JWT",

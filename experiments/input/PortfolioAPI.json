@@ -1,27 +1,22 @@
 {
   "app_name": "PortfolioAPI",
   "entities": [
-    {
-      "name": "Project",
-      "fields": {
-        "id": "int",
-        "title": "string"
-      }
-    },
-    {
-      "name": "Client",
-      "fields": {
-        "id": "int",
-        "name": "string"
-      }
-    },
-    {
-      "name": "Invoice",
-      "fields": {
-        "id": "int",
-        "client_id": "int",
-        "amount": "float"
-      }
-    }
-  ]
+    "Project",
+    "Client",
+    "Invoice"
+  ],
+  "features": [
+    "CRUD",
+    "auth",
+    "filtering"
+  ],
+  "database": "PostgreSQL",
+  "difficulty": "Advanced",
+  "objectives": [
+    "Implement secure authentication with JWT",
+    "Add transactional order processing or workflow logic",
+    "Implement complex search with filters and relations",
+    "Write integration and load tests"
+  ],
+  "api_pattern": "REST"
 }

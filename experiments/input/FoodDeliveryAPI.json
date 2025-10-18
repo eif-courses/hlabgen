@@ -1,16 +1,16 @@
 {
-  "app_name": "SchoolAPI",
+  "app_name": "FoodDeliveryAPI",
   "entities": [
-    "Teacher",
-    "Student",
-    "Class"
+    "Restaurant",
+    "MenuItem",
+    "Order"
   ],
   "features": [
     "CRUD",
-    "notifications",
-    "analytics"
+    "validation",
+    "reporting"
   ],
-  "database": "MySQL",
+  "database": "PostgreSQL",
   "difficulty": "Advanced",
   "objectives": [
     "Implement secure authentication with JWT",

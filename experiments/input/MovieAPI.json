@@ -1,29 +1,22 @@
 {
   "app_name": "MovieAPI",
   "entities": [
-    {
-      "name": "Movie",
-      "fields": {
-        "id": "int",
-        "title": "string",
-        "year": "int"
-      }
-    },
-    {
-      "name": "Director",
-      "fields": {
-        "id": "int",
-        "name": "string"
-      }
-    },
-    {
-      "name": "Review",
-      "fields": {
-        "id": "int",
-        "movie_id": "int",
-        "rating": "int",
-        "comment": "string"
-      }
-    }
-  ]
+    "Movie",
+    "Director",
+    "Review"
+  ],
+  "features": [
+    "CRUD",
+    "search",
+    "pagination"
+  ],
+  "database": "SQLite",
+  "difficulty": "Advanced",
+  "objectives": [
+    "Implement secure authentication with JWT",
+    "Add transactional order processing or workflow logic",
+    "Implement complex search with filters and relations",
+    "Write integration and load tests"
+  ],
+  "api_pattern": "REST"
 }

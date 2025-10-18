@@ -1,29 +1,23 @@
 {
   "app_name": "ShopAPI",
   "entities": [
-    {
-      "name": "Product",
-      "fields": {
-        "id": "int",
-        "name": "string",
-        "price": "float"
-      }
-    },
-    {
-      "name": "Order",
-      "fields": {
-        "id": "int",
-        "product_id": "int",
-        "quantity": "int"
-      }
-    },
-    {
-      "name": "Customer",
-      "fields": {
-        "id": "int",
-        "name": "string",
-        "email": "string"
-      }
-    }
-  ]
+    "Product",
+    "Order",
+    "Customer",
+    "Cart",
+    "Payment"
+  ],
+  "features": [
+    "CRUD",
+    "validation",
+    "reporting"
+  ],
+  "database": "PostgreSQL",
+  "difficulty": "Beginner",
+  "objectives": [
+    "Implement basic REST CRUD operations",
+    "Add simple search functionality",
+    "Write unit tests for handlers"
+  ],
+  "api_pattern": "REST"
 }

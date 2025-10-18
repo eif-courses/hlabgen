@@ -1,28 +1,21 @@
 {
   "app_name": "SocialAPI",
   "entities": [
-    {
-      "name": "User",
-      "fields": {
-        "id": "int",
-        "username": "string"
-      }
-    },
-    {
-      "name": "Post",
-      "fields": {
-        "id": "int",
-        "user_id": "int",
-        "content": "string"
-      }
-    },
-    {
-      "name": "Comment",
-      "fields": {
-        "id": "int",
-        "post_id": "int",
-        "text": "string"
-      }
-    }
-  ]
+    "User",
+    "Post",
+    "Comment"
+  ],
+  "features": [
+    "CRUD",
+    "search",
+    "pagination"
+  ],
+  "database": "PostgreSQL",
+  "difficulty": "Beginner",
+  "objectives": [
+    "Implement basic REST CRUD operations",
+    "Add simple search functionality",
+    "Write unit tests for handlers"
+  ],
+  "api_pattern": "REST"
 }

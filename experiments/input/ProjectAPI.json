@@ -1,16 +1,16 @@
 {
-  "app_name": "FinanceAPI",
+  "app_name": "ProjectAPI",
   "entities": [
-    "Account",
-    "Transaction",
-    "Invoice"
+    "Project",
+    "Task",
+    "Milestone"
   ],
   "features": [
     "CRUD",
     "search",
     "pagination"
   ],
-  "database": "SQLite",
+  "database": "PostgreSQL",
   "difficulty": "Intermediate",
   "objectives": [
     "Implement authentication and role-based access",

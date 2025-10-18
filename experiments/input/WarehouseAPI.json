@@ -1,27 +1,21 @@
 {
   "app_name": "WarehouseAPI",
   "entities": [
-    {
-      "name": "Item",
-      "fields": {
-        "id": "int",
-        "name": "string"
-      }
-    },
-    {
-      "name": "Location",
-      "fields": {
-        "id": "int",
-        "code": "string"
-      }
-    },
-    {
-      "name": "Shipment",
-      "fields": {
-        "id": "int",
-        "item_id": "int",
-        "location_id": "int"
-      }
-    }
-  ]
+    "Item",
+    "Location",
+    "Shipment"
+  ],
+  "features": [
+    "CRUD",
+    "notifications",
+    "analytics"
+  ],
+  "database": "MySQL",
+  "difficulty": "Beginner",
+  "objectives": [
+    "Implement basic REST CRUD operations",
+    "Add simple search functionality",
+    "Write unit tests for handlers"
+  ],
+  "api_pattern": "REST"
 }

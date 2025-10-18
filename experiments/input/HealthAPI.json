@@ -1,14 +1,14 @@
 {
-  "app_name": "SchoolAPI",
+  "app_name": "HealthAPI",
   "entities": [
-    "Teacher",
-    "Student",
-    "Class"
+    "Patient",
+    "Doctor",
+    "Record"
   ],
   "features": [
     "CRUD",
-    "notifications",
-    "analytics"
+    "search",
+    "pagination"
   ],
   "database": "MySQL",
   "difficulty": "Advanced",

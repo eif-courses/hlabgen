@@ -1,16 +1,8 @@
 {
-  "app_name": "HotelAPI",
-  "entities": [
-    "Hotel",
-    "Room",
-    "Reservation"
-  ],
-  "features": [
-    "CRUD",
-    "validation",
-    "reporting"
-  ],
-  "database": "PostgreSQL",
+  "app_name": "BlogAPI",
+  "entities": ["Post", "Comment", "Author"],
+  "features": ["CRUD", "search", "pagination"],
+  "database": "SQLite",
   "difficulty": "Beginner",
   "objectives": [
     "Implement basic REST CRUD operations",

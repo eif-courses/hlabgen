@@ -1,29 +1,22 @@
 {
   "app_name": "FitnessAPI",
   "entities": [
-    {
-      "name": "User",
-      "fields": {
-        "id": "int",
-        "name": "string"
-      }
-    },
-    {
-      "name": "Workout",
-      "fields": {
-        "id": "int",
-        "user_id": "int",
-        "type": "string"
-      }
-    },
-    {
-      "name": "Exercise",
-      "fields": {
-        "id": "int",
-        "workout_id": "int",
-        "name": "string",
-        "reps": "int"
-      }
-    }
-  ]
+    "User",
+    "Workout",
+    "Exercise",
+    "Goal"
+  ],
+  "features": [
+    "CRUD",
+    "transactions",
+    "payment"
+  ],
+  "database": "PostgreSQL",
+  "difficulty": "Beginner",
+  "objectives": [
+    "Implement basic REST CRUD operations",
+    "Add simple search functionality",
+    "Write unit tests for handlers"
+  ],
+  "api_pattern": "REST"
 }

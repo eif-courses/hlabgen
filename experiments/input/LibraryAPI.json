@@ -1,29 +1,21 @@
 {
   "app_name": "LibraryAPI",
   "entities": [
-    {
-      "name": "Book",
-      "fields": {
-        "id": "int",
-        "title": "string",
-        "author": "string"
-      }
-    },
-    {
-      "name": "Member",
-      "fields": {
-        "id": "int",
-        "name": "string"
-      }
-    },
-    {
-      "name": "Loan",
-      "fields": {
-        "id": "int",
-        "book_id": "int",
-        "member_id": "int",
-        "due_date": "string"
-      }
-    }
-  ]
+    "Book",
+    "Member",
+    "Loan"
+  ],
+  "features": [
+    "CRUD",
+    "validation",
+    "reporting"
+  ],
+  "database": "MySQL",
+  "difficulty": "Beginner",
+  "objectives": [
+    "Implement basic REST CRUD operations",
+    "Add simple search functionality",
+    "Write unit tests for handlers"
+  ],
+  "api_pattern": "REST"
 }

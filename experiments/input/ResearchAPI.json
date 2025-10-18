@@ -1,27 +1,22 @@
 {
   "app_name": "ResearchAPI",
   "entities": [
-    {
-      "name": "Paper",
-      "fields": {
-        "id": "int",
-        "title": "string"
-      }
-    },
-    {
-      "name": "Author",
-      "fields": {
-        "id": "int",
-        "name": "string"
-      }
-    },
-    {
-      "name": "Review",
-      "fields": {
-        "id": "int",
-        "paper_id": "int",
-        "score": "int"
-      }
-    }
-  ]
+    "Paper",
+    "Author",
+    "Review"
+  ],
+  "features": [
+    "CRUD",
+    "validation",
+    "reporting"
+  ],
+  "database": "PostgreSQL",
+  "difficulty": "Advanced",
+  "objectives": [
+    "Implement secure authentication with JWT",
+    "Add transactional order processing or workflow logic",
+    "Implement complex search with filters and relations",
+    "Write integration and load tests"
+  ],
+  "api_pattern": "REST"
 }

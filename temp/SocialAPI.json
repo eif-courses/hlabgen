@@ -1,0 +1,14 @@
+{
+  "app_name": "SocialAPI",
+  "entities": ["User", "Post", "Comment", "Like", "Follow", "Notification"],
+  "features": ["CRUD", "auth", "real-time", "pagination", "feed"],
+  "database": "PostgreSQL",
+  "difficulty": "Advanced",
+  "objectives": [
+    "Implement social feed generation",
+    "Add follow/unfollow functionality",
+    "Implement notification system",
+    "Write comprehensive test suite"
+  ],
+  "api_pattern": "REST"
+}

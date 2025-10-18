@@ -1,28 +1,21 @@
 {
   "app_name": "StudentAPI",
   "entities": [
-    {
-      "name": "Student",
-      "fields": {
-        "id": "int",
-        "name": "string"
-      }
-    },
-    {
-      "name": "Course",
-      "fields": {
-        "id": "int",
-        "title": "string"
-      }
-    },
-    {
-      "name": "Grade",
-      "fields": {
-        "id": "int",
-        "student_id": "int",
-        "course_id": "int",
-        "score": "float"
-      }
-    }
-  ]
+    "Student",
+    "Course",
+    "Grade"
+  ],
+  "features": [
+    "CRUD",
+    "auth",
+    "filtering"
+  ],
+  "database": "PostgreSQL",
+  "difficulty": "Beginner",
+  "objectives": [
+    "Implement basic REST CRUD operations",
+    "Add simple search functionality",
+    "Write unit tests for handlers"
+  ],
+  "api_pattern": "REST"
 }

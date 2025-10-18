@@ -1,27 +1,22 @@
 {
   "app_name": "CourseAPI",
   "entities": [
-    {
-      "name": "Course",
-      "fields": {
-        "id": "int",
-        "title": "string"
-      }
-    },
-    {
-      "name": "Lecturer",
-      "fields": {
-        "id": "int",
-        "name": "string"
-      }
-    },
-    {
-      "name": "Enrollment",
-      "fields": {
-        "id": "int",
-        "course_id": "int",
-        "student_name": "string"
-      }
-    }
-  ]
+    "Course",
+    "Lesson",
+    "Enrollment"
+  ],
+  "features": [
+    "CRUD",
+    "transactions",
+    "payment"
+  ],
+  "database": "SQLite",
+  "difficulty": "Advanced",
+  "objectives": [
+    "Implement secure authentication with JWT",
+    "Add transactional order processing or workflow logic",
+    "Implement complex search with filters and relations",
+    "Write integration and load tests"
+  ],
+  "api_pattern": "REST"
 }

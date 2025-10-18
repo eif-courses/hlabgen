@@ -1,0 +1,14 @@
+{
+  "app_name": "TaskAPI",
+  "entities": ["Task", "Project", "User", "Team"],
+  "features": ["CRUD", "auth", "filtering", "sorting"],
+  "database": "PostgreSQL",
+  "difficulty": "Intermediate",
+  "objectives": [
+    "Implement role-based access control",
+    "Add task status filtering",
+    "Implement team collaboration features",
+    "Write handler and model tests"
+  ],
+  "api_pattern": "REST"
+}

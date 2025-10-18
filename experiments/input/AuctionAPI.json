@@ -1,28 +1,21 @@
 {
   "app_name": "AuctionAPI",
   "entities": [
-    {
-      "name": "Auction",
-      "fields": {
-        "id": "int",
-        "title": "string"
-      }
-    },
-    {
-      "name": "Bid",
-      "fields": {
-        "id": "int",
-        "auction_id": "int",
-        "user": "string",
-        "amount": "float"
-      }
-    },
-    {
-      "name": "User",
-      "fields": {
-        "id": "int",
-        "name": "string"
-      }
-    }
-  ]
+    "Auction",
+    "Bid",
+    "User"
+  ],
+  "features": [
+    "CRUD",
+    "auth",
+    "filtering"
+  ],
+  "database": "SQLite",
+  "difficulty": "Beginner",
+  "objectives": [
+    "Implement basic REST CRUD operations",
+    "Add simple search functionality",
+    "Write unit tests for handlers"
+  ],
+  "api_pattern": "REST"
 }

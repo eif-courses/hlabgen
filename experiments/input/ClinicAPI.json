@@ -1,28 +1,21 @@
 {
   "app_name": "ClinicAPI",
   "entities": [
-    {
-      "name": "Doctor",
-      "fields": {
-        "id": "int",
-        "name": "string"
-      }
-    },
-    {
-      "name": "Patient",
-      "fields": {
-        "id": "int",
-        "name": "string"
-      }
-    },
-    {
-      "name": "Appointment",
-      "fields": {
-        "id": "int",
-        "doctor_id": "int",
-        "patient_id": "int",
-        "date": "string"
-      }
-    }
-  ]
+    "Doctor",
+    "Patient",
+    "Appointment"
+  ],
+  "features": [
+    "CRUD",
+    "transactions",
+    "payment"
+  ],
+  "database": "PostgreSQL",
+  "difficulty": "Beginner",
+  "objectives": [
+    "Implement basic REST CRUD operations",
+    "Add simple search functionality",
+    "Write unit tests for handlers"
+  ],
+  "api_pattern": "REST"
 }

@@ -1,21 +1,21 @@
 {
   "app_name": "RecipeAPI",
   "entities": [
-    {
-      "name": "Recipe",
-      "fields": {
-        "id": "int",
-        "name": "string",
-        "instructions": "string"
-      }
-    },
-    {
-      "name": "Ingredient",
-      "fields": {
-        "id": "int",
-        "recipe_id": "int",
-        "name": "string"
-      }
-    }
-  ]
+    "Recipe",
+    "Ingredient",
+    "Step"
+  ],
+  "features": [
+    "CRUD",
+    "transactions",
+    "payment"
+  ],
+  "database": "PostgreSQL",
+  "difficulty": "Intermediate",
+  "objectives": [
+    "Implement authentication and role-based access",
+    "Add pagination and query filtering",
+    "Integrate tests for core endpoints"
+  ],
+  "api_pattern": "REST"
 }
