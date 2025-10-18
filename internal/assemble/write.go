@@ -20,32 +20,148 @@ type File struct {
 // ValidateAndFixTestFunctions checks for invalid test signatures and fixes them
 func ValidateAndFixTestFunctions(code string) (string, bool) {
 	fixed := false
+	originalCode := code
 
-	// Pattern 1: func TestXxx() { -> func TestXxx(t *testing.T) {
-	pattern1 := regexp.MustCompile(`func (Test\w+)\(\) {`)
-	if pattern1.MatchString(code) {
-		code = pattern1.ReplaceAllString(code, `func $1(t *testing.T) {`)
-		fixed = true
-		fmt.Println("🔧 Fixed test signature: added missing (t *testing.T) parameter")
+	// Use line-by-line approach for more reliable matching
+	lines := strings.Split(code, "\n")
+
+	for i, line := range lines {
+		trimmed := strings.TrimSpace(line)
+
+		// Skip if not a function declaration
+		if !strings.HasPrefix(trimmed, "func Test") {
+			continue
+		}
+
+		// Extract function name
+		funcNameMatch := regexp.MustCompile(`func (Test\w+)\s*\(`).FindStringSubmatch(trimmed)
+		if len(funcNameMatch) < 2 {
+			continue
+		}
+		funcName := funcNameMatch[1]
+
+		// Check if it already has correct signature
+		if strings.Contains(trimmed, "func "+funcName+"(t *testing.T)") {
+			continue // Already correct
+		}
+
+		// Fix the signature - replace everything between ( and ) with (t *testing.T)
+		oldLine := line
+
+		if strings.Contains(trimmed, "{") {
+			// Function and opening brace on same line: func TestXxx() {
+			lines[i] = regexp.MustCompile(`func `+regexp.QuoteMeta(funcName)+`\s*\([^)]*\)\s*\{`).
+				ReplaceAllString(line, `func `+funcName+`(t *testing.T) {`)
+		} else {
+			// Function and opening brace on different lines: func TestXxx()
+			lines[i] = regexp.MustCompile(`func `+regexp.QuoteMeta(funcName)+`\s*\([^)]*\)\s*$`).
+				ReplaceAllString(line, `func `+funcName+`(t *testing.T)`)
+		}
+
+		if lines[i] != oldLine {
+			fixed = true
+			fmt.Printf("🔧 Fixed test signature for %s\n", funcName)
+		}
 	}
 
-	// Pattern 2: func TestXxx(t testing.T) { -> func TestXxx(t *testing.T) {
-	pattern2 := regexp.MustCompile(`func (Test\w+)\(t testing\.T\) {`)
-	if pattern2.MatchString(code) {
-		code = pattern2.ReplaceAllString(code, `func $1(t *testing.T) {`)
+	code = strings.Join(lines, "\n")
+
+	// Fix missing commas in composite literals
+	code, commaFixed := fixMissingCommas(code)
+	if commaFixed {
 		fixed = true
-		fmt.Println("🔧 Fixed test signature: added missing pointer *")
 	}
 
-	// Pattern 3: Remove extra parameters from test functions
-	pattern3 := regexp.MustCompile(`func (Test\w+)\(t \*testing\.T[^)]+\) {`)
-	if pattern3.MatchString(code) {
-		code = pattern3.ReplaceAllString(code, `func $1(t *testing.T) {`)
-		fixed = true
-		fmt.Println("🔧 Fixed test signature: removed extra parameters")
+	// If we made any changes, ensure testing import is present
+	if code != originalCode && strings.Contains(code, "func Test") {
+		if !strings.Contains(code, `"testing"`) {
+			code = ensureTestingImport(code)
+			fixed = true
+			fmt.Println("🔧 Added missing testing import")
+		}
 	}
 
 	return code, fixed
+}
+
+// ensureTestingImport adds "testing" import if missing
+func ensureTestingImport(code string) string {
+	if strings.Contains(code, `"testing"`) {
+		return code
+	}
+
+	lines := strings.Split(code, "\n")
+	for i, line := range lines {
+		// Look for import block
+		if strings.Contains(line, "import (") {
+			// Check if testing is already in the next few lines
+			hasTestingImport := false
+			for j := i + 1; j < len(lines) && j < i+10; j++ {
+				if strings.Contains(lines[j], `"testing"`) {
+					hasTestingImport = true
+					break
+				}
+				if strings.TrimSpace(lines[j]) == ")" {
+					break
+				}
+			}
+			if !hasTestingImport {
+				// Add testing import after "import ("
+				lines = append(lines[:i+1], append([]string{"\t\"testing\""}, lines[i+1:]...)...)
+			}
+			return strings.Join(lines, "\n")
+		}
+	}
+
+	// If no import block found, add at the top after package declaration
+	for i, line := range lines {
+		if strings.HasPrefix(strings.TrimSpace(line), "package ") {
+			lines = append(lines[:i+1], append([]string{"", "import (", "\t\"testing\"", ")"}, lines[i+1:]...)...)
+			return strings.Join(lines, "\n")
+		}
+	}
+
+	return code
+}
+
+// fixMissingCommas adds missing trailing commas in struct literals
+func fixMissingCommas(code string) (string, bool) {
+	fixed := false
+
+	lines := strings.Split(code, "\n")
+	for i := 0; i < len(lines)-1; i++ {
+		currentLine := lines[i]
+		trimmed := strings.TrimSpace(currentLine)
+		nextLine := strings.TrimSpace(lines[i+1])
+
+		// Skip comments and empty lines
+		if strings.HasPrefix(trimmed, "//") || trimmed == "" {
+			continue
+		}
+
+		// Check if line contains field assignment (key: value)
+		if strings.Contains(trimmed, ":") && !strings.Contains(trimmed, "::") {
+			// Check if it doesn't already end with comma, brace, or paren
+			if !strings.HasSuffix(trimmed, ",") &&
+				!strings.HasSuffix(trimmed, "{") &&
+				!strings.HasSuffix(trimmed, "(") &&
+				!strings.HasSuffix(trimmed, "[") {
+
+				// Next line is either another field, closing brace, or end of struct
+				if nextLine == "}" || nextLine == "}," || nextLine == "})," ||
+					nextLine == "})" || strings.Contains(nextLine, ":") {
+					lines[i] = currentLine + ","
+					fixed = true
+				}
+			}
+		}
+	}
+
+	if fixed {
+		fmt.Println("🔧 Fixed missing commas in composite literal")
+	}
+
+	return strings.Join(lines, "\n"), fixed
 }
 
 // WriteMany writes multiple generated files to disk,
