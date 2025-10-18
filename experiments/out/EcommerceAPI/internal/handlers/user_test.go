@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func TestCreateUser() {
+func TestCreateUser(t *testing.T) {
 	user := models.User{
 		Username: "testuser",
 		Email:    "test@example.com",
@@ -25,7 +25,7 @@ func TestCreateUser() {
 	}
 }
 
-func TestGetUsers() {
+func TestGetUsers(t *testing.T) {
 	req := httptest.NewRequest("GET", "/users", nil)
 	w := httptest.NewRecorder()
 	handlers.GetUsers(w, req)

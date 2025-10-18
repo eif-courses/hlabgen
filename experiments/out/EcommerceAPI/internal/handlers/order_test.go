@@ -10,13 +10,11 @@ import (
 	"testing"
 )
 
-func TestCreateOrder() {
+func TestCreateOrder(t *testing.T) {
 	order := models.Order{
-		UserID: 1,
-		Products: []models.Product{
-			{ID: 1, Name: "Test Product", Price: 10.0, Stock: 100},
-		},
-		Total: 10.0,
+		UserID:   1,
+		Products: []models.Product{{ID: 1, Name: "Product", Price: 10.0, Stock: 100}},
+		Total:    10.0,
 	}
 	body, _ := json.Marshal(order)
 	req := httptest.NewRequest("POST", "/orders", bytes.NewBuffer(body))
@@ -27,7 +25,7 @@ func TestCreateOrder() {
 	}
 }
 
-func TestGetOrders() {
+func TestGetOrders(t *testing.T) {
 	req := httptest.NewRequest("GET", "/orders", nil)
 	w := httptest.NewRecorder()
 	handlers.GetOrders(w, req)

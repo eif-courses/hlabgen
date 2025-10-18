@@ -154,10 +154,13 @@ func ensureNetHTTPImport(code string) string {
 	return code
 }
 
-// fixMissingCommas adds missing trailing commas in struct literals
+// fixMissingCommas adds missing trailing commas in struct literals ONLY
 func fixMissingCommas(code string) (string, bool) {
 	fixed := false
 	lines := strings.Split(code, "\n")
+
+	inStructLiteral := false
+	structBraceCount := 0
 
 	for i := 0; i < len(lines)-1; i++ {
 		currentLine := lines[i]
@@ -169,62 +172,79 @@ func fixMissingCommas(code string) (string, bool) {
 			continue
 		}
 
-		// Already has comma
-		if strings.HasSuffix(trimmed, ",") {
+		// Detect struct literal start: = SomeType{ or := SomeType{
+		if (strings.Contains(trimmed, "= models.") ||
+			strings.Contains(trimmed, ":= models.") ||
+			strings.Contains(trimmed, "= []models.")) &&
+			strings.HasSuffix(trimmed, "{") {
+			inStructLiteral = true
+			structBraceCount = 1
 			continue
 		}
 
-		// Opening braces - don't add comma
-		if strings.HasSuffix(trimmed, "{") ||
-			strings.HasSuffix(trimmed, "(") ||
-			strings.HasSuffix(trimmed, "[") {
-			continue
-		}
+		// Track brace depth inside struct literals
+		if inStructLiteral {
+			structBraceCount += strings.Count(trimmed, "{")
+			structBraceCount -= strings.Count(trimmed, "}")
 
-		// Check if this is a closing statement that shouldn't have comma
-		if trimmed == "}" || trimmed == ")" || trimmed == "]" {
-			continue
-		}
-
-		// Check if next line is closing brace
-		if nextLineTrimmed == "}" || nextLineTrimmed == "}," ||
-			nextLineTrimmed == "})," || nextLineTrimmed == "})" {
-			// This is a field that needs a comma before closing brace
-			if strings.Contains(trimmed, ":") ||
-				strings.Contains(trimmed, "=") ||
-				(strings.Contains(trimmed, "{") && strings.Contains(trimmed, "}")) {
-				lines[i] = currentLine + ","
-				fixed = true
-				fmt.Printf("🔧 Fixed missing comma at line %d (before closing brace)\n", i+1)
+			// Exit struct literal when braces are balanced
+			if structBraceCount == 0 {
+				inStructLiteral = false
+				continue
 			}
-		}
 
-		// Check if next line is another field (contains : and is not a label)
-		if strings.Contains(nextLineTrimmed, ":") &&
-			!strings.HasPrefix(nextLineTrimmed, "//") &&
-			!strings.HasSuffix(nextLineTrimmed, ":") { // exclude labels like "default:"
-			if strings.Contains(trimmed, ":") {
-				lines[i] = currentLine + ","
-				fixed = true
-				fmt.Printf("🔧 Fixed missing comma between fields at line %d\n", i+1)
-			}
-		}
+			// Only fix commas INSIDE struct literals
+			if structBraceCount > 0 {
+				// Already has comma
+				if strings.HasSuffix(trimmed, ",") {
+					continue
+				}
 
-		// Special case: inline struct literal followed by closing brace
-		if strings.Contains(currentLine, "{") &&
-			strings.Contains(currentLine, "}") &&
-			!strings.HasSuffix(trimmed, "},") &&
-			(nextLineTrimmed == "}" || nextLineTrimmed == "},") {
-			if !strings.HasSuffix(trimmed, ",") {
-				lines[i] = currentLine + ","
-				fixed = true
-				fmt.Printf("🔧 Fixed missing comma after inline struct at line %d\n", i+1)
+				// Opening braces - don't add comma
+				if strings.HasSuffix(trimmed, "{") {
+					continue
+				}
+
+				// Check if next line is closing brace
+				if nextLineTrimmed == "}" || nextLineTrimmed == "}," ||
+					nextLineTrimmed == "})," || nextLineTrimmed == "})" {
+					// This is a field that needs a comma before closing brace
+					if strings.Contains(trimmed, ":") ||
+						(strings.Contains(trimmed, "{") && strings.Contains(trimmed, "}")) {
+						lines[i] = currentLine + ","
+						fixed = true
+						fmt.Printf("🔧 Fixed missing comma in struct literal at line %d\n", i+1)
+					}
+				}
+
+				// Check if next line is another field (contains : and is not a label)
+				if strings.Contains(nextLineTrimmed, ":") &&
+					!strings.HasPrefix(nextLineTrimmed, "//") &&
+					!strings.HasSuffix(nextLineTrimmed, ":") { // exclude labels like "default:"
+					if strings.Contains(trimmed, ":") {
+						lines[i] = currentLine + ","
+						fixed = true
+						fmt.Printf("🔧 Fixed missing comma between fields at line %d\n", i+1)
+					}
+				}
+
+				// Special case: inline struct literal followed by closing brace
+				if strings.Contains(currentLine, "{") &&
+					strings.Contains(currentLine, "}") &&
+					!strings.HasSuffix(trimmed, "},") &&
+					(nextLineTrimmed == "}" || nextLineTrimmed == "},") {
+					if !strings.HasSuffix(trimmed, ",") {
+						lines[i] = currentLine + ","
+						fixed = true
+						fmt.Printf("🔧 Fixed missing comma after inline struct at line %d\n", i+1)
+					}
+				}
 			}
 		}
 	}
 
 	if fixed {
-		fmt.Println("✅ Fixed missing commas in composite literals")
+		fmt.Println("✅ Fixed missing commas in struct literals")
 	}
 
 	return strings.Join(lines, "\n"), fixed

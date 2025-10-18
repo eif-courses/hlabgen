@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func TestCreateProduct() {
+func TestCreateProduct(t *testing.T) {
 	product := models.Product{
 		Name:  "Test Product",
 		Price: 10.0,
@@ -25,7 +25,7 @@ func TestCreateProduct() {
 	}
 }
 
-func TestGetProducts() {
+func TestGetProducts(t *testing.T) {
 	req := httptest.NewRequest("GET", "/products", nil)
 	w := httptest.NewRecorder()
 	handlers.GetProducts(w, req)
