@@ -1,0 +1,2 @@
+AppName,Mode,Timestamp,Model,BuildSuccess,TestsPass,CoveragePct,LintWarnings,MLDuration,RepairAttempts
+EcommerceAPI,hybrid,2025-10-19T01:33:03+03:00,gpt-4o-mini,false,false,0.00,0,0s,0

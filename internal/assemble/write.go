@@ -21,39 +21,29 @@ type File struct {
 func ValidateAndFixTestFunctions(code string) (string, bool) {
 	fixed := false
 	originalCode := code
-
-	// Use line-by-line approach for more reliable matching
 	lines := strings.Split(code, "\n")
 
 	for i, line := range lines {
 		trimmed := strings.TrimSpace(line)
-
-		// Skip if not a function declaration
 		if !strings.HasPrefix(trimmed, "func Test") {
 			continue
 		}
 
-		// Extract function name
 		funcNameMatch := regexp.MustCompile(`func (Test\w+)\s*\(`).FindStringSubmatch(trimmed)
 		if len(funcNameMatch) < 2 {
 			continue
 		}
 		funcName := funcNameMatch[1]
 
-		// Check if it already has correct signature
 		if strings.Contains(trimmed, "func "+funcName+"(t *testing.T)") {
-			continue // Already correct
+			continue
 		}
 
-		// Fix the signature - replace everything between ( and ) with (t *testing.T)
 		oldLine := line
-
 		if strings.Contains(trimmed, "{") {
-			// Function and opening brace on same line: func TestXxx() {
 			lines[i] = regexp.MustCompile(`func `+regexp.QuoteMeta(funcName)+`\s*\([^)]*\)\s*\{`).
 				ReplaceAllString(line, `func `+funcName+`(t *testing.T) {`)
 		} else {
-			// Function and opening brace on different lines: func TestXxx()
 			lines[i] = regexp.MustCompile(`func `+regexp.QuoteMeta(funcName)+`\s*\([^)]*\)\s*$`).
 				ReplaceAllString(line, `func `+funcName+`(t *testing.T)`)
 		}
@@ -66,13 +56,13 @@ func ValidateAndFixTestFunctions(code string) (string, bool) {
 
 	code = strings.Join(lines, "\n")
 
-	// Fix missing commas in composite literals
+	// Fix missing commas
 	code, commaFixed := fixMissingCommas(code)
 	if commaFixed {
 		fixed = true
 	}
 
-	// If we made any changes, ensure testing import is present
+	// Ensure testing import exists if we made changes
 	if code != originalCode && strings.Contains(code, "func Test") {
 		if !strings.Contains(code, `"testing"`) {
 			code = ensureTestingImport(code)
@@ -84,6 +74,69 @@ func ValidateAndFixTestFunctions(code string) (string, bool) {
 	return code, fixed
 }
 
+// fixMissingCommas adds missing trailing commas in struct literals
+func fixMissingCommas(code string) (string, bool) {
+	fixed := false
+	lines := strings.Split(code, "\n")
+
+	for i := 0; i < len(lines)-1; i++ {
+		currentLine := lines[i]
+		trimmed := strings.TrimSpace(currentLine)
+		nextLineTrimmed := strings.TrimSpace(lines[i+1])
+
+		if strings.HasPrefix(trimmed, "//") || trimmed == "" {
+			continue
+		}
+
+		if strings.HasSuffix(trimmed, ",") {
+			continue
+		}
+
+		if strings.HasSuffix(trimmed, "{") ||
+			strings.HasSuffix(trimmed, "(") ||
+			strings.HasSuffix(trimmed, "[") {
+			continue
+		}
+
+		if nextLineTrimmed == "}" || nextLineTrimmed == "}," ||
+			nextLineTrimmed == "})," || nextLineTrimmed == "})" {
+			if strings.Contains(trimmed, ":") ||
+				strings.Contains(currentLine, "{") ||
+				(len(trimmed) > 0 && !strings.HasSuffix(trimmed, "{") && !strings.HasSuffix(trimmed, "}")) {
+				lines[i] = currentLine + ","
+				fixed = true
+				fmt.Printf("🔧 Fixed missing comma at line %d (before closing brace)\n", i+1)
+			}
+		}
+
+		if strings.Contains(nextLineTrimmed, ":") &&
+			!strings.HasPrefix(nextLineTrimmed, "//") {
+			if strings.Contains(trimmed, ":") ||
+				strings.Contains(trimmed, "=") {
+				lines[i] = currentLine + ","
+				fixed = true
+				fmt.Printf("🔧 Fixed missing comma at line %d (before next field)\n", i+1)
+			}
+		}
+
+		if strings.Contains(currentLine, "{") && !strings.HasSuffix(trimmed, "{") {
+			if !strings.Contains(trimmed, "}") {
+				if nextLineTrimmed == "}" || nextLineTrimmed == "}," {
+					lines[i] = currentLine + ","
+					fixed = true
+					fmt.Printf("🔧 Fixed missing comma at line %d (inline struct)\n", i+1)
+				}
+			}
+		}
+	}
+
+	if fixed {
+		fmt.Println("✅ Fixed missing commas in composite literal")
+	}
+
+	return strings.Join(lines, "\n"), fixed
+}
+
 // ensureTestingImport adds "testing" import if missing
 func ensureTestingImport(code string) string {
 	if strings.Contains(code, `"testing"`) {
@@ -92,9 +145,7 @@ func ensureTestingImport(code string) string {
 
 	lines := strings.Split(code, "\n")
 	for i, line := range lines {
-		// Look for import block
 		if strings.Contains(line, "import (") {
-			// Check if testing is already in the next few lines
 			hasTestingImport := false
 			for j := i + 1; j < len(lines) && j < i+10; j++ {
 				if strings.Contains(lines[j], `"testing"`) {
@@ -106,14 +157,12 @@ func ensureTestingImport(code string) string {
 				}
 			}
 			if !hasTestingImport {
-				// Add testing import after "import ("
 				lines = append(lines[:i+1], append([]string{"\t\"testing\""}, lines[i+1:]...)...)
 			}
 			return strings.Join(lines, "\n")
 		}
 	}
 
-	// If no import block found, add at the top after package declaration
 	for i, line := range lines {
 		if strings.HasPrefix(strings.TrimSpace(line), "package ") {
 			lines = append(lines[:i+1], append([]string{"", "import (", "\t\"testing\"", ")"}, lines[i+1:]...)...)
@@ -122,46 +171,6 @@ func ensureTestingImport(code string) string {
 	}
 
 	return code
-}
-
-// fixMissingCommas adds missing trailing commas in struct literals
-func fixMissingCommas(code string) (string, bool) {
-	fixed := false
-
-	lines := strings.Split(code, "\n")
-	for i := 0; i < len(lines)-1; i++ {
-		currentLine := lines[i]
-		trimmed := strings.TrimSpace(currentLine)
-		nextLine := strings.TrimSpace(lines[i+1])
-
-		// Skip comments and empty lines
-		if strings.HasPrefix(trimmed, "//") || trimmed == "" {
-			continue
-		}
-
-		// Check if line contains field assignment (key: value)
-		if strings.Contains(trimmed, ":") && !strings.Contains(trimmed, "::") {
-			// Check if it doesn't already end with comma, brace, or paren
-			if !strings.HasSuffix(trimmed, ",") &&
-				!strings.HasSuffix(trimmed, "{") &&
-				!strings.HasSuffix(trimmed, "(") &&
-				!strings.HasSuffix(trimmed, "[") {
-
-				// Next line is either another field, closing brace, or end of struct
-				if nextLine == "}" || nextLine == "}," || nextLine == "})," ||
-					nextLine == "})" || strings.Contains(nextLine, ":") {
-					lines[i] = currentLine + ","
-					fixed = true
-				}
-			}
-		}
-	}
-
-	if fixed {
-		fmt.Println("🔧 Fixed missing commas in composite literal")
-	}
-
-	return strings.Join(lines, "\n"), fixed
 }
 
 // WriteMany writes multiple generated files to disk,

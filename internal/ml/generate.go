@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math/rand"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -65,16 +64,6 @@ func Generate(s Schema) ([]GenFile, GenerationMetrics, error) {
 	}
 
 	content := strings.TrimSpace(resp.Choices[0].Message.Content)
-
-	// TEST CORRUPTION SYNTHETICALLY when option = 1
-	if os.Getenv("HLABGEN_CORRUPT_TEST") == "1" {
-		rand.Seed(time.Now().UnixNano())
-		if rand.Float64() < 0.1 {
-			fmt.Println("🧪 Injected synthetic JSON corruption for repair test")
-			content = strings.Replace(content, "]", "", 1)
-		}
-	}
-	// END OF TEST
 
 	files, err := tryParseModelOutput(content)
 	if err != nil {
@@ -140,24 +129,44 @@ func Generate(s Schema) ([]GenFile, GenerationMetrics, error) {
 // --- Parsing and Repair ---
 
 func tryParseModelOutput(content string) ([]GenFile, error) {
+	originalContent := content
+
+	// Remove markdown code blocks
+	content = strings.TrimSpace(content)
 	content = strings.TrimPrefix(content, "```json")
 	content = strings.TrimPrefix(content, "```")
 	content = strings.TrimSuffix(content, "```")
 	content = strings.TrimSpace(content)
 
-	re := regexp.MustCompile(`(?s)\[\s*{.*}\s*\]`)
-	matches := re.FindString(content)
-	if matches == "" {
+	// Find JSON array boundaries
+	startIdx := strings.Index(content, "[")
+	endIdx := strings.LastIndex(content, "]")
+
+	if startIdx == -1 || endIdx == -1 || startIdx >= endIdx {
+		fmt.Println("❌ Could not find JSON array")
+		fmt.Println("First 300 chars:", originalContent[:min(300, len(originalContent))])
 		return nil, errors.New("no valid JSON array found")
 	}
 
+	// Extract JSON
+	jsonStr := content[startIdx : endIdx+1]
+
 	var files []GenFile
-	if err := json.Unmarshal([]byte(matches), &files); err != nil {
+	if err := json.Unmarshal([]byte(jsonStr), &files); err != nil {
+		fmt.Printf("❌ JSON error: %v\n", err)
 		return nil, fmt.Errorf("json parse error: %w", err)
 	}
 
+	fmt.Printf("✅ Parsed %d files\n", len(files))
 	return files, nil
 }
+
+//func min(a, b int) int {
+//	if a < b {
+//		return a
+//	}
+//	return b
+//}
 
 func repairModelOutput(client *openai.Client, ctx context.Context, broken string) (string, error) {
 	repairPrompt := fmt.Sprintf(`The following JSON output is invalid. 
