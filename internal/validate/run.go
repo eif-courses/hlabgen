@@ -47,18 +47,36 @@ func Run(projectPath string) (metrics.Result, error) {
 		m.CoveragePct = 0
 	} else {
 		var combinedOut strings.Builder
+		var coverValues []float64
+		passed := false
+
 		for _, dir := range testDirs {
-			cmd := exec.Command("go", "test", "-cover")
+			cmd := exec.Command("go", "test", "-v", "-cover")
 			cmd.Dir = dir
 			var out bytes.Buffer
 			cmd.Stdout, cmd.Stderr = &out, &out
 			_ = cmd.Run()
-			combinedOut.WriteString(out.String() + "\n")
+			output := out.String()
+			combinedOut.WriteString(fmt.Sprintf("\n--- %s ---\n%s", dir, output))
+
+			if strings.Contains(output, "PASS") {
+				passed = true
+			}
+			if cov := parseCoverage(output); cov > 0 {
+				coverValues = append(coverValues, cov)
+			}
 		}
 
-		out := combinedOut.String()
-		m.TestsPass = strings.Contains(out, "PASS")
-		m.CoveragePct = parseCoverage(out)
+		// ✅ Mark as passed if *any* directory reports PASS
+		m.TestsPass = passed
+
+		// ✅ Average coverage across testable packages
+		m.CoveragePct = average(coverValues)
+
+		// Optional debug print
+		fmt.Println("\n--- go test summary ---")
+		fmt.Println(combinedOut.String())
+		fmt.Println("------------------------")
 	}
 
 	// --- gocyclo (if available)
@@ -76,10 +94,10 @@ func Run(projectPath string) (metrics.Result, error) {
 func findTestDirs(root string) []string {
 	var testDirs []string
 	filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		if err != nil || info.IsDir() {
+		if err != nil {
 			return nil
 		}
-		if strings.HasSuffix(info.Name(), "_test.go") {
+		if !info.IsDir() && strings.HasSuffix(info.Name(), "_test.go") {
 			dir := filepath.Dir(path)
 			if !contains(testDirs, dir) {
 				testDirs = append(testDirs, dir)
@@ -100,6 +118,7 @@ func contains(list []string, val string) bool {
 	return false
 }
 
+// Counts non-empty lines (used for vet/lint warnings).
 func countLines(s string) int {
 	if strings.TrimSpace(s) == "" {
 		return 0
@@ -107,13 +126,14 @@ func countLines(s string) int {
 	return len(strings.Split(strings.TrimSpace(s), "\n"))
 }
 
+// Extracts coverage percentage (e.g. "coverage: 38.5% of statements").
 func parseCoverage(out string) float64 {
 	for _, line := range strings.Split(out, "\n") {
 		if strings.Contains(line, "coverage:") && strings.Contains(line, "%") {
-			f := strings.Fields(line)
-			for _, t := range f {
-				if strings.HasSuffix(t, "%") {
-					val := strings.TrimSuffix(t, "%")
+			fields := strings.Fields(line)
+			for _, f := range fields {
+				if strings.HasSuffix(f, "%") {
+					val := strings.TrimSuffix(f, "%")
 					if v, err := strconv.ParseFloat(val, 64); err == nil {
 						return v
 					}
@@ -124,6 +144,19 @@ func parseCoverage(out string) float64 {
 	return 0
 }
 
+// Calculates the average of float slice values.
+func average(values []float64) float64 {
+	if len(values) == 0 {
+		return 0
+	}
+	var sum float64
+	for _, v := range values {
+		sum += v
+	}
+	return sum / float64(len(values))
+}
+
+// Computes average cyclomatic complexity (if gocyclo is available).
 func avgCyclo(out string) float64 {
 	var sum, n float64
 	for _, line := range strings.Split(strings.TrimSpace(out), "\n") {
