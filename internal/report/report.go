@@ -7,10 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
-// ExperimentResult represents combined metrics for one experiment.
 type ExperimentResult struct {
 	AppName         string  `json:"app_name"`
 	Mode            string  `json:"mode"`
@@ -20,23 +18,8 @@ type ExperimentResult struct {
 	ErrorMessage    string  `json:"error_message"`
 	DurationSeconds float64 `json:"duration_seconds"`
 	RuleFixes       int     `json:"rule_fixes"`
-	RelaxedMode     bool    `json:"relaxed_mode"`
+	Coverage        float64 `json:"coverage"` // ADD THIS
 }
-
-// GenerationMetrics mirrors your ml.GenerationMetrics struct.
-type GenerationMetrics struct {
-	StartTime      time.Time `json:"start_time"`
-	EndTime        time.Time `json:"end_time"`
-	Duration       string    `json:"duration"`
-	PrimarySuccess bool      `json:"primary_success"`
-	RepairAttempts int       `json:"repair_attempts"`
-	FinalSuccess   bool      `json:"final_success"`
-	ErrorMessage   string    `json:"error_message"`
-	RuleFixes      int       `json:"rule_fixes"`
-}
-
-// Global cache for CSV data
-var csvModeCache map[string]string
 
 // LoadMetricsFromJSON loads a single experiment's metrics JSON.
 func LoadMetricsFromJSON(path string) (ExperimentResult, error) {
@@ -45,39 +28,78 @@ func LoadMetricsFromJSON(path string) (ExperimentResult, error) {
 		return ExperimentResult{}, err
 	}
 
-	var m GenerationMetrics
+	var m map[string]interface{}
 	if err := json.Unmarshal(data, &m); err != nil {
 		return ExperimentResult{}, err
 	}
 
-	// Convert duration to seconds
-	duration, _ := time.ParseDuration(m.Duration)
-
 	app := filepath.Base(filepath.Dir(path))
-
-	// ✅ Try to read mode from experiment_info.txt first, then fall back to CSV
 	mode := readModeFromExperimentInfo(filepath.Dir(path), app)
+
+	// Extract values from gen_metrics
+	duration := 0.0
+	if d, ok := m["Duration"].(float64); ok {
+		duration = d / 1e9 // Convert nanoseconds to seconds
+	}
+
+	repairs := 0
+	if r, ok := m["RepairAttempts"].(float64); ok {
+		repairs = int(r)
+	}
+
+	fixes := 0
+	if f, ok := m["RuleFixes"].(float64); ok {
+		fixes = int(f)
+	}
+
+	primarySuccess := false
+	if p, ok := m["PrimarySuccess"].(bool); ok {
+		primarySuccess = p
+	}
+
+	finalSuccess := false
+	if f, ok := m["FinalSuccess"].(bool); ok {
+		finalSuccess = f
+	}
+
+	errorMsg := ""
+	if e, ok := m["ErrorMessage"].(string); ok {
+		errorMsg = e
+	}
+
+	// Try to load metrics file for coverage
+	appDir := filepath.Dir(path)
+	coverage := 0.0
+	metricsPath := filepath.Join(appDir, "metrics.json")
+	if data, err := os.ReadFile(metricsPath); err == nil {
+		var metrics map[string]interface{}
+		if err := json.Unmarshal(data, &metrics); err == nil {
+			if cov, ok := metrics["coverage_pct"].(float64); ok {
+				coverage = cov
+			}
+		}
+	}
 
 	return ExperimentResult{
 		AppName:         app,
 		Mode:            mode,
-		PrimarySuccess:  m.PrimarySuccess,
-		RepairAttempts:  m.RepairAttempts,
-		FinalSuccess:    m.FinalSuccess,
-		ErrorMessage:    m.ErrorMessage,
-		DurationSeconds: duration.Seconds(),
-		RuleFixes:       m.RuleFixes,
-		RelaxedMode:     false,
+		PrimarySuccess:  primarySuccess,
+		RepairAttempts:  repairs,
+		FinalSuccess:    finalSuccess,
+		ErrorMessage:    errorMsg,
+		DurationSeconds: duration,
+		RuleFixes:       fixes,
+		Coverage:        coverage, // ADD THIS FIELD
 	}, nil
 }
 
-// ✅ Helper: Read Mode from experiment_info.txt or fall back to CSV
+var csvModeCache map[string]string
+
 func readModeFromExperimentInfo(metricsDir string, appName string) string {
-	// Try locations where experiment_info.txt might be:
 	possiblePaths := []string{
-		filepath.Join(metricsDir, "experiment_info.txt"),                    // Same directory as gen_metrics.json
-		filepath.Join("experiments", "out", appName, "experiment_info.txt"), // experiments/out/<AppName>/
-		filepath.Join("experiments", appName, "experiment_info.txt"),        // experiments/<AppName>/
+		filepath.Join(metricsDir, "experiment_info.txt"),
+		filepath.Join("experiments", "out", appName, "experiment_info.txt"),
+		filepath.Join("experiments", appName, "experiment_info.txt"),
 	}
 
 	for _, infoPath := range possiblePaths {
@@ -100,13 +122,10 @@ func readModeFromExperimentInfo(metricsDir string, appName string) string {
 		}
 	}
 
-	// ✅ FALLBACK: Read from summary.csv if experiment_info.txt not found
 	return readModeFromSummaryCSV(appName)
 }
 
-// ✅ NEW: Read mode from summary.csv
 func readModeFromSummaryCSV(appName string) string {
-	// Initialize cache if not already done
 	if csvModeCache == nil {
 		csvModeCache = loadSummaryCSVCache()
 	}
@@ -118,7 +137,6 @@ func readModeFromSummaryCSV(appName string) string {
 	return "unknown"
 }
 
-// ✅ NEW: Load summary.csv into memory cache
 func loadSummaryCSVCache() map[string]string {
 	cache := make(map[string]string)
 
@@ -130,8 +148,7 @@ func loadSummaryCSVCache() map[string]string {
 	defer file.Close()
 
 	reader := csv.NewReader(file)
-	// Skip header
-	reader.Read()
+	reader.Read() // Skip header
 
 	for {
 		record, err := reader.Read()
@@ -139,7 +156,6 @@ func loadSummaryCSVCache() map[string]string {
 			break
 		}
 
-		// CSV format: AppName, Mode, Timestamp, Model, ...
 		if len(record) >= 2 {
 			appName := strings.TrimSpace(record[0])
 			mode := strings.TrimSpace(record[1])
@@ -152,77 +168,45 @@ func loadSummaryCSVCache() map[string]string {
 	return cache
 }
 
-// CollectAllExperiments scans experiments/* for metrics files.
 func CollectAllExperiments(baseDir string) ([]ExperimentResult, error) {
 	var results []ExperimentResult
 
-	// Look in experiments/out/ directory
 	outDir := filepath.Join(baseDir, "out")
 	entries, err := os.ReadDir(outDir)
 	if err != nil {
-		// Fallback to baseDir itself
-		entries, err = os.ReadDir(baseDir)
-		if err != nil {
-			return nil, err
-		}
+		return nil, err
 	}
 
 	for _, e := range entries {
 		if !e.IsDir() {
 			continue
 		}
-		appDir := filepath.Join(outDir, e.Name())
 
-		mainPath := filepath.Join(appDir, "gen_metrics.json")
-		if _, err := os.Stat(mainPath); err == nil {
-			res, err := LoadMetricsFromJSON(mainPath)
-			if err == nil {
-				results = append(results, res)
-			}
+		appDir := filepath.Join(outDir, e.Name())
+		files, err := os.ReadDir(appDir)
+		if err != nil {
+			continue
 		}
 
-		relaxedPath := filepath.Join(appDir, "gen_metrics_relaxed.json")
-		if _, err := os.Stat(relaxedPath); err == nil {
-			res, err := LoadMetricsFromJSON(relaxedPath)
-			if err == nil {
-				results = append(results, res)
+		for _, f := range files {
+			if strings.HasPrefix(f.Name(), "gen_metrics") && strings.HasSuffix(f.Name(), ".json") {
+				filePath := filepath.Join(appDir, f.Name())
+				res, err := LoadMetricsFromJSON(filePath)
+				if err == nil {
+					results = append(results, res)
+					break
+				}
 			}
 		}
 	}
 
-	// If no results from out/ directory, try root experiments/ directory
 	if len(results) == 0 {
-		entries, err := os.ReadDir(baseDir)
-		if err == nil {
-			for _, e := range entries {
-				if !e.IsDir() {
-					continue
-				}
-				appDir := filepath.Join(baseDir, e.Name())
-
-				mainPath := filepath.Join(appDir, "gen_metrics.json")
-				if _, err := os.Stat(mainPath); err == nil {
-					res, err := LoadMetricsFromJSON(mainPath)
-					if err == nil {
-						results = append(results, res)
-					}
-				}
-
-				relaxedPath := filepath.Join(appDir, "gen_metrics_relaxed.json")
-				if _, err := os.Stat(relaxedPath); err == nil {
-					res, err := LoadMetricsFromJSON(relaxedPath)
-					if err == nil {
-						results = append(results, res)
-					}
-				}
-			}
-		}
+		return nil, fmt.Errorf("no gen_metrics files found")
 	}
 
 	return results, nil
 }
 
-// GenerateMarkdownReport writes a summary Markdown table.
 func GenerateMarkdownReport(results []ExperimentResult, output string) error {
 	header := `# Experimental Evaluation Results
 
@@ -256,7 +240,6 @@ func GenerateMarkdownReport(results []ExperimentResult, output string) error {
 	return nil
 }
 
-// GenerateSummaryJSONReport scans all experiments and produces results.md.
 func GenerateSummaryJSONReport() error {
 	baseDir := "experiments"
 	output := filepath.Join(baseDir, "logs", "results.md")
@@ -267,13 +250,12 @@ func GenerateSummaryJSONReport() error {
 	}
 
 	if len(results) == 0 {
-		return fmt.Errorf("no gen_metrics.json files found under %s", baseDir)
+		return fmt.Errorf("no gen_metrics.json files found")
 	}
 
 	return GenerateMarkdownReport(results, output)
 }
 
-// shorten truncates error messages for cleaner tables.
 func shorten(s string, max int) string {
 	if len(s) <= max {
 		return s

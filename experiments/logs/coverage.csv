@@ -1,7 +1,0 @@
-AppName,BuildSuccess,TestsPass,CoveragePct,MLDurationSec,RepairAttempts
-LibraryAPI,true,true,48.1,0.00,0
-LibraryAPI,true,true,35.6,0.00,0
-LibraryAPI,true,true,35.6,0.00,0
-LibraryAPI_rules,true,true,48.1,0.00,0
-LibraryAPI_ml,true,true,37.5,0.00,0
-LibraryAPI_hybrid,true,true,35.6,0.00,0

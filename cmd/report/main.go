@@ -478,8 +478,9 @@ func avgCoverageFromResults(results []report.ExperimentResult, buildMetrics map[
 	sum := 0.0
 	count := 0
 	for _, r := range results {
-		if bm, ok := buildMetrics[r.AppName]; ok {
-			sum += bm.CoveragePct
+		// Use Coverage field directly from ExperimentResult
+		if r.Coverage > 0 {
+			sum += r.Coverage
 			count++
 		}
 	}
