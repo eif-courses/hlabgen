@@ -1,23 +1,117 @@
 
 🚀 Starting generation for app: CarRentalAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/19 12:27:25 🧠 Starting ML-based code generation...
-2025/10/19 12:27:25 ⚠️  ML generation failed once: error, status code: 503, status: 503 Service Unavailable, message: No available capacity was found for the model
-2025/10/19 12:27:25 🔁 Retrying with relaxed mode...
-2025/10/19 12:27:25 🪄 Using relaxed ML generation mode (cleaning JSON output)...
-2025/10/19 12:27:26 🧹 Cleaning malformed JSON output after error: error, status code: 503, status: 503 Service Unavailable, message: No available capacity was found for the model
-2025/10/19 12:27:26 🔁 Retrying ML generation in relaxed mode (second API call)...
-2025/10/19 12:27:28 ❌ Relaxed ML generation still failed: error, status code: 503, status: 503 Service Unavailable, message: No available capacity was found for the model
-🧾 Saved ML metrics → experiments/CarRentalAPI/gen_metrics_relaxed.json
-2025/10/19 12:27:28 ❌ ML generation failed completely — falling back to rule-based only: error, status code: 503, status: 503 Service Unavailable, message: No available capacity was found for the model
-⚠️  No test files detected — skipping tests.
-✅ Validation completed in 0.32s
+2025/10/19 13:00:52 🧠 Starting ML-based code generation...
+🌍 Using custom endpoint: https://api.openai.com/v1
+🤖 Trying model: gpt-3.5-turbo
+⏱️  Model call took 13.851097177s (model: gpt-3.5-turbo, attempt: 1)
+✅ Parsed 12 files
+
+📊 Generation Summary:
+  • Duration: 13.851453139s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+✅ CarRentalAPI generation completed successfully
+🧾 Saved ML metrics → experiments/CarRentalAPI/gen_metrics.json
+📝 Processing: internal/models/car.go
+✅ Written: experiments/out/CarRentalAPI/internal/models/car.go
+📝 Processing: internal/models/customer.go
+✅ Written: experiments/out/CarRentalAPI/internal/models/customer.go
+📝 Processing: internal/models/rental.go
+✅ Written: experiments/out/CarRentalAPI/internal/models/rental.go
+📝 Processing: internal/handlers/car.go
+🔧 Fixed handler signature for CreateCar
+✅ Written: experiments/out/CarRentalAPI/internal/handlers/car.go
+📝 Processing: internal/handlers/customer.go
+🔧 Fixed handler signature for CreateCustomer
+✅ Written: experiments/out/CarRentalAPI/internal/handlers/customer.go
+📝 Processing: internal/handlers/rental.go
+🔧 Fixed handler signature for CreateRental
+✅ Written: experiments/out/CarRentalAPI/internal/handlers/rental.go
+📝 Processing: internal/handlers/car_test.go
+🔧 Fixed test signature for TestCreateCar
+✅ Auto-fixed test signatures in internal/handlers/car_test.go
+✅ Written: experiments/out/CarRentalAPI/internal/handlers/car_test.go
+📝 Processing: internal/handlers/customer_test.go
+🔧 Fixed test signature for TestCreateCustomer
+✅ Auto-fixed test signatures in internal/handlers/customer_test.go
+✅ Written: experiments/out/CarRentalAPI/internal/handlers/customer_test.go
+📝 Processing: internal/handlers/rental_test.go
+🔧 Fixed test signature for TestCreateRental
+✅ Auto-fixed test signatures in internal/handlers/rental_test.go
+✅ Written: experiments/out/CarRentalAPI/internal/handlers/rental_test.go
+📝 Processing: internal/routes/routes.go
+🔧 Fixed Register function parameter
+✅ Written: experiments/out/CarRentalAPI/internal/routes/routes.go
+📝 Processing: cmd/main.go
+✅ Written: experiments/out/CarRentalAPI/cmd/main.go
+📝 Processing: tasks.md
+⚠️  Syntax validation failed for tasks.md: temp.go:1:1: illegal character U+0023 '#'
+🔧 Attempting additional fixes...
+❌ Could not auto-fix syntax errors in tasks.md
+✅ Written: experiments/out/CarRentalAPI/tasks.md
+
+🔧 Total rule-based fixes applied: 25
+
+🔧 Running auto-fix on generated files...
+
+🔧 Auto-fixing all files in: experiments/out/CarRentalAPI
+
+📝 Fixing test function signatures...
+  ✅ Fixed test signatures in car_test.go
+  ✅ Fixed test signatures in customer_test.go
+  ✅ Fixed test signatures in rental_test.go
+
+📝 Fixing handler function signatures...
+
+📝 Fixing routes Register function...
+
+📝 Fixing missing commas in struct literals...
+
+📝 Ensuring test file imports...
+
+✅ Applied 3 fixes total!
+✅ Auto-fix completed successfully
+
+🔍 Validating Go syntax...
+✅ All generated files have valid Go syntax
+2025/10/19 13:01:06 ✅ Generated 3 test file(s)
+
+🔧 Fixing import paths...
+2025/10/19 13:01:06 🔧 Detected module name: CarRentalAPI — fixing imports...
+2025/10/19 13:01:06 ✅ No import fixes needed
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+
+🔍 Final syntax validation after fixes...
+✅ All syntax errors resolved
+✅ ML generation completed (13.85s)
+📁 Saved per-package coverage → experiments/out/CarRentalAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/CarRentalAPI/internal/handlers ---
+=== RUN   TestCreateCar
+--- PASS: TestCreateCar (0.00s)
+=== RUN   TestCreateCustomer
+--- PASS: TestCreateCustomer (0.00s)
+=== RUN   TestCreateRental
+--- PASS: TestCreateRental (0.00s)
+PASS
+coverage: 60.0% of statements
+ok  	CarRentalAPI/internal/handlers	0.003s
+
+------------------------
+✅ Validation completed in 0.80s
 
 📊 Summary for CarRentalAPI:
   • BuildSuccess = true
   • LintWarnings = 0
-  • TestsPass    = false
-  • Coverage     = 0.0%
+  • TestsPass    = true
+  • Coverage     = 60.0%
   • ML Duration  = 0s (repair 0)
   • Rule Fixes   = 0
 🧾 Appended 3 experiments into experiments/logs/summary.csv

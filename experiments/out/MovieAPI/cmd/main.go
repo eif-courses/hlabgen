@@ -1,4 +1,3 @@
-// Auto-generated scaffold for MovieAPI (2025-10-19 12:27:58)
 package main
 
 import (

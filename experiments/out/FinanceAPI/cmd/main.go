@@ -1,4 +1,3 @@
-// Auto-generated scaffold for FinanceAPI (2025-10-19 12:27:37)
 package main
 
 import (

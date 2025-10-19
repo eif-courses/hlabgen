@@ -1,10 +1,10 @@
 App: AuctionAPI
 Mode: hybrid
-Timestamp: 2025-10-19T12:27:21+03:00
+Timestamp: 2025-10-19T13:00:21+03:00
 OpenAI Model: gpt-4o-mini
-BuildSuccess: true
-TestsPass: false
-Coverage: 0.0%
+BuildSuccess: false
+TestsPass: true
+Coverage: 60.0%
 MLDuration: 0s
 RepairAttempts: 0
 RuleFixes: 0

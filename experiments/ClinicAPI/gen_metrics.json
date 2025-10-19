@@ -1,11 +1,11 @@
 {
   "app_name": "ClinicAPI",
-  "duration_sec": 32.783300011,
-  "end_time": "2025-10-19T12:18:04+03:00",
+  "duration_sec": 15.21702009,
+  "end_time": "2025-10-19T13:01:22+03:00",
   "error_message": "",
   "final_success": true,
   "primary_success": true,
   "repair_attempts": 0,
   "rule_fixes": 0,
-  "start_time": "2025-10-19T12:17:31+03:00"
+  "start_time": "2025-10-19T13:01:07+03:00"
 }

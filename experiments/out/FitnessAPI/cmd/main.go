@@ -1,4 +1,3 @@
-// Auto-generated scaffold for FitnessAPI (2025-10-19 12:27:40)
 package main
 
 import (

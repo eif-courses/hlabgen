@@ -1,4 +1,3 @@
-// Auto-generated scaffold for HotelAPI (2025-10-19 12:27:48)
 package main
 
 import (

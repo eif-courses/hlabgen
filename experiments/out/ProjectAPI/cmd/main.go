@@ -1,4 +1,3 @@
-// Auto-generated scaffold for ProjectAPI (2025-10-19 12:28:06)
 package main
 
 import (

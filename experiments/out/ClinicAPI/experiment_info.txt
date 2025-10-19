@@ -1,10 +1,10 @@
 App: ClinicAPI
 Mode: hybrid
-Timestamp: 2025-10-19T12:27:31+03:00
+Timestamp: 2025-10-19T13:01:23+03:00
 OpenAI Model: gpt-4o-mini
 BuildSuccess: true
-TestsPass: false
-Coverage: 0.0%
+TestsPass: true
+Coverage: 53.3%
 MLDuration: 0s
 RepairAttempts: 0
 RuleFixes: 0

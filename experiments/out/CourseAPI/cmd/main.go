@@ -1,4 +1,3 @@
-// Auto-generated scaffold for CourseAPI (2025-10-19 12:27:31)
 package main
 
 import (

@@ -1,4 +1,3 @@
-// Auto-generated scaffold for ShopAPI (2025-10-19 12:28:07)
 package main
 
 import (

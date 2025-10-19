@@ -1,11 +1,11 @@
 {
   "app_name": "EcommerceAPI",
-  "duration_sec": 80.935314498,
-  "end_time": "2025-10-19T12:19:55+03:00",
+  "duration_sec": 29.500334363,
+  "end_time": "2025-10-19T13:02:01+03:00",
   "error_message": "",
   "final_success": true,
-  "primary_success": false,
-  "repair_attempts": 1,
+  "primary_success": true,
+  "repair_attempts": 0,
   "rule_fixes": 0,
-  "start_time": "2025-10-19T12:18:34+03:00"
+  "start_time": "2025-10-19T13:01:31+03:00"
 }

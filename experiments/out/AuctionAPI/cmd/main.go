@@ -1,4 +1,3 @@
-// Auto-generated scaffold for AuctionAPI (2025-10-19 12:27:06)
 package main
 
 import (

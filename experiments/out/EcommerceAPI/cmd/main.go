@@ -1,4 +1,3 @@
-// Auto-generated scaffold for EcommerceAPI (2025-10-19 12:27:33)
 package main
 
 import (

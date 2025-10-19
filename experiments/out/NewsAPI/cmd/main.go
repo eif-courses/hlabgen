@@ -1,4 +1,3 @@
-// Auto-generated scaffold for NewsAPI (2025-10-19 12:28:03)
 package main
 
 import (

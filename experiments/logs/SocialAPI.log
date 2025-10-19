@@ -1,4 +1,118 @@
 
 🚀 Starting generation for app: SocialAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/19 12:28:07 🧠 Starting ML-based code generation...
+2025/10/19 13:06:28 🧠 Starting ML-based code generation...
+🌍 Using custom endpoint: https://api.openai.com/v1
+🤖 Trying model: gpt-3.5-turbo
+⏱️  Model call took 16.306967743s (model: gpt-3.5-turbo, attempt: 1)
+✅ Parsed 11 files
+
+📊 Generation Summary:
+  • Duration: 16.307247264s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+✅ SocialAPI generation completed successfully
+🧾 Saved ML metrics → experiments/SocialAPI/gen_metrics.json
+📝 Processing: internal/models/user.go
+✅ Written: experiments/out/SocialAPI/internal/models/user.go
+📝 Processing: internal/models/post.go
+✅ Written: experiments/out/SocialAPI/internal/models/post.go
+📝 Processing: internal/models/comment.go
+✅ Written: experiments/out/SocialAPI/internal/models/comment.go
+📝 Processing: internal/handlers/user.go
+🔧 Fixed handler signature for CreateUser
+✅ Written: experiments/out/SocialAPI/internal/handlers/user.go
+📝 Processing: internal/handlers/post.go
+🔧 Fixed handler signature for CreatePost
+✅ Written: experiments/out/SocialAPI/internal/handlers/post.go
+📝 Processing: internal/handlers/comment.go
+🔧 Fixed handler signature for CreateComment
+✅ Written: experiments/out/SocialAPI/internal/handlers/comment.go
+📝 Processing: internal/handlers/user_test.go
+🔧 Fixed test signature for TestCreateUser
+✅ Auto-fixed test signatures in internal/handlers/user_test.go
+✅ Written: experiments/out/SocialAPI/internal/handlers/user_test.go
+📝 Processing: internal/handlers/post_test.go
+🔧 Fixed test signature for TestCreatePost
+✅ Auto-fixed test signatures in internal/handlers/post_test.go
+✅ Written: experiments/out/SocialAPI/internal/handlers/post_test.go
+📝 Processing: internal/handlers/comment_test.go
+🔧 Fixed test signature for TestCreateComment
+✅ Auto-fixed test signatures in internal/handlers/comment_test.go
+✅ Written: experiments/out/SocialAPI/internal/handlers/comment_test.go
+📝 Processing: internal/routes/routes.go
+🔧 Fixed Register function parameter
+✅ Written: experiments/out/SocialAPI/internal/routes/routes.go
+📝 Processing: cmd/main.go
+✅ Written: experiments/out/SocialAPI/cmd/main.go
+
+🔧 Total rule-based fixes applied: 24
+
+🔧 Running auto-fix on generated files...
+
+🔧 Auto-fixing all files in: experiments/out/SocialAPI
+
+📝 Fixing test function signatures...
+  ✅ Fixed test signatures in comment_test.go
+  ✅ Fixed test signatures in post_test.go
+  ✅ Fixed test signatures in user_test.go
+
+📝 Fixing handler function signatures...
+
+📝 Fixing routes Register function...
+
+📝 Fixing missing commas in struct literals...
+
+📝 Ensuring test file imports...
+
+✅ Applied 3 fixes total!
+✅ Auto-fix completed successfully
+
+🔍 Validating Go syntax...
+✅ All generated files have valid Go syntax
+2025/10/19 13:06:44 ✅ Generated 3 test file(s)
+
+🔧 Fixing import paths...
+2025/10/19 13:06:44 🔧 Detected module name: SocialAPI — fixing imports...
+2025/10/19 13:06:44 ✅ No import fixes needed
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+
+🔍 Final syntax validation after fixes...
+✅ All syntax errors resolved
+✅ ML generation completed (16.31s)
+📁 Saved per-package coverage → experiments/out/SocialAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/SocialAPI/internal/handlers ---
+=== RUN   TestCreateComment
+--- PASS: TestCreateComment (0.00s)
+=== RUN   TestCreatePost
+--- PASS: TestCreatePost (0.00s)
+=== RUN   TestCreateUser
+--- PASS: TestCreateUser (0.00s)
+PASS
+coverage: 60.0% of statements
+ok  	SocialAPI/internal/handlers	0.002s
+
+------------------------
+✅ Validation completed in 0.69s
+
+📊 Summary for SocialAPI:
+  • BuildSuccess = true
+  • LintWarnings = 0
+  • TestsPass    = true
+  • Coverage     = 60.0%
+  • ML Duration  = 0s (repair 0)
+  • Rule Fixes   = 0
+🧾 Appended 23 experiments into experiments/logs/summary.csv
+
+🧾 Generating Markdown summary from JSON metrics...
+📊 Markdown results saved → experiments/logs/results.md
+✅ Summary successfully written to experiments/logs/results.md
+
+✅ Experiment complete.

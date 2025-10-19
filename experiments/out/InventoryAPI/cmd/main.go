@@ -1,4 +1,3 @@
-// Auto-generated scaffold for InventoryAPI (2025-10-19 12:27:53)
 package main
 
 import (

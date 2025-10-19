@@ -1,7 +1,139 @@
 
 🚀 Starting generation for app: RecipeAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/19 12:28:06 🧠 Starting ML-based code generation...
-2025/10/19 12:28:06 ⚠️  ML generation failed once: error, status code: 503, status: 503 Service Unavailable, message: No available capacity was found for the model
-2025/10/19 12:28:06 🔁 Retrying with relaxed mode...
-2025/10/19 12:28:06 🪄 Using relaxed ML generation mode (cleaning JSON output)...
+2025/10/19 13:05:26 🧠 Starting ML-based code generation...
+🌍 Using custom endpoint: https://api.openai.com/v1
+🤖 Trying model: gpt-3.5-turbo
+⏱️  Model call took 16.43164113s (model: gpt-3.5-turbo, attempt: 1)
+✅ Parsed 11 files
+
+📊 Generation Summary:
+  • Duration: 16.432053365s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+✅ RecipeAPI generation completed successfully
+🧾 Saved ML metrics → experiments/RecipeAPI/gen_metrics.json
+📝 Processing: internal/models/recipe.go
+✅ Written: experiments/out/RecipeAPI/internal/models/recipe.go
+📝 Processing: internal/models/ingredient.go
+✅ Written: experiments/out/RecipeAPI/internal/models/ingredient.go
+📝 Processing: internal/models/step.go
+✅ Written: experiments/out/RecipeAPI/internal/models/step.go
+📝 Processing: internal/handlers/recipe.go
+🔧 Fixed handler signature for CreateRecipe
+🔧 Fixed handler signature for GetRecipes
+🔧 Fixed handler signature for GetRecipe
+🔧 Fixed handler signature for UpdateRecipe
+🔧 Fixed handler signature for DeleteRecipe
+✅ Written: experiments/out/RecipeAPI/internal/handlers/recipe.go
+📝 Processing: internal/handlers/ingredient.go
+🔧 Fixed handler signature for CreateIngredient
+🔧 Fixed handler signature for GetIngredients
+🔧 Fixed handler signature for GetIngredient
+🔧 Fixed handler signature for UpdateIngredient
+🔧 Fixed handler signature for DeleteIngredient
+✅ Written: experiments/out/RecipeAPI/internal/handlers/ingredient.go
+📝 Processing: internal/handlers/step.go
+🔧 Fixed handler signature for CreateStep
+🔧 Fixed handler signature for GetSteps
+🔧 Fixed handler signature for GetStep
+🔧 Fixed handler signature for UpdateStep
+🔧 Fixed handler signature for DeleteStep
+✅ Written: experiments/out/RecipeAPI/internal/handlers/step.go
+📝 Processing: internal/handlers/recipe_test.go
+🔧 Fixed test signature for TestCreateRecipe
+🔧 Fixed test signature for TestGetRecipes
+✅ Auto-fixed test signatures in internal/handlers/recipe_test.go
+✅ Written: experiments/out/RecipeAPI/internal/handlers/recipe_test.go
+📝 Processing: internal/handlers/ingredient_test.go
+🔧 Fixed test signature for TestCreateIngredient
+🔧 Fixed test signature for TestGetIngredients
+✅ Auto-fixed test signatures in internal/handlers/ingredient_test.go
+✅ Written: experiments/out/RecipeAPI/internal/handlers/ingredient_test.go
+📝 Processing: internal/handlers/step_test.go
+🔧 Fixed test signature for TestCreateStep
+🔧 Fixed test signature for TestGetSteps
+✅ Auto-fixed test signatures in internal/handlers/step_test.go
+✅ Written: experiments/out/RecipeAPI/internal/handlers/step_test.go
+📝 Processing: internal/routes/routes.go
+🔧 Fixed Register function parameter
+✅ Written: experiments/out/RecipeAPI/internal/routes/routes.go
+📝 Processing: cmd/main.go
+✅ Written: experiments/out/RecipeAPI/cmd/main.go
+
+🔧 Total rule-based fixes applied: 24
+
+🔧 Running auto-fix on generated files...
+
+🔧 Auto-fixing all files in: experiments/out/RecipeAPI
+
+📝 Fixing test function signatures...
+  ✅ Fixed test signatures in ingredient_test.go
+  ✅ Fixed test signatures in recipe_test.go
+  ✅ Fixed test signatures in step_test.go
+
+📝 Fixing handler function signatures...
+
+📝 Fixing routes Register function...
+
+📝 Fixing missing commas in struct literals...
+
+📝 Ensuring test file imports...
+
+✅ Applied 3 fixes total!
+✅ Auto-fix completed successfully
+
+🔍 Validating Go syntax...
+✅ All generated files have valid Go syntax
+2025/10/19 13:05:43 ✅ Generated 3 test file(s)
+
+🔧 Fixing import paths...
+2025/10/19 13:05:43 🔧 Detected module name: RecipeAPI — fixing imports...
+2025/10/19 13:05:43 ✅ No import fixes needed
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+
+🔍 Final syntax validation after fixes...
+✅ All syntax errors resolved
+✅ ML generation completed (16.43s)
+📁 Saved per-package coverage → experiments/out/RecipeAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/RecipeAPI/internal/handlers ---
+=== RUN   TestCreateIngredient
+--- PASS: TestCreateIngredient (0.00s)
+=== RUN   TestGetIngredients
+--- PASS: TestGetIngredients (0.00s)
+=== RUN   TestCreateRecipe
+--- PASS: TestCreateRecipe (0.00s)
+=== RUN   TestGetRecipes
+--- PASS: TestGetRecipes (0.00s)
+=== RUN   TestCreateStep
+--- PASS: TestCreateStep (0.00s)
+=== RUN   TestGetSteps
+--- PASS: TestGetSteps (0.00s)
+PASS
+coverage: 53.3% of statements
+ok  	RecipeAPI/internal/handlers	0.003s
+
+------------------------
+✅ Validation completed in 0.79s
+
+📊 Summary for RecipeAPI:
+  • BuildSuccess = true
+  • LintWarnings = 0
+  • TestsPass    = true
+  • Coverage     = 53.3%
+  • ML Duration  = 0s (repair 0)
+  • Rule Fixes   = 0
+🧾 Appended 19 experiments into experiments/logs/summary.csv
+
+🧾 Generating Markdown summary from JSON metrics...
+📊 Markdown results saved → experiments/logs/results.md
+✅ Summary successfully written to experiments/logs/results.md
+
+✅ Experiment complete.

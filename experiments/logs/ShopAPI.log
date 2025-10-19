@@ -1,4 +1,147 @@
 
 🚀 Starting generation for app: ShopAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/19 12:28:07 🧠 Starting ML-based code generation...
+2025/10/19 13:06:04 🧠 Starting ML-based code generation...
+🌍 Using custom endpoint: https://api.openai.com/v1
+🤖 Trying model: gpt-3.5-turbo
+⏱️  Model call took 22.839196763s (model: gpt-3.5-turbo, attempt: 1)
+✅ Parsed 18 files
+
+📊 Generation Summary:
+  • Duration: 22.839553357s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+✅ ShopAPI generation completed successfully
+🧾 Saved ML metrics → experiments/ShopAPI/gen_metrics.json
+📝 Processing: internal/models/product.go
+✅ Written: experiments/out/ShopAPI/internal/models/product.go
+📝 Processing: internal/models/order.go
+✅ Written: experiments/out/ShopAPI/internal/models/order.go
+📝 Processing: internal/models/customer.go
+✅ Written: experiments/out/ShopAPI/internal/models/customer.go
+📝 Processing: internal/models/cart.go
+✅ Written: experiments/out/ShopAPI/internal/models/cart.go
+📝 Processing: internal/models/payment.go
+✅ Written: experiments/out/ShopAPI/internal/models/payment.go
+📝 Processing: internal/handlers/product.go
+🔧 Fixed handler signature for CreateProduct
+✅ Written: experiments/out/ShopAPI/internal/handlers/product.go
+📝 Processing: internal/handlers/order.go
+🔧 Fixed handler signature for CreateOrder
+✅ Written: experiments/out/ShopAPI/internal/handlers/order.go
+📝 Processing: internal/handlers/customer.go
+🔧 Fixed handler signature for CreateCustomer
+✅ Written: experiments/out/ShopAPI/internal/handlers/customer.go
+📝 Processing: internal/handlers/cart.go
+🔧 Fixed handler signature for CreateCart
+✅ Written: experiments/out/ShopAPI/internal/handlers/cart.go
+📝 Processing: internal/handlers/payment.go
+🔧 Fixed handler signature for CreatePayment
+✅ Written: experiments/out/ShopAPI/internal/handlers/payment.go
+📝 Processing: internal/handlers/product_test.go
+🔧 Fixed test signature for TestCreateProduct
+✅ Auto-fixed test signatures in internal/handlers/product_test.go
+✅ Written: experiments/out/ShopAPI/internal/handlers/product_test.go
+📝 Processing: internal/handlers/order_test.go
+🔧 Fixed test signature for TestCreateOrder
+✅ Auto-fixed test signatures in internal/handlers/order_test.go
+✅ Written: experiments/out/ShopAPI/internal/handlers/order_test.go
+📝 Processing: internal/handlers/customer_test.go
+🔧 Fixed test signature for TestCreateCustomer
+✅ Auto-fixed test signatures in internal/handlers/customer_test.go
+✅ Written: experiments/out/ShopAPI/internal/handlers/customer_test.go
+📝 Processing: internal/handlers/cart_test.go
+🔧 Fixed test signature for TestCreateCart
+✅ Auto-fixed test signatures in internal/handlers/cart_test.go
+✅ Written: experiments/out/ShopAPI/internal/handlers/cart_test.go
+📝 Processing: internal/handlers/payment_test.go
+🔧 Fixed test signature for TestCreatePayment
+✅ Auto-fixed test signatures in internal/handlers/payment_test.go
+✅ Written: experiments/out/ShopAPI/internal/handlers/payment_test.go
+📝 Processing: internal/routes/routes.go
+🔧 Fixed Register function parameter
+✅ Written: experiments/out/ShopAPI/internal/routes/routes.go
+📝 Processing: cmd/main.go
+✅ Written: experiments/out/ShopAPI/cmd/main.go
+📝 Processing: tasks.md
+⚠️  Syntax validation failed for tasks.md: temp.go:1:1: illegal character U+0023 '#'
+🔧 Attempting additional fixes...
+❌ Could not auto-fix syntax errors in tasks.md
+✅ Written: experiments/out/ShopAPI/tasks.md
+
+🔧 Total rule-based fixes applied: 39
+
+🔧 Running auto-fix on generated files...
+
+🔧 Auto-fixing all files in: experiments/out/ShopAPI
+
+📝 Fixing test function signatures...
+  ✅ Fixed test signatures in cart_test.go
+  ✅ Fixed test signatures in customer_test.go
+  ✅ Fixed test signatures in order_test.go
+  ✅ Fixed test signatures in payment_test.go
+  ✅ Fixed test signatures in product_test.go
+
+📝 Fixing handler function signatures...
+
+📝 Fixing routes Register function...
+
+📝 Fixing missing commas in struct literals...
+
+📝 Ensuring test file imports...
+
+✅ Applied 5 fixes total!
+✅ Auto-fix completed successfully
+
+🔍 Validating Go syntax...
+✅ All generated files have valid Go syntax
+2025/10/19 13:06:27 ✅ Generated 5 test file(s)
+
+🔧 Fixing import paths...
+2025/10/19 13:06:27 🔧 Detected module name: ShopAPI — fixing imports...
+2025/10/19 13:06:27 ✅ No import fixes needed
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+
+🔍 Final syntax validation after fixes...
+✅ All syntax errors resolved
+✅ ML generation completed (22.84s)
+📁 Saved per-package coverage → experiments/out/ShopAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/ShopAPI/internal/handlers ---
+=== RUN   TestCreateCart
+--- PASS: TestCreateCart (0.00s)
+=== RUN   TestCreateCustomer
+--- PASS: TestCreateCustomer (0.00s)
+=== RUN   TestCreateOrder
+--- PASS: TestCreateOrder (0.00s)
+=== RUN   TestCreatePayment
+--- PASS: TestCreatePayment (0.00s)
+=== RUN   TestCreateProduct
+--- PASS: TestCreateProduct (0.00s)
+PASS
+coverage: 60.0% of statements
+ok  	ShopAPI/internal/handlers	0.005s
+
+------------------------
+✅ Validation completed in 0.59s
+
+📊 Summary for ShopAPI:
+  • BuildSuccess = false
+  • LintWarnings = 0
+  • TestsPass    = true
+  • Coverage     = 60.0%
+  • ML Duration  = 0s (repair 0)
+  • Rule Fixes   = 0
+🧾 Appended 22 experiments into experiments/logs/summary.csv
+
+🧾 Generating Markdown summary from JSON metrics...
+📊 Markdown results saved → experiments/logs/results.md
+✅ Summary successfully written to experiments/logs/results.md
+
+✅ Experiment complete.

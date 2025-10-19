@@ -1,0 +1,11 @@
+{
+  "app_name": "BlogAPI",
+  "duration_sec": 0,
+  "end_time": "0001-01-01T00:00:00Z",
+  "error_message": "error, status code: 403, status: 403 Forbidden, message: This endpoint is only accessible by projects with geography restrictions enabled.",
+  "final_success": false,
+  "primary_success": false,
+  "repair_attempts": 0,
+  "rule_fixes": 0,
+  "start_time": "2025-10-19T12:54:26+03:00"
+}

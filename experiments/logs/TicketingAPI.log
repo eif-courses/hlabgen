@@ -1,0 +1,124 @@
+
+🚀 Starting generation for app: TicketingAPI (mode=hybrid)
+✅ Rule-based scaffold created
+2025/10/19 13:07:18 🧠 Starting ML-based code generation...
+🌍 Using custom endpoint: https://api.openai.com/v1
+🤖 Trying model: gpt-3.5-turbo
+⏱️  Model call took 10.518303815s (model: gpt-3.5-turbo, attempt: 1)
+✅ Parsed 14 files
+
+📊 Generation Summary:
+  • Duration: 10.518538855s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+✅ TicketingAPI generation completed successfully
+🧾 Saved ML metrics → experiments/TicketingAPI/gen_metrics.json
+📝 Processing: internal/models/ticket.go
+✅ Written: experiments/out/TicketingAPI/internal/models/ticket.go
+📝 Processing: internal/models/event.go
+✅ Written: experiments/out/TicketingAPI/internal/models/event.go
+📝 Processing: internal/models/attendee.go
+✅ Written: experiments/out/TicketingAPI/internal/models/attendee.go
+📝 Processing: internal/models/venue.go
+✅ Written: experiments/out/TicketingAPI/internal/models/venue.go
+📝 Processing: internal/handlers/ticket.go
+🔧 Fixed handler signature for CreateTicket
+✅ Written: experiments/out/TicketingAPI/internal/handlers/ticket.go
+📝 Processing: internal/handlers/event.go
+🔧 Fixed handler signature for CreateEvent
+✅ Written: experiments/out/TicketingAPI/internal/handlers/event.go
+📝 Processing: internal/handlers/attendee.go
+🔧 Fixed handler signature for CreateAttendee
+✅ Written: experiments/out/TicketingAPI/internal/handlers/attendee.go
+📝 Processing: internal/handlers/venue.go
+🔧 Fixed handler signature for CreateVenue
+✅ Written: experiments/out/TicketingAPI/internal/handlers/venue.go
+📝 Processing: internal/routes/routes.go
+🔧 Fixed Register function parameter
+✅ Written: experiments/out/TicketingAPI/internal/routes/routes.go
+📝 Processing: cmd/main.go
+✅ Written: experiments/out/TicketingAPI/cmd/main.go
+📝 Processing: internal/handlers/ticket_test.go
+🔧 Fixed test signature for TestCreateTicket
+✅ Auto-fixed test signatures in internal/handlers/ticket_test.go
+✅ Written: experiments/out/TicketingAPI/internal/handlers/ticket_test.go
+📝 Processing: internal/handlers/event_test.go
+🔧 Fixed test signature for TestCreateEvent
+✅ Auto-fixed test signatures in internal/handlers/event_test.go
+✅ Written: experiments/out/TicketingAPI/internal/handlers/event_test.go
+📝 Processing: internal/handlers/attendee_test.go
+🔧 Fixed test signature for TestCreateAttendee
+✅ Auto-fixed test signatures in internal/handlers/attendee_test.go
+✅ Written: experiments/out/TicketingAPI/internal/handlers/attendee_test.go
+📝 Processing: internal/handlers/venue_test.go
+🔧 Fixed test signature for TestCreateVenue
+✅ Auto-fixed test signatures in internal/handlers/venue_test.go
+✅ Written: experiments/out/TicketingAPI/internal/handlers/venue_test.go
+
+🔧 Total rule-based fixes applied: 31
+
+🔧 Running auto-fix on generated files...
+
+🔧 Auto-fixing all files in: experiments/out/TicketingAPI
+
+📝 Fixing test function signatures...
+  ✅ Fixed test signatures in attendee_test.go
+  ✅ Fixed test signatures in event_test.go
+  ✅ Fixed test signatures in ticket_test.go
+  ✅ Fixed test signatures in venue_test.go
+
+📝 Fixing handler function signatures...
+
+📝 Fixing routes Register function...
+
+📝 Fixing missing commas in struct literals...
+
+📝 Ensuring test file imports...
+
+✅ Applied 4 fixes total!
+✅ Auto-fix completed successfully
+
+🔍 Validating Go syntax...
+✅ All generated files have valid Go syntax
+2025/10/19 13:07:28 ✅ Generated 4 test file(s)
+
+🔧 Fixing import paths...
+2025/10/19 13:07:28 🔧 Detected module name: TicketingAPI — fixing imports...
+2025/10/19 13:07:28 ✅ No import fixes needed
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+
+🔍 Final syntax validation after fixes...
+✅ All syntax errors resolved
+✅ ML generation completed (10.52s)
+📁 Saved per-package coverage → experiments/out/TicketingAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/TicketingAPI/internal/handlers ---
+# TicketingAPI/internal/handlers [TicketingAPI/internal/handlers.test]
+./attendee.go:4:2: "encoding/json" imported and not used
+./event.go:4:2: "encoding/json" imported and not used
+./venue.go:4:2: "encoding/json" imported and not used
+FAIL	TicketingAPI/internal/handlers [build failed]
+
+------------------------
+✅ Validation completed in 0.18s
+
+📊 Summary for TicketingAPI:
+  • BuildSuccess = false
+  • LintWarnings = 0
+  • TestsPass    = false
+  • Coverage     = 0.0%
+  • ML Duration  = 0s (repair 0)
+  • Rule Fixes   = 0
+🧾 Appended 27 experiments into experiments/logs/summary.csv
+
+🧾 Generating Markdown summary from JSON metrics...
+📊 Markdown results saved → experiments/logs/results.md
+✅ Summary successfully written to experiments/logs/results.md
+
+✅ Experiment complete.

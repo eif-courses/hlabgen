@@ -81,7 +81,8 @@ func Generate(s Schema) ([]GenFile, GenerationMetrics, error) {
 		if repairErr != nil {
 			metrics.ErrorMessage = fmt.Sprintf("repair model error: %v", repairErr)
 			metrics.EndTime = time.Now()
-			metrics.Duration = metrics.EndTime.Sub(metrics.StartTime)
+			metrics.Duration = metrics.EndTime.Sub(metrics.StartTime) // ← This must run!
+
 			saveMetrics(s.AppName, metrics, filepath.Join("experiments", s.AppName, "gen_metrics.json"))
 
 			return nil, metrics, fmt.Errorf("failed to repair model output: %w", repairErr)
