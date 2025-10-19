@@ -380,3 +380,248 @@ make status
 
 # Clean and start over
 make clean
+
+
+
+
+
+Daily Research Workflow:
+bash# 1. Run experiments
+make all-experiments
+
+# 2. Generate reports
+make reports-all
+
+# 3. Safe clean (preserves metrics for later analysis)
+make clean-safe
+
+# 4. Or archive before cleaning
+make clean-archive
+Before Cleaning (Recommended):
+bash# See what will be deleted
+make clean-dry-run
+
+# Archive metrics before cleaning
+make archive-metrics
+
+# Now safe to clean
+make clean
+Paper Submission Workflow:
+bash# 1. Generate complete academic package
+make academic-package
+
+# 2. Create backup for submission
+make backup
+
+# 3. Check all reports are ready
+make status
+
+# 4. View statistics
+make stats
+Recovery Workflow:
+bash# If you accidentally cleaned, restore from archive
+make restore-latest
+
+# Regenerate reports from archived metrics
+make reports-all
+```
+
+## 📁 Directory Structure After Running:
+```
+hlabgen/
+├── experiments/
+│   ├── input/              # Your JSON configs (never deleted)
+│   ├── out/
+│   │   ├── LibraryAPI/
+│   │   │   ├── gen_metrics.json     ✅ Preserved by clean-safe
+│   │   │   ├── coverage.json        ✅ Preserved by clean-safe
+│   │   │   ├── internal/            ❌ Deleted by clean-safe
+│   │   │   ├── cmd/                 ❌ Deleted by clean-safe
+│   │   │   └── go.mod               ❌ Deleted by clean-safe
+│   │   └── ...
+│   ├── logs/
+│   │   ├── results.md
+│   │   ├── statistics.md
+│   │   ├── comparative.md
+│   │   ├── failures.md
+│   │   ├── tables.tex
+│   │   ├── coverage.csv
+│   │   └── summary.csv
+│   └── archives/            # Created by archive commands
+│       ├── metrics_20251019_140320/
+│       │   ├── gen_metrics.json (all apps)
+│       │   ├── coverage.json (all apps)
+│       │   ├── coverage.csv
+│       │   └── *.md, *.tex
+│       └── metrics_20251019_153045/
+└── hlabgen_backup_20251019_140320.tar.gz  # Created by backup
+🎓 Best Practices for Research:
+1. Before Major Changes:
+   bashmake backup
+# or
+make archive-metrics
+2. Regular Workflow:
+   bash# Run experiments
+   make all-experiments
+
+# Generate all reports
+make reports-all
+
+# Archive results
+make archive-metrics
+
+# Clean code but keep metrics
+make clean-code
+3. For Paper Revisions:
+   bash# Restore old metrics
+   make restore-latest
+
+# Or manually:
+cp experiments/archives/metrics_20251019_140320/* experiments/out/
+
+# Regenerate reports
+make reports-all
+4. Before Submission:
+   bash# Create final backup
+   make backup
+
+# Verify everything
+make status
+make stats
+```
+
+## 🔍 What Each Clean Command Does:
+
+### `make clean`
+```
+❌ Deletes: experiments/out/* (all)
+❌ Deletes: experiments/logs/* (all)
+✅ Keeps: experiments/input/*
+⚠️  WARNING: Deletes metrics!
+```
+
+### `make clean-safe`
+```
+❌ Deletes: Generated code (.go files, go.mod, etc.)
+✅ Keeps: *metrics*.json files
+✅ Keeps: coverage.json files
+✅ Keeps: experiments/input/*
+```
+
+### `make clean-code`
+```
+❌ Deletes: internal/, cmd/, go.mod, go.sum, tasks.md
+✅ Keeps: ALL .json files
+✅ Keeps: All metrics and coverage data
+✅ Keeps: experiments/logs/*
+```
+
+### `make clean-logs`
+```
+❌ Deletes: experiments/logs/*
+✅ Keeps: experiments/out/* (all generated code and metrics)
+```
+
+### `make clean-archive`
+```
+1. Archives all metrics to experiments/archives/metrics_TIMESTAMP/
+2. Then runs make clean
+   ✅ Safe: All metrics backed up before deletion
+```
+
+### `make clean-all`
+```
+1. Creates full backup: hlabgen_backup_TIMESTAMP.tar.gz
+2. Then deletes everything
+   ✅ Safe: Complete backup created first
+```
+
+## 📊 Archive Structure:
+
+When you run `make archive-metrics`, it creates:
+```
+experiments/archives/metrics_20251019_153045/
+├── gen_metrics.json          # From LibraryAPI
+├── gen_metrics.json          # From BlogAPI  
+├── gen_metrics.json          # From TaskManagerAPI
+├── coverage.json             # From each app
+├── coverage.csv              # Summary
+├── summary.csv               # Summary
+├── results.md                # Reports
+├── statistics.md
+├── comparative.md
+├── failures.md
+└── tables.tex
+🚀 Quick Command Reference:
+Development:
+bashmake quick-test              # Test with 3 apps
+make experiment APP=X        # Single experiment
+make all-experiments         # All experiments
+Reports:
+bashmake report                  # Standard report
+make reports-all             # All report types
+make report-statistics       # Just statistics
+Cleaning:
+bashmake clean-dry-run          # Preview what will be deleted
+make clean-safe             # Clean but keep metrics
+make clean-code             # Clean only code
+make clean-archive          # Archive then clean (SAFEST)
+Backup:
+bashmake archive-metrics        # Quick metrics archive
+make backup                 # Full backup
+make list-archives          # View archives
+make restore-latest         # Restore from latest
+Utilities:
+bashmake status                 # Check status
+make stats                  # Quick statistics
+make list                   # List experiments
+make disk-usage             # Check disk space
+make verify-env             # Check setup
+💡 Recommended Workflow for Your Paper:
+bash# Day 1: Initial run
+make academic-package        # Run everything
+make archive-metrics         # Backup results
+
+# Day 2-X: Continue experiments
+make all-experiments         # Add more experiments
+make reports-all             # Update reports
+make archive-metrics         # Backup again
+
+# Before paper submission:
+make backup                  # Create final backup
+make status                  # Verify everything
+make stats                   # Check final numbers
+
+# Copy reports to paper:
+cp experiments/logs/tables.tex ~/paper/results/
+cp experiments/logs/statistics.md ~/paper/appendix/
+🎯 Your Next Steps:
+Since your quick-test succeeded, here's what to do:
+bash# 1. Check current status
+make status
+
+# 2. View your metrics (they're already there!)
+cat experiments/logs/coverage.csv
+cat experiments/logs/summary.csv
+
+# 3. Create your first archive
+make archive-metrics
+
+# 4. If you have more experiments, run them all
+make all-experiments
+
+# 5. Generate comprehensive reports
+make reports-all
+
+# 6. Create final backup
+make backup
+📈 View Your Real Results Now:
+bash# View coverage data
+column -t -s, experiments/logs/coverage.csv
+
+# View full summary
+column -t -s, experiments/logs/summary.csv
+
+# View reports
+cat experiments/logs/statistics.md
+cat experiments/logs/comparative.md

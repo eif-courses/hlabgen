@@ -1,1 +1,10 @@
 .env
+# In .gitignore, add:
+experiments/out/*/internal/
+experiments/out/*/cmd/
+experiments/out/*/*.mod
+experiments/out/*/*.sum
+
+# But keep metrics
+!experiments/**/*metrics*.json
+!experiments/**/coverage.json
