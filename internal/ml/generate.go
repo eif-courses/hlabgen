@@ -141,7 +141,7 @@ func Generate(s Schema) ([]GenFile, GenerationMetrics, error) {
 
 // callWithRetry attempts API call with exponential backoff and model fallback
 func callWithRetry(ctx context.Context, client *openai.Client, prompt string, temperature float32) (openai.ChatCompletionResponse, error) {
-	models := []string{openai.GPT3Dot5Turbo, openai.GPT3Dot5Turbo16K}
+	models := []string{openai.GPT4oMini, openai.GPT3Dot5Turbo, openai.GPT3Dot5Turbo16K}
 
 	maxRetries := 3
 

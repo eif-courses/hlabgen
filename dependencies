@@ -1,3 +1,10 @@
 go get github.com/sashabaranov/go-openai
 go run ./cmd/hlabgen -input experiments/input/library.json -mode hybrid -out experiments/out/LibraryAPI
 
+
+
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+Install gocyclo (Optional - for cyclomatic complexity metric)
+
+go install github.com/fzipp/gocyclo/cmd/gocyclo@latest

@@ -325,3 +325,58 @@ cat experiments/logs/results.md
 
 # Clean up
 make clean
+
+
+
+# Basic workflow
+make list                    # See available experiments
+make experiment APP=LibraryAPI   # Run one experiment
+make all-experiments         # Run all experiments
+make report                  # Generate standard report
+
+# Academic workflow (recommended for papers)
+make academic-package        # Run everything + generate all reports
+
+# Individual reports
+make report-comparative      # Compare modes
+make report-statistics       # Statistical analysis
+make report-failures         # Failure analysis
+make report-latex           # LaTeX tables
+
+# Utilities
+make stats                  # Quick statistics
+make status                 # Check experiment status
+make verify-env             # Verify dependencies
+make disk-usage             # Check disk space
+make clean                  # Clean everything
+make archive                # Backup results
+
+# Development
+make watch APP=LibraryAPI   # Auto-rerun on changes
+
+
+
+# Quick test (3 apps)
+make quick-test
+
+# Full run (all apps)
+make all-experiments
+
+# Everything for paper
+make academic-package
+
+# Just regenerate reports (if you already ran experiments)
+make reports-all
+
+# Individual report types
+make report-comparative
+make report-statistics
+make report-failures
+make report-latex
+
+# View status
+make stats
+make status
+
+# Clean and start over
+make clean
