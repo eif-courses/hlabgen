@@ -1,5 +1,5 @@
 # =====================================================
-# 🧪 HLabGen Experiment Automation Makefile (Complete Edition with Fixed Cleaning)
+# 🧪 HLabGen Experiment Automation Makefile (Complete Edition)
 # =====================================================
 
 # --- Configuration Defaults ---
@@ -36,11 +36,17 @@ help:
 	@echo "$(COLOR_BLUE)╚════════════════════════════════════════════════════════════╝$(COLOR_RESET)"
 	@echo ""
 	@echo "$(COLOR_GREEN)📦 Experiment Commands:$(COLOR_RESET)"
-	@echo "  make generate APP=<name>     - Generate a single app"
-	@echo "  make validate APP=<name>     - Validate an existing app"
-	@echo "  make experiment APP=<name>   - Run full pipeline for one app"
-	@echo "  make all-experiments         - Run ALL experiments"
-	@echo "  make quick-test              - Run a quick 3-app smoke test"
+	@echo "  make generate APP=<name> MODE=<mode>  - Generate a single app"
+	@echo "      MODE options: rules | ml | hybrid (default: hybrid)"
+	@echo "  make experiment APP=<name>            - Run full pipeline for one app"
+	@echo "  make all-experiments MODE=<mode>      - Run ALL experiments"
+	@echo "  make quick-test                       - Run a quick 3-app smoke test"
+	@echo ""
+	@echo "$(COLOR_CYAN)🔬 Mode Comparison Commands:$(COLOR_RESET)"
+	@echo "  make compare-modes                    - Run experiments in all 3 modes"
+	@echo "  make analyze-modes                    - Analyze mode comparison results"
+	@echo "  make report-mode-comparison           - Generate mode comparison report"
+	@echo "  make multi-run-mode MODE=X RUNS=N     - Multiple runs in specific mode"
 	@echo ""
 	@echo "$(COLOR_CYAN)📊 Report Generation Commands:$(COLOR_RESET)"
 	@echo "  make report                  - Generate standard Markdown report"
@@ -75,6 +81,9 @@ help:
 	@echo "  make verify-env              - Verify environment setup"
 	@echo "  make watch APP=<name>        - Watch and auto-rerun experiment"
 	@echo "  make disk-usage              - Check disk space usage"
+	@echo "  make count-loc               - Count lines of code"
+	@echo "  make activity                - Show recent activity"
+	@echo "  make config                  - Show current configuration"
 	@echo ""
 	@echo "$(COLOR_YELLOW)📋 Available apps:$(COLOR_RESET)"
 	@for file in $(INPUT_FILES); do \
@@ -83,9 +92,14 @@ help:
 		printf "  $(COLOR_GREEN)%-20s$(COLOR_RESET) [%s]\n" $$app $$diff; \
 	done
 	@echo ""
+	@echo "$(COLOR_YELLOW)📊 Generation Modes:$(COLOR_RESET)"
+	@echo "  $(COLOR_GREEN)rules$(COLOR_RESET)   - Template-based generation (fast, basic functionality)"
+	@echo "  $(COLOR_CYAN)ml$(COLOR_RESET)      - GPT-based generation (smart, may need repairs)"
+	@echo "  $(COLOR_PURPLE)hybrid$(COLOR_RESET)  - Rules + ML + Fixes (recommended, best quality)"
+	@echo ""
 	@echo "$(COLOR_CYAN)💡 Examples:$(COLOR_RESET)"
-	@echo "  make experiment APP=LibraryAPI"
-	@echo "  make all-experiments"
+	@echo "  make experiment APP=LibraryAPI MODE=rules"
+	@echo "  make compare-modes"
 	@echo "  make academic-package"
 	@echo "  make clean-archive           # Safe clean with backup"
 
@@ -105,7 +119,7 @@ generate:
 		echo "$(COLOR_RED)❌ File $(INPUT_DIR)/$(APP).json not found$(COLOR_RESET)"; \
 		exit 1; \
 	fi
-	@echo "$(COLOR_BLUE)🚀 Generating $(APP)...$(COLOR_RESET)"
+	@echo "$(COLOR_BLUE)🚀 Generating $(APP) in $(MODE) mode...$(COLOR_RESET)"
 	@go run ./cmd/hlabgen -input $(INPUT_DIR)/$(APP).json -mode $(MODE) -out $(OUT_DIR)/$(APP)
 	@echo "$(COLOR_GREEN)✅ Finished generating $(APP)$(COLOR_RESET)"
 
@@ -125,13 +139,13 @@ experiment:
 		echo "$(COLOR_RED)❌ Please specify APP=<AppName>$(COLOR_RESET)"; \
 		exit 1; \
 	fi
-	@$(MAKE) generate APP=$(APP)
+	@$(MAKE) generate APP=$(APP) MODE=$(MODE)
 	@$(MAKE) report
 
 # 4️⃣ Run all experiments
 all-experiments:
 	@echo "$(COLOR_BLUE)╔════════════════════════════════════════════════════════════╗$(COLOR_RESET)"
-	@echo "$(COLOR_BLUE)║  🧬 Running all experiments in $(INPUT_DIR)...            ║$(COLOR_RESET)"
+	@echo "$(COLOR_BLUE)║  🧬 Running all experiments (mode: $(MODE))                ║$(COLOR_RESET)"
 	@echo "$(COLOR_BLUE)╚════════════════════════════════════════════════════════════╝$(COLOR_RESET)"
 	@mkdir -p $(LOG_DIR)
 	@rm -f $(LOG_DIR)/failed_experiments.txt
@@ -143,7 +157,7 @@ all-experiments:
 		current=$$((current + 1)); \
 		echo ""; \
 		echo "$(COLOR_BLUE)══════════════════════════════════════════════════════════════"; \
-		echo "🚀 [$$current/$$total] $$app"; \
+		echo "🚀 [$$current/$$total] $$app (mode: $(MODE))"; \
 		echo "══════════════════════════════════════════════════════════════$(COLOR_RESET)"; \
 		if go run ./cmd/hlabgen -input $$file -mode $(MODE) -out $(OUT_DIR)/$$app 2>&1 | tee $(LOG_DIR)/$$app.log; then \
 			echo "$(COLOR_GREEN)✅ $$app completed successfully$(COLOR_RESET)"; \
@@ -174,11 +188,250 @@ all-experiments:
 
 # 5️⃣ Quick smoke test
 quick-test:
-	@echo "$(COLOR_BLUE)🧪 Running quick test (3 apps)...$(COLOR_RESET)"
-	@$(MAKE) experiment APP=LibraryAPI
-	@$(MAKE) experiment APP=BlogAPI
-	@$(MAKE) experiment APP=TaskManagerAPI
+	@echo "$(COLOR_BLUE)🧪 Running quick test (3 apps, mode: $(MODE))...$(COLOR_RESET)"
+	@$(MAKE) experiment APP=LibraryAPI MODE=$(MODE)
+	@$(MAKE) experiment APP=BlogAPI MODE=$(MODE)
+	@$(MAKE) experiment APP=TaskManagerAPI MODE=$(MODE)
 	@echo "$(COLOR_GREEN)✅ Quick test complete$(COLOR_RESET)"
+
+# =====================================================
+# 🔬 Mode Comparison
+# =====================================================
+
+# Run experiments across all modes for comparison
+compare-modes:
+	@echo "$(COLOR_BLUE)╔════════════════════════════════════════════════════════════╗$(COLOR_RESET)"
+	@echo "$(COLOR_BLUE)║  🔬 Running Experiments Across All Modes                  ║$(COLOR_RESET)"
+	@echo "$(COLOR_BLUE)╚════════════════════════════════════════════════════════════╝$(COLOR_RESET)"
+	@start_time=$$(date +%s); \
+	for mode in rules ml hybrid; do \
+		echo ""; \
+		echo "$(COLOR_CYAN)══════════════════════════════════════════════════════════════"; \
+		echo "🎯 Running in $$mode mode"; \
+		echo "══════════════════════════════════════════════════════════════$(COLOR_RESET)"; \
+		$(MAKE) all-experiments MODE=$$mode; \
+		echo "$(COLOR_BLUE)📦 Archiving $$mode results...$(COLOR_RESET)"; \
+		timestamp=$$(date +%Y%m%d_%H%M%S); \
+		archive_dir="$(ARCHIVE_DIR)/$${mode}_$$timestamp"; \
+		mkdir -p "$$archive_dir"; \
+		for dir in experiments/*/; do \
+			app_name=$$(basename "$$dir"); \
+			if [ "$$app_name" != "input" ] && [ "$$app_name" != "out" ] && [ "$$app_name" != "logs" ] && [ "$$app_name" != "archives" ] && [ -d "$$dir" ]; then \
+				for file in "$$dir"*.json; do \
+					if [ -f "$$file" ]; then \
+						cp "$$file" "$$archive_dir/$${app_name}_$$(basename $$file)" 2>/dev/null; \
+					fi; \
+				done; \
+			fi; \
+		done; \
+		if [ -d "$(LOG_DIR)" ]; then \
+			cp $(LOG_DIR)/*.csv "$$archive_dir/" 2>/dev/null || true; \
+			cp $(LOG_DIR)/*.md "$$archive_dir/" 2>/dev/null || true; \
+		fi; \
+		echo "$(COLOR_GREEN)✅ $$mode mode completed and archived$(COLOR_RESET)"; \
+		if [ "$$mode" != "hybrid" ]; then \
+			echo "$(COLOR_YELLOW)🧹 Cleaning for next mode...$(COLOR_RESET)"; \
+			$(MAKE) clean-code; \
+			sleep 2; \
+		fi; \
+	done; \
+	end_time=$$(date +%s); \
+	duration=$$((end_time - start_time)); \
+	minutes=$$((duration / 60)); \
+	seconds=$$((duration % 60)); \
+	echo ""; \
+	echo "$(COLOR_BLUE)╔════════════════════════════════════════════════════════════╗$(COLOR_RESET)"; \
+	echo "$(COLOR_BLUE)║  ✅ COMPLETED ALL MODES                                    ║$(COLOR_RESET)"; \
+	echo "$(COLOR_BLUE)╚════════════════════════════════════════════════════════════╝$(COLOR_RESET)"; \
+	echo "$(COLOR_GREEN)⏱️  Total time: $$minutes minutes $$seconds seconds$(COLOR_RESET)"; \
+	echo "$(COLOR_CYAN)📊 Run 'make analyze-modes' to see comparison$(COLOR_RESET)"
+
+# Analyze and compare results across modes
+analyze-modes:
+	@echo "$(COLOR_BLUE)📊 Mode Comparison Analysis$(COLOR_RESET)"
+	@echo "────────────────────────────────────────────────────────"
+	@if [ ! -d "$(ARCHIVE_DIR)" ]; then \
+		echo "$(COLOR_RED)❌ No archived runs found$(COLOR_RESET)"; \
+		echo "$(COLOR_YELLOW)💡 Run 'make compare-modes' first$(COLOR_RESET)"; \
+		exit 1; \
+	fi; \
+	echo ""; \
+	printf "$(COLOR_CYAN)%-20s %-12s %-12s %-12s %-12s$(COLOR_RESET)\n" "Mode" "Success%" "Avg Duration" "Avg Repairs" "Avg Coverage"; \
+	echo "────────────────────────────────────────────────────────────────────────"; \
+	for mode in rules ml hybrid; do \
+		mode_dir=$$(ls -dt $(ARCHIVE_DIR)/$${mode}_* 2>/dev/null | head -1); \
+		if [ -n "$$mode_dir" ] && [ -d "$$mode_dir" ]; then \
+			successes=0; \
+			total=0; \
+			total_duration=0; \
+			total_repairs=0; \
+			total_coverage=0; \
+			coverage_count=0; \
+			for file in "$$mode_dir"/*_gen_metrics.json; do \
+				if [ -f "$$file" ]; then \
+					total=$$((total + 1)); \
+					duration=$$(grep -o '"duration_sec"[[:space:]]*:[[:space:]]*[0-9.]*' "$$file" | grep -o '[0-9.]*$$' || echo "0"); \
+					repairs=$$(grep -o '"repair_attempts"[[:space:]]*:[[:space:]]*[0-9]*' "$$file" | grep -o '[0-9]*$$' || echo "0"); \
+					success=$$(grep -o '"final_success"[[:space:]]*:[[:space:]]*true' "$$file"); \
+					total_duration=$$(echo "$$total_duration + $$duration" | bc); \
+					total_repairs=$$((total_repairs + repairs)); \
+					[ -n "$$success" ] && successes=$$((successes + 1)); \
+				fi; \
+			done; \
+			for csv in "$$mode_dir"/coverage.csv; do \
+				if [ -f "$$csv" ]; then \
+					coverage=$$(tail -n +2 "$$csv" | cut -d',' -f4 | awk '{sum+=$$1; count++} END {if(count>0) print sum/count; else print 0}'); \
+					total_coverage=$$coverage; \
+					coverage_count=1; \
+				fi; \
+			done; \
+			if [ $$total -gt 0 ]; then \
+				success_rate=$$(echo "scale=1; $$successes * 100 / $$total" | bc); \
+				avg_duration=$$(echo "scale=2; $$total_duration / $$total" | bc); \
+				avg_repairs=$$(echo "scale=1; $$total_repairs / $$total" | bc); \
+				avg_coverage=$$(echo "scale=1; $$total_coverage" | bc); \
+				if [ "$$mode" = "hybrid" ]; then \
+					color="$(COLOR_GREEN)"; \
+				elif [ "$$mode" = "ml" ]; then \
+					color="$(COLOR_CYAN)"; \
+				else \
+					color="$(COLOR_YELLOW)"; \
+				fi; \
+				printf "$${color}%-20s$(COLOR_RESET) %-12s %-12s %-12s %-12s\n" \
+					"$$mode" "$${success_rate}%" "$${avg_duration}s" "$$avg_repairs" "$${avg_coverage}%"; \
+			fi; \
+		else \
+			echo "$(COLOR_RED)$$mode - No data$(COLOR_RESET)"; \
+		fi; \
+	done; \
+	echo ""
+
+# Generate detailed mode comparison report
+report-mode-comparison:
+	@echo "$(COLOR_BLUE)📊 Generating Mode Comparison Report$(COLOR_RESET)"
+	@output="$(LOG_DIR)/mode_comparison.md"; \
+	mkdir -p $(LOG_DIR); \
+	echo "# Mode Comparison Report" > $$output; \
+	echo "" >> $$output; \
+	echo "Generated: $$(date)" >> $$output; \
+	echo "" >> $$output; \
+	echo "## Overview" >> $$output; \
+	echo "" >> $$output; \
+	echo "| Mode | Success Rate | Avg Duration | Avg Repairs | Avg Coverage |" >> $$output; \
+	echo "|------|--------------|--------------|-------------|--------------|" >> $$output; \
+	for mode in rules ml hybrid; do \
+		mode_dir=$$(ls -dt $(ARCHIVE_DIR)/$${mode}_* 2>/dev/null | head -1); \
+		if [ -n "$$mode_dir" ] && [ -d "$$mode_dir" ]; then \
+			successes=0; total=0; total_duration=0; total_repairs=0; total_coverage=0; \
+			for file in "$$mode_dir"/*_gen_metrics.json; do \
+				if [ -f "$$file" ]; then \
+					total=$$((total + 1)); \
+					duration=$$(grep -o '"duration_sec"[[:space:]]*:[[:space:]]*[0-9.]*' "$$file" | grep -o '[0-9.]*$$' || echo "0"); \
+					repairs=$$(grep -o '"repair_attempts"[[:space:]]*:[[:space:]]*[0-9]*' "$$file" | grep -o '[0-9]*$$' || echo "0"); \
+					success=$$(grep -o '"final_success"[[:space:]]*:[[:space:]]*true' "$$file"); \
+					total_duration=$$(echo "$$total_duration + $$duration" | bc); \
+					total_repairs=$$((total_repairs + repairs)); \
+					[ -n "$$success" ] && successes=$$((successes + 1)); \
+				fi; \
+			done; \
+			for csv in "$$mode_dir"/coverage.csv; do \
+				if [ -f "$$csv" ]; then \
+					total_coverage=$$(tail -n +2 "$$csv" | cut -d',' -f4 | awk '{sum+=$$1; count++} END {if(count>0) print sum/count; else print 0}'); \
+				fi; \
+			done; \
+			if [ $$total -gt 0 ]; then \
+				success_rate=$$(echo "scale=1; $$successes * 100 / $$total" | bc); \
+				avg_duration=$$(echo "scale=2; $$total_duration / $$total" | bc); \
+				avg_repairs=$$(echo "scale=1; $$total_repairs / $$total" | bc); \
+				echo "| $$mode | $${success_rate}% | $${avg_duration}s | $$avg_repairs | $${total_coverage}% |" >> $$output; \
+			fi; \
+		fi; \
+	done; \
+	echo "" >> $$output; \
+	echo "## Key Findings" >> $$output; \
+	echo "" >> $$output; \
+	echo "- **Rules mode**: Template-based generation (fastest, basic functionality)" >> $$output; \
+	echo "- **ML mode**: GPT-based generation (slower, more sophisticated)" >> $$output; \
+	echo "- **Hybrid mode**: Combines rules + ML + fixes (best quality)" >> $$output; \
+	echo "" >> $$output; \
+	echo "$(COLOR_GREEN)✅ Report saved: $$output$(COLOR_RESET)"
+
+# Multi-run with specific mode
+multi-run-mode:
+	@if [ -z "$(MODE)" ]; then \
+		echo "$(COLOR_RED)❌ Please specify MODE=rules|ml|hybrid$(COLOR_RESET)"; \
+		exit 1; \
+	fi
+	@if [ -z "$(RUNS)" ]; then \
+		RUNS=5; \
+	else \
+		RUNS=$(RUNS); \
+	fi; \
+	echo "$(COLOR_BLUE)╔════════════════════════════════════════════════════════════╗$(COLOR_RESET)"; \
+	echo "$(COLOR_BLUE)║  🔬 Running $$RUNS iterations in $(MODE) mode             ║$(COLOR_RESET)"; \
+	echo "$(COLOR_BLUE)╚════════════════════════════════════════════════════════════╝$(COLOR_RESET)"; \
+	for i in $$(seq 1 $$RUNS); do \
+		echo ""; \
+		echo "$(COLOR_CYAN)══════════════════════════════════════════════════════════════"; \
+		echo "🔬 $(MODE) mode - Iteration $$i of $$RUNS"; \
+		echo "══════════════════════════════════════════════════════════════$(COLOR_RESET)"; \
+		$(MAKE) all-experiments MODE=$(MODE); \
+		timestamp=$$(date +%Y%m%d_%H%M%S); \
+		archive_dir="$(ARCHIVE_DIR)/$(MODE)_run$${i}_$$timestamp"; \
+		mkdir -p "$$archive_dir"; \
+		for dir in experiments/*/; do \
+			app_name=$$(basename "$$dir"); \
+			if [ "$$app_name" != "input" ] && [ "$$app_name" != "out" ] && [ "$$app_name" != "logs" ] && [ "$$app_name" != "archives" ]; then \
+				for file in "$$dir"*.json; do \
+					[ -f "$$file" ] && cp "$$file" "$$archive_dir/$${app_name}_$$(basename $$file)" 2>/dev/null; \
+				done; \
+			fi; \
+		done; \
+		[ -d "$(LOG_DIR)" ] && cp $(LOG_DIR)/*.csv "$$archive_dir/" 2>/dev/null || true; \
+		echo "$(COLOR_GREEN)✅ Run $$i archived$(COLOR_RESET)"; \
+		if [ $$i -lt $$RUNS ]; then \
+			$(MAKE) clean-code; \
+			sleep 2; \
+		fi; \
+	done; \
+	echo "$(COLOR_GREEN)✅ Completed $$RUNS runs in $(MODE) mode$(COLOR_RESET)"
+
+# Run experiments N times for statistical analysis
+multi-run:
+	@if [ -z "$(RUNS)" ]; then \
+		RUNS=5; \
+	else \
+		RUNS=$(RUNS); \
+	fi; \
+	echo "$(COLOR_BLUE)╔════════════════════════════════════════════════════════════╗$(COLOR_RESET)"; \
+	echo "$(COLOR_BLUE)║  🔬 Running $$RUNS iterations (mode: $(MODE))             ║$(COLOR_RESET)"; \
+	echo "$(COLOR_BLUE)╚════════════════════════════════════════════════════════════╝$(COLOR_RESET)"; \
+	start_time=$$(date +%s); \
+	for i in $$(seq 1 $$RUNS); do \
+		echo ""; \
+		echo "$(COLOR_CYAN)══════════════════════════════════════════════════════════════"; \
+		echo "🔬 Iteration $$i of $$RUNS"; \
+		echo "══════════════════════════════════════════════════════════════$(COLOR_RESET)"; \
+		$(MAKE) all-experiments MODE=$(MODE); \
+		echo "$(COLOR_BLUE)📦 Archiving run $$i...$(COLOR_RESET)"; \
+		$(MAKE) archive-metrics; \
+		if [ $$i -lt $$RUNS ]; then \
+			echo "$(COLOR_YELLOW)🧹 Cleaning for next iteration...$(COLOR_RESET)"; \
+			$(MAKE) clean-code; \
+			sleep 2; \
+		fi; \
+	done; \
+	end_time=$$(date +%s); \
+	duration=$$((end_time - start_time)); \
+	minutes=$$((duration / 60)); \
+	seconds=$$((duration % 60)); \
+	echo ""; \
+	echo "$(COLOR_BLUE)╔════════════════════════════════════════════════════════════╗$(COLOR_RESET)"; \
+	echo "$(COLOR_BLUE)║  ✅ COMPLETED $$RUNS ITERATIONS                             ║$(COLOR_RESET)"; \
+	echo "$(COLOR_BLUE)╚════════════════════════════════════════════════════════════╝$(COLOR_RESET)"; \
+	echo "$(COLOR_GREEN)⏱️  Total time: $$minutes minutes $$seconds seconds$(COLOR_RESET)"; \
+	echo "$(COLOR_CYAN)📊 Archives created: $$RUNS$(COLOR_RESET)"; \
+	$(MAKE) list-archives
 
 # =====================================================
 # 📊 Report Generation
@@ -258,7 +511,8 @@ clean:
 		mkdir -p $(LOG_DIR); \
 	fi
 	@for dir in experiments/*/; do \
-		if [ -d "$$dir" ] && [ "$$(basename $$dir)" != "input" ] && [ "$$(basename $$dir)" != "out" ] && [ "$$(basename $$dir)" != "logs" ] && [ "$$(basename $$dir)" != "archives" ]; then \
+		dirname=$$(basename "$$dir"); \
+		if [ "$$dirname" != "input" ] && [ "$$dirname" != "out" ] && [ "$$dirname" != "logs" ] && [ "$$dirname" != "archives" ] && [ -d "$$dir" ]; then \
 			rm -rf "$$dir"; \
 		fi; \
 	done
@@ -279,9 +533,6 @@ clean-safe:
 		dirname=$$(basename "$$dir"); \
 		if [ "$$dirname" != "input" ] && [ "$$dirname" != "out" ] && [ "$$dirname" != "logs" ] && [ "$$dirname" != "archives" ] && [ -d "$$dir" ]; then \
 			find "$$dir" -type f ! -name '*metrics*.json' ! -name 'coverage.json' -delete 2>/dev/null; \
-			if [ -z "$$(ls -A $$dir 2>/dev/null | grep -v '.*metrics.*\.json\|coverage\.json')" ]; then \
-				: ; \
-			fi; \
 		fi; \
 	done
 	@echo "$(COLOR_GREEN)✅ Cleaned (metrics preserved)$(COLOR_RESET)"
@@ -443,6 +694,7 @@ archive-metrics:
 	else \
 		echo "$(COLOR_GREEN)✅ Archived $$file_count files to $$archive_dir$(COLOR_RESET)"; \
 	fi
+
 # Create compressed archive of all results
 archive:
 	@timestamp=$$(date +%Y%m%d_%H%M%S); \
@@ -711,176 +963,16 @@ config:
 	@echo "$(COLOR_CYAN)Archive Dir:$(COLOR_RESET)    $(ARCHIVE_DIR)"
 	@echo ""
 	@echo "$(COLOR_CYAN)Environment:$(COLOR_RESET)"
-
-
-
-
-
-# Run experiments N times for statistical analysis
-multi-run:
-	@if [ -z "$(RUNS)" ]; then \
-		RUNS=5; \
-	else \
-		RUNS=$(RUNS); \
-	fi; \
-	echo "$(COLOR_BLUE)╔════════════════════════════════════════════════════════════╗$(COLOR_RESET)"; \
-	echo "$(COLOR_BLUE)║  🔬 Running $$RUNS iterations for statistical analysis    ║$(COLOR_RESET)"; \
-	echo "$(COLOR_BLUE)╚════════════════════════════════════════════════════════════╝$(COLOR_RESET)"; \
-	start_time=$$(date +%s); \
-	for i in $$(seq 1 $$RUNS); do \
-		echo ""; \
-		echo "$(COLOR_CYAN)══════════════════════════════════════════════════════════════"; \
-		echo "🔬 Iteration $$i of $$RUNS"; \
-		echo "══════════════════════════════════════════════════════════════$(COLOR_RESET)"; \
-		$(MAKE) all-experiments; \
-		echo "$(COLOR_BLUE)📦 Archiving run $$i...$(COLOR_RESET)"; \
-		$(MAKE) archive-metrics; \
-		if [ $$i -lt $$RUNS ]; then \
-			echo "$(COLOR_YELLOW)🧹 Cleaning for next iteration...$(COLOR_RESET)"; \
-			$(MAKE) clean-code; \
-			sleep 2; \
-		fi; \
-	done; \
-	end_time=$$(date +%s); \
-	duration=$$((end_time - start_time)); \
-	minutes=$$((duration / 60)); \
-	seconds=$$((duration % 60)); \
-	echo ""; \
-	echo "$(COLOR_BLUE)╔════════════════════════════════════════════════════════════╗$(COLOR_RESET)"; \
-	echo "$(COLOR_BLUE)║  ✅ COMPLETED $$RUNS ITERATIONS                             ║$(COLOR_RESET)"; \
-	echo "$(COLOR_BLUE)╚════════════════════════════════════════════════════════════╝$(COLOR_RESET)"; \
-	echo "$(COLOR_GREEN)⏱️  Total time: $$minutes minutes $$seconds seconds$(COLOR_RESET)"; \
-	echo "$(COLOR_CYAN)📊 Archives created: $$RUNS$(COLOR_RESET)"; \
-	$(MAKE) list-archives
-
-# Analyze multiple runs and generate aggregate statistics
-analyze-multi-run:
-	@echo "$(COLOR_BLUE)📊 Analyzing Multiple Experiment Runs$(COLOR_RESET)"
-	@echo "────────────────────────────────────────────────────────"
-	@if [ ! -d "$(ARCHIVE_DIR)" ] || [ -z "$$(ls -A $(ARCHIVE_DIR) 2>/dev/null)" ]; then \
-		echo "$(COLOR_RED)❌ No archived runs found$(COLOR_RESET)"; \
-		echo "$(COLOR_YELLOW)💡 Run 'make multi-run' first$(COLOR_RESET)"; \
-		exit 1; \
-	fi; \
-	run_count=$$(find $(ARCHIVE_DIR) -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l); \
-	echo "$(COLOR_CYAN)Found $$run_count archived runs$(COLOR_RESET)"; \
-	echo ""; \
-	for app in LibraryAPI BlogAPI TaskManagerAPI; do \
-		echo "$(COLOR_GREEN)📊 $$app:$(COLOR_RESET)"; \
-		durations=""; \
-		repairs=""; \
-		successes=0; \
-		total=0; \
-		for archive in $(ARCHIVE_DIR)/metrics_*/; do \
-			if [ -d "$$archive" ]; then \
-				metric_file="$$archive/$${app}_gen_metrics.json"; \
-				if [ -f "$$metric_file" ]; then \
-					total=$$((total + 1)); \
-					duration=$$(grep -o '"duration_sec"[[:space:]]*:[[:space:]]*[0-9.]*' "$$metric_file" | grep -o '[0-9.]*$$'); \
-					repair=$$(grep -o '"repair_attempts"[[:space:]]*:[[:space:]]*[0-9]*' "$$metric_file" | grep -o '[0-9]*$$'); \
-					success=$$(grep -o '"final_success"[[:space:]]*:[[:space:]]*true' "$$metric_file"); \
-					durations="$$durations $$duration"; \
-					repairs="$$repairs $$repair"; \
-					if [ -n "$$success" ]; then \
-						successes=$$((successes + 1)); \
-					fi; \
-				fi; \
-			fi; \
-		done; \
-		if [ $$total -gt 0 ]; then \
-			avg_duration=$$(echo "$$durations" | awk '{sum=0; for(i=1;i<=NF;i++) sum+=$$i; print sum/NF}'); \
-			avg_repairs=$$(echo "$$repairs" | awk '{sum=0; for(i=1;i<=NF;i++) sum+=$$i; print sum/NF}'); \
-			success_rate=$$(echo "scale=1; $$successes * 100 / $$total" | bc); \
-			echo "  • Runs: $$total"; \
-			echo "  • Success rate: $$success_rate% ($$successes/$$total)"; \
-			printf "  • Avg duration: %.2fs\n" $$avg_duration; \
-			printf "  • Avg repairs: %.1f\n" $$avg_repairs; \
-		else \
-			echo "  • No data found"; \
-		fi; \
-		echo ""; \
-	done
-
-# Compare specific run iterations
-compare-runs:
-	@if [ -z "$(RUN1)" ] || [ -z "$(RUN2)" ]; then \
-		echo "$(COLOR_RED)❌ Please specify RUN1=metrics_TIMESTAMP1 RUN2=metrics_TIMESTAMP2$(COLOR_RESET)"; \
-		echo "$(COLOR_YELLOW)Available runs:$(COLOR_RESET)"; \
-		ls -1 $(ARCHIVE_DIR)/ 2>/dev/null | sed 's/^/  • /'; \
-		exit 1; \
-	fi
-	@echo "$(COLOR_BLUE)🔍 Comparing Run 1 vs Run 2$(COLOR_RESET)"
-	@echo "────────────────────────────────────────────────────────"
-	@echo "$(COLOR_CYAN)Run 1:$(COLOR_RESET) $(RUN1)"
-	@echo "$(COLOR_CYAN)Run 2:$(COLOR_RESET) $(RUN2)"
-	@echo ""
-	@for app in LibraryAPI BlogAPI TaskManagerAPI; do \
-		echo "$(COLOR_GREEN)$$app:$(COLOR_RESET)"; \
-		file1="$(ARCHIVE_DIR)/$(RUN1)/$${app}_gen_metrics.json"; \
-		file2="$(ARCHIVE_DIR)/$(RUN2)/$${app}_gen_metrics.json"; \
-		if [ -f "$$file1" ] && [ -f "$$file2" ]; then \
-			dur1=$$(grep -o '"duration_sec"[[:space:]]*:[[:space:]]*[0-9.]*' "$$file1" | grep -o '[0-9.]*$$'); \
-			dur2=$$(grep -o '"duration_sec"[[:space:]]*:[[:space:]]*[0-9.]*' "$$file2" | grep -o '[0-9.]*$$'); \
-			echo "  Run 1 duration: $${dur1}s"; \
-			echo "  Run 2 duration: $${dur2}s"; \
-		else \
-			echo "  Missing data"; \
-		fi; \
-		echo ""; \
-	done
-
-
-
-# Enhanced multi-run analysis with statistics
-analyze-multi-run-stats:
-	@echo "$(COLOR_BLUE)📊 Statistical Analysis of Multiple Runs$(COLOR_RESET)"
-	@echo "────────────────────────────────────────────────────────"
-	@if [ ! -d "$(ARCHIVE_DIR)" ] || [ -z "$$(ls -A $(ARCHIVE_DIR) 2>/dev/null)" ]; then \
-		echo "$(COLOR_RED)❌ No archived runs found$(COLOR_RESET)"; \
-		exit 1; \
-	fi; \
-	run_count=$$(find $(ARCHIVE_DIR) -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l); \
-	echo "$(COLOR_CYAN)Analyzing $$run_count runs$(COLOR_RESET)"; \
-	echo ""; \
-	echo "$(COLOR_BLUE)Results:$(COLOR_RESET)"; \
-	echo ""; \
-	printf "$(COLOR_CYAN)%-20s %-12s %-12s %-12s %-15s$(COLOR_RESET)\n" "App" "Success%" "Duration" "StdDev" "Repairs"; \
-	echo "────────────────────────────────────────────────────────────────────────"; \
-	for app in LibraryAPI BlogAPI TaskManagerAPI; do \
-		durations=""; \
-		repairs=""; \
-		successes=0; \
-		total=0; \
-		for archive in $(ARCHIVE_DIR)/metrics_*/; do \
-			metric_file="$$archive/$${app}_gen_metrics.json"; \
-			if [ -f "$$metric_file" ]; then \
-				total=$$((total + 1)); \
-				duration=$$(grep -o '"duration_sec"[[:space:]]*:[[:space:]]*[0-9.]*' "$$metric_file" | grep -o '[0-9.]*$$'); \
-				repair=$$(grep -o '"repair_attempts"[[:space:]]*:[[:space:]]*[0-9]*' "$$metric_file" | grep -o '[0-9]*$$'); \
-				success=$$(grep -o '"final_success"[[:space:]]*:[[:space:]]*true' "$$metric_file"); \
-				durations="$$durations $$duration"; \
-				repairs="$$repairs $$repair"; \
-				[ -n "$$success" ] && successes=$$((successes + 1)); \
-			fi; \
-		done; \
-		if [ $$total -gt 0 ]; then \
-			success_rate=$$(echo "scale=1; $$successes * 100 / $$total" | bc); \
-			avg_duration=$$(echo "$$durations" | awk '{sum=0; for(i=1;i<=NF;i++) sum+=$$i; printf "%.2f", sum/NF}'); \
-			std_dev=$$(echo "$$durations" | awk -v avg=$$avg_duration '{sum=0; for(i=1;i<=NF;i++) sum+=($$i-avg)^2; printf "%.2f", sqrt(sum/NF)}'); \
-			avg_repairs=$$(echo "$$repairs" | awk '{sum=0; for(i=1;i<=NF;i++) sum+=$$i; printf "%.1f", sum/NF}'); \
-			printf "$(COLOR_GREEN)%-20s$(COLOR_RESET) %-12s %-12s %-12s %-15s\n" \
-				"$$app" "$${success_rate}%" "$${avg_duration}s" "±$${std_dev}s" "$$avg_repairs"; \
-		fi; \
-	done; \
-	echo ""
-
+	@echo "  OPENAI_API_KEY: $$(if [ -n "$$OPENAI_API_KEY" ]; then echo "✅ Set"; else echo "❌ Not set"; fi)"
+	@echo "  OPENAI_BASE_URL: $$(if [ -n "$$OPENAI_BASE_URL" ]; then echo "$$OPENAI_BASE_URL"; else echo "(default)"; fi)"
 
 # =====================================================
 # 🎯 Phony Targets
 # =====================================================
 
 .PHONY: help generate validate experiment all-experiments quick-test \
+        compare-modes analyze-modes report-mode-comparison multi-run-mode multi-run \
         report reports-all report-comparative report-statistics report-failures report-latex \
         academic-package clean clean-safe clean-code clean-logs clean-archive clean-all \
         clean-dry-run clean-force archive archive-metrics backup list-archives restore-latest \
-        list stats status verify-env watch disk-usage count-loc activity compare config multi-run analyze-multi-run compare-runs analyze-multi-run-stats
+        list stats status verify-env watch disk-usage count-loc activity compare config
