@@ -9,12 +9,14 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/eif-courses/hlabgen/internal/metrics"
 )
 
 // Run performs validation and metrics extraction for a generated Go project.
 func Run(projectPath string) (metrics.Result, error) {
+	start := time.Now() // ⏱ Track total validation time
 	m := metrics.Result{}
 
 	// --- go fmt (non-fatal)
@@ -35,14 +37,16 @@ func Run(projectPath string) (metrics.Result, error) {
 	m.VetWarnings = countLines(vetOut.String())
 
 	// --- golangci-lint (optional)
-	lint := exec.Command("golangci-lint", "run", "--out-format=tab")
-	lint.Dir = projectPath
-	var lintOut bytes.Buffer
-	lint.Stdout = &lintOut
-	_ = lint.Run()
-	m.LintWarnings = countLines(lintOut.String())
+	if _, err := exec.LookPath("golangci-lint"); err == nil {
+		lint := exec.Command("golangci-lint", "run", "--out-format=tab")
+		lint.Dir = projectPath
+		var lintOut bytes.Buffer
+		lint.Stdout = &lintOut
+		_ = lint.Run()
+		m.LintWarnings = countLines(lintOut.String())
+	}
 
-	// --- go test -cover (smart detection)
+	// --- go test -cover
 	testDirs := findTestDirs(projectPath)
 	if len(testDirs) == 0 {
 		fmt.Println("⚠️  No test files detected — skipping tests.")
@@ -82,7 +86,7 @@ func Run(projectPath string) (metrics.Result, error) {
 			fmt.Printf("📁 Saved per-package coverage → %s\n", covPath)
 		}
 
-		// ✅ Append global coverage summary to CSV (with ML metrics)
+		// ✅ Append global coverage summary to CSV
 		_ = appendCoverageCSV(projectPath, m)
 
 		fmt.Println("\n--- go test summary ---")
@@ -90,14 +94,21 @@ func Run(projectPath string) (metrics.Result, error) {
 		fmt.Println("------------------------")
 	}
 
-	// --- gocyclo (if available)
-	cyclo := exec.Command("gocyclo", "-over", "0", ".")
-	cyclo.Dir = projectPath
-	var cycloOut bytes.Buffer
-	cyclo.Stdout = &cycloOut
-	_ = cyclo.Run()
-	m.CyclomaticAvg = avgCyclo(cycloOut.String())
+	// --- gocyclo (optional)
+	if _, err := exec.LookPath("gocyclo"); err == nil {
+		cyclo := exec.Command("gocyclo", "-over", "0", ".")
+		cyclo.Dir = projectPath
+		var cycloOut bytes.Buffer
+		cyclo.Stdout = &cycloOut
+		_ = cyclo.Run()
+		m.CyclomaticAvg = avgCyclo(cycloOut.String())
+	}
 
+	// Record total duration
+	m.GenTimeSec = time.Since(start).Seconds()
+
+	fmt.Printf("✅ Validation completed in %.2fs\n", m.GenTimeSec)
+	m.Timestamp = time.Now().Format(time.RFC3339)
 	return m, nil
 }
 

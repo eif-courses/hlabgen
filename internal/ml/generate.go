@@ -78,7 +78,8 @@ func Generate(s Schema) ([]GenFile, GenerationMetrics, error) {
 			metrics.ErrorMessage = fmt.Sprintf("repair model error: %v", repairErr)
 			metrics.EndTime = time.Now()
 			metrics.Duration = metrics.EndTime.Sub(metrics.StartTime)
-			saveMetrics(metrics, "experiments/logs/metrics.csv")
+			saveMetrics(s.AppName, metrics, filepath.Join("experiments", s.AppName, "gen_metrics.json"))
+
 			return nil, metrics, fmt.Errorf("failed to repair model output: %w", repairErr)
 		}
 		fmt.Printf("🔁 Repair call took %v\n", time.Since(startRepair))
@@ -92,7 +93,8 @@ func Generate(s Schema) ([]GenFile, GenerationMetrics, error) {
 			metrics.ErrorMessage = fmt.Sprintf("failed to parse repaired output: %v", err)
 			metrics.EndTime = time.Now()
 			metrics.Duration = metrics.EndTime.Sub(metrics.StartTime)
-			saveMetrics(metrics, "experiments/logs/metrics.csv")
+			saveMetrics(s.AppName, metrics, filepath.Join("experiments", s.AppName, "gen_metrics.json"))
+
 			return nil, metrics, fmt.Errorf(metrics.ErrorMessage)
 		}
 
@@ -112,7 +114,13 @@ func Generate(s Schema) ([]GenFile, GenerationMetrics, error) {
 	fmt.Printf("  • Final Success: %v\n", metrics.FinalSuccess)
 	fmt.Printf("  • Error: %s\n", metrics.ErrorMessage)
 
-	saveMetrics(metrics, "experiments/logs/metrics.csv")
+	if metrics.FinalSuccess {
+		fmt.Printf("✅ %s generation completed successfully\n", s.AppName)
+	} else {
+		fmt.Printf("❌ %s generation failed: %s\n", s.AppName, metrics.ErrorMessage)
+	}
+
+	saveMetrics(s.AppName, metrics, filepath.Join("experiments", s.AppName, "gen_metrics.json"))
 
 	// 🧩 Merge duplicate structs
 	files = deduplicateAndMergeStructs(files)
@@ -161,12 +169,12 @@ func tryParseModelOutput(content string) ([]GenFile, error) {
 	return files, nil
 }
 
-//func min(a, b int) int {
-//	if a < b {
-//		return a
-//	}
-//	return b
-//}
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
 
 func repairModelOutput(client *openai.Client, ctx context.Context, broken string) (string, error) {
 	repairPrompt := fmt.Sprintf(`The following JSON output is invalid. 
@@ -200,20 +208,25 @@ Input:
 
 // --- Metrics ---
 
-func saveMetrics(m GenerationMetrics, path string) {
-	os.MkdirAll(filepath.Dir(path), 0o755)
-	line := fmt.Sprintf("%s,%t,%d,%t,%s,%v\n",
-		m.StartTime.Format(time.RFC3339),
-		m.PrimarySuccess,
-		m.RepairAttempts,
-		m.FinalSuccess,
-		m.ErrorMessage,
-		m.Duration,
-		m.RuleFixes,
-	)
-	f, _ := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
-	defer f.Close()
-	f.WriteString(line)
+func saveMetrics(appName string, m GenerationMetrics, path string) {
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		fmt.Printf("⚠️ Failed to create metrics dir: %v\n", err)
+		return
+	}
+	data := map[string]any{
+		"app_name":        appName,
+		"start_time":      m.StartTime.Format(time.RFC3339),
+		"end_time":        m.EndTime.Format(time.RFC3339),
+		"duration_sec":    m.Duration.Seconds(),
+		"primary_success": m.PrimarySuccess,
+		"repair_attempts": m.RepairAttempts,
+		"final_success":   m.FinalSuccess,
+		"error_message":   m.ErrorMessage,
+		"rule_fixes":      m.RuleFixes,
+	}
+	b, _ := json.MarshalIndent(data, "", "  ")
+	_ = os.WriteFile(path, b, 0o644)
+	fmt.Printf("🧾 Saved ML metrics → %s\n", path)
 }
 
 // --- Deduplication ---

@@ -214,8 +214,11 @@ func main() {
 	if err := metrics.AggregateToCSV("experiments/out", summaryPath); err != nil {
 		log.Printf("⚠️  Failed to aggregate metrics: %v\n", err)
 	}
-	if err := report.GenerateSummary(); err != nil {
-		fmt.Println("⚠️ Failed to generate summary:", err)
+	fmt.Println("\n🧾 Generating Markdown summary from JSON metrics...")
+	if err := report.GenerateSummaryJSONReport(); err != nil {
+		fmt.Println("⚠️ Failed to generate JSON summary:", err)
+	} else {
+		fmt.Println("✅ Summary successfully written to experiments/logs/results.md")
 	}
 
 	fmt.Println("\n✅ Experiment complete.")

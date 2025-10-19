@@ -7,25 +7,14 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 // AggregateToCSV scans all experiment result folders under baseDir
-// and writes a reproducibility summary CSV with metrics + metadata.
+// and appends reproducibility results to a single summary CSV.
+// If the file already exists, new results are appended instead of overwriting.
 func AggregateToCSV(baseDir, outputPath string) error {
-	rows := [][]string{
-		{
-			"AppName",
-			"Mode",
-			"Timestamp",
-			"Model",
-			"BuildSuccess",
-			"TestsPass",
-			"CoveragePct",
-			"LintWarnings",
-			"MLDuration",
-			"RepairAttempts",
-		},
-	}
+	var newRows [][]string
 
 	entries, err := os.ReadDir(baseDir)
 	if err != nil {
@@ -44,14 +33,13 @@ func AggregateToCSV(baseDir, outputPath string) error {
 			_ = json.Unmarshal(data, &res)
 		}
 
-		// --- Load gen_metrics.json ---
-		var gen map[string]interface{}
-		if data, err := os.ReadFile(filepath.Join(appDir, "gen_metrics.json")); err == nil {
-			_ = json.Unmarshal(data, &gen)
-		}
-
 		// --- Load experiment_info.txt (metadata) ---
 		meta := parseMeta(filepath.Join(appDir, "experiment_info.txt"))
+
+		// --- Add timestamp in case missing ---
+		if meta["Timestamp"] == "" {
+			meta["Timestamp"] = time.Now().Format(time.RFC3339)
+		}
 
 		// --- Build row ---
 		row := []string{
@@ -66,7 +54,7 @@ func AggregateToCSV(baseDir, outputPath string) error {
 			meta["MLDuration"],
 			meta["RepairAttempts"],
 		}
-		rows = append(rows, row)
+		newRows = append(newRows, row)
 	}
 
 	// --- Ensure output dir exists ---
@@ -74,23 +62,48 @@ func AggregateToCSV(baseDir, outputPath string) error {
 		return fmt.Errorf("failed to create output dir: %w", err)
 	}
 
-	// --- Write CSV ---
-	f, err := os.Create(outputPath)
+	// --- Detect if CSV exists (append or create) ---
+	fileExists := false
+	if _, err := os.Stat(outputPath); err == nil {
+		fileExists = true
+	}
+
+	f, err := os.OpenFile(outputPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
-		return fmt.Errorf("failed to create CSV: %w", err)
+		return fmt.Errorf("failed to open CSV: %w", err)
 	}
 	defer f.Close()
 
 	writer := csv.NewWriter(f)
 	defer writer.Flush()
 
-	for _, row := range rows {
+	// --- Write header only once ---
+	if !fileExists {
+		header := []string{
+			"AppName",
+			"Mode",
+			"Timestamp",
+			"Model",
+			"BuildSuccess",
+			"TestsPass",
+			"CoveragePct",
+			"LintWarnings",
+			"MLDuration",
+			"RepairAttempts",
+		}
+		if err := writer.Write(header); err != nil {
+			return err
+		}
+	}
+
+	// --- Write new rows ---
+	for _, row := range newRows {
 		if err := writer.Write(row); err != nil {
 			return err
 		}
 	}
 
-	fmt.Printf("🧾 Aggregated %d experiments into %s\n", len(rows)-1, outputPath)
+	fmt.Printf("🧾 Appended %d experiments into %s\n", len(newRows), outputPath)
 	return nil
 }
 

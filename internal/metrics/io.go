@@ -12,13 +12,15 @@ import (
 
 // SaveResult saves validation/build metrics.
 func SaveResult(outDir string, m Result) error {
-	path := filepath.Join(outDir, "metrics.json")
+	filename := fmt.Sprintf("metrics_%s.json", timestamp())
+	path := filepath.Join(outDir, filename)
 	return writeJSON(path, m)
 }
 
 // SaveMLMetrics saves machine learning generation metrics.
 func SaveMLMetrics(outDir string, m mlinternal.GenerationMetrics) error {
-	path := filepath.Join(outDir, "gen_metrics.json")
+	filename := fmt.Sprintf("gen_metrics_%s.json", timestamp())
+	path := filepath.Join(outDir, filename)
 	return writeJSON(path, m)
 }
 
@@ -34,7 +36,8 @@ func SaveCombinedMetrics(outDir string, build Result, gen mlinternal.GenerationM
 		Generation: gen,
 	}
 
-	path := filepath.Join(outDir, "combined_metrics.json")
+	filename := fmt.Sprintf("combined_metrics_%s.json", timestamp())
+	path := filepath.Join(outDir, filename)
 	return writeJSON(path, data)
 }
 
@@ -48,4 +51,9 @@ func writeJSON(path string, v any) error {
 		return fmt.Errorf("failed to encode JSON: %w", err)
 	}
 	return os.WriteFile(path, b, 0o644)
+}
+
+// timestamp returns a compact timestamp for filenames (no colons).
+func timestamp() string {
+	return time.Now().Format("2006-01-02_15-04-05")
 }

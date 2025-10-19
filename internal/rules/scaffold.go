@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 )
 
 // File represents a file created by the rule-based scaffold.
@@ -34,7 +35,8 @@ func Scaffold(outDir string, appName string) ([]File, error) {
 	modulePath := detectModulePath(outDir, appName)
 
 	// --- main.go ---
-	mainGo := []byte(fmt.Sprintf(`package main
+	mainGo := []byte(fmt.Sprintf(`// Auto-generated scaffold for %s (%s)
+package main
 
 import (
 	"log"
@@ -49,7 +51,7 @@ func main() {
 	log.Println("Server listening on :8080")
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
-`, modulePath))
+`, appName, time.Now().Format("2006-01-02 15:04:05"), modulePath))
 
 	// --- routes.go ---
 	routesGo := []byte(`package routes
