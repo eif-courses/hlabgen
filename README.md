@@ -306,3 +306,22 @@ If you use this setup in your research, please cite:
 Developed by  
 **Marius Gžegoževskis**, ****, and ****  
 as part of the *HLabGen Project* on AI-driven software automation in higher education.
+
+
+# Prepare dependencies
+go mod tidy
+
+# Run one experiment
+make experiment APP=BlogAPI
+
+# Run all
+make all-experiments
+
+# Generate summary (if needed manually)
+make report
+
+# Check results
+cat experiments/logs/results.md
+
+# Clean up
+make clean

@@ -1,0 +1,7 @@
+
+🚀 Starting generation for app: FinanceAPI (mode=hybrid)
+✅ Rule-based scaffold created
+2025/10/19 12:08:44 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 36.765490259s
+❌ JSON error: invalid character 'e' after object key:value pair
+⚠️ Primary parse failed, retrying with JSON repair prompt...

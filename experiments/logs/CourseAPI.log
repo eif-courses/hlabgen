@@ -1,0 +1,196 @@
+
+🚀 Starting generation for app: CourseAPI (mode=hybrid)
+✅ Rule-based scaffold created
+2025/10/19 12:04:52 🧠 Starting ML-based code generation...
+⏱️  Initial model call took 33.668605823s
+❌ JSON error: invalid character 'e' after object key:value pair
+⚠️ Primary parse failed, retrying with JSON repair prompt...
+🔁 Repair call took 21.734308145s
+❌ JSON error: invalid character 'e' after object key:value pair
+--- CLEANED JSON ---
+[
+  {
+    "filename": "internal/models/course.go",
+    "code": "package models\n\ntype Course struct {\n\tID          int     `json:\"id\"`\n\tTitle       string  `json:\"title\"`\n\tDescription string  `json:\"description\"`\n\tPrice       float64 `json:\"price\"`\n}\n\ntype Lesson struct {\n\tID       int    `json:\"id\"`\n\tCourseID int    `json:\"course_id\"`\n\tTitle    string `json:\"title\"`\n\tContent  string `json:\"content\"`\n}\n\ntype Enrollment struct {\n\tID       int `json:\"id\"`\n\tCourseID int `json:\"course_id\"`\n\tUserID   int `json:\"user_id\"`\n}"
+  },
+  {
+    "filename": "internal/handlers/course.go",
+    "code": "package handlers\n\nimport (\n\t"encoding/json\"\n\t"net/http\"\n\t\"CourseAPI/internal/models\"\n)\n\nvar courses []models.Course\n\nfunc CreateCourse(w http.ResponseWriter, r *http.Request) {\n\tvar course models.Course\n\tif r.Body == nil {\n\t\thttp.Error(w, \"missing body\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif err := json.NewDecoder(r.Body).Decode(&course); err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}\n\tcourses = append(courses, course)\n\tw.WriteHeader(http.StatusCreated)\n\tjson.NewEncoder(w).Encode(course)\n}\n\nfunc GetCourses(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(courses)\n}\n\nfunc GetCourse(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for getting a single course\n\tw.WriteHeader(http.StatusOK)\n}\n\nfunc UpdateCourse(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for updating a course\n\tw.WriteHeader(http.StatusOK)\n}\n\nfunc DeleteCourse(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for deleting a course\n\tw.WriteHeader(http.StatusNoContent)\n}"
+  },
+  {
+    "filename": "internal/handlers/course_test.go",
+    "code": "package handlers_test\n\nimport (\n\t"bytes\"\n\t"encoding/json\"\n\t"net/http\"\n\t"net/http/httptest\"\n\t\"testing\"\n\t\"CourseAPI/internal/handlers\"\n\t\"CourseAPI/internal/models\"\n)\n\nfunc TestCreateCourse(t *testing.T) {\n\tcourse := models.Course{\n\t\tTitle:       \"Test Course\",\n\t\tDescription: \"Test Description\",\n\t\tPrice:       100.0,\n\t}\n\tbody, _ := json.Marshal(course)\n\treq := httptest.NewRequest(\"POST\", \"/courses\", bytes.NewBuffer(body))\n\tw := httptest.NewRecorder()\n\thandlers.CreateCourse(w, req)\n\tif w.Code != http.StatusCreated {\n\t\tt.Errorf(\"Expected 201, got %d\", w.Code)\n\t}\n}\n\nfunc TestGetCourses(t *testing.T) {\n\treq := httptest.NewRequest(\"GET\", \"/courses\", nil)\n\tw := httptest.NewRecorder()\n\thandlers.GetCourses(w, req)\n\tif w.Code != http.StatusOK {\n\t\tt.Errorf(\"Expected 200, got %d\", w.Code)\n\t}\n}"
+  },
+  {
+    "filename": "internal/handlers/lesson.go",
+    "code": "package handlers\n\nimport (\n\t"encoding/json\"\n\t"net/http\"\n\t\"CourseAPI/internal/models\"\n)\n\nvar lessons []models.Lesson\n\nfunc CreateLesson(w http.ResponseWriter, r *http.Request) {\n\tvar lesson models.Lesson\n\tif r.Body == nil {\n\t\thttp.Error(w, \"missing body\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif err := json.NewDecoder(r.Body).Decode(&lesson); err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}\n\tlessons = append(lessons, lesson)\n\tw.WriteHeader(http.StatusCreated)\n\tjson.NewEncoder(w).Encode(lesson)\n}\n\nfunc GetLessons(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(lessons)\n}\n\nfunc GetLesson(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for getting a single lesson\n\tw.WriteHeader(http.StatusOK)\n}\n\nfunc UpdateLesson(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for updating a lesson\n\tw.WriteHeader(http.StatusOK)\n}\n\nfunc DeleteLesson(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for deleting a lesson\n\tw.WriteHeader(http.StatusNoContent)\n}"
+  },
+  {
+    "filename": "internal/handlers/lesson_test.go",
+    "code": "package handlers_test\n\nimport (\n\t"bytes\"\n\t"encoding/json\"\n\t"net/http\"\n\t"net/http/httptest\"\n\t\"testing\"\n\t\"CourseAPI/internal/handlers\"\n\t\"CourseAPI/internal/models\"\n)\n\nfunc TestCreateLesson(t *testing.T) {\n\tlesson := models.Lesson{\n\t\tCourseID: 1,\n\t\tTitle:    \"Test Lesson\",\n\t\tContent:  \"Test Content\",\n\t}\n\tbody, _ := json.Marshal(lesson)\n\treq := httptest.NewRequest(\"POST\", \"/lessons\", bytes.NewBuffer(body))\n\tw := httptest.NewRecorder()\n\thandlers.CreateLesson(w, req)\n\tif w.Code != http.StatusCreated {\n\t\tt.Errorf(\"Expected 201, got %d\", w.Code)\n\t}\n}\n\nfunc TestGetLessons(t *testing.T) {\n\treq := httptest.NewRequest(\"GET\", \"/lessons\", nil)\n\tw := httptest.NewRecorder()\n\thandlers.GetLessons(w, req)\n\tif w.Code != http.StatusOK {\n\t\tt.Errorf(\"Expected 200, got %d\", w.Code)\n\t}\n}"
+  },
+  {
+    "filename": "internal/handlers/enrollment.go",
+    "code": "package handlers\n\nimport (\n\t"encoding/json\"\n\t"net/http\"\n\t\"CourseAPI/internal/models\"\n)\n\nvar enrollments []models.Enrollment\n\nfunc CreateEnrollment(w http.ResponseWriter, r *http.Request) {\n\tvar enrollment models.Enrollment\n\tif r.Body == nil {\n\t\thttp.Error(w, \"missing body\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif err := json.NewDecoder(r.Body).Decode(&enrollment); err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}\n\tenrollments = append(enrollments, enrollment)\n\tw.WriteHeader(http.StatusCreated)\n\tjson.NewEncoder(w).Encode(enrollment)\n}\n\nfunc GetEnrollments(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(enrollments)\n}\n\nfunc GetEnrollment(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for getting a single enrollment\n\tw.WriteHeader(http.StatusOK)\n}\n\nfunc UpdateEnrollment(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for updating an enrollment\n\tw.WriteHeader(http.StatusOK)\n}\n\nfunc DeleteEnrollment(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for deleting an enrollment\n\tw.WriteHeader(http.StatusNoContent)\n}"
+  },
+  {
+    "filename": "internal/handlers/enrollment_test.go",
+    "code": "package handlers_test\n\nimport (\n\t"bytes\"\n\t"encoding/json\"\n\t"net/http\"\n\t"net/http/httptest\"\n\t\"testing\"\n\t\"CourseAPI/internal/handlers\"\n\t\"CourseAPI/internal/models\"\n)\n\nfunc TestCreateEnrollment(t *testing.T) {\n\tenrollment := models.Enrollment{\n\t\tCourseID: 1,\n\t\tUserID:   1,\n\t}\n\tbody, _ := json.Marshal(enrollment)\n\treq := httptest.NewRequest(\"POST\", \"/enrollments\", bytes.NewBuffer(body))\n\tw := httptest.NewRecorder()\n\thandlers.CreateEnrollment(w, req)\n\tif w.Code != http.StatusCreated {\n\t\tt.Errorf(\"Expected 201, got %d\", w.Code)\n\t}\n}\n\nfunc TestGetEnrollments(t *testing.T) {\n\treq := httptest.NewRequest(\"GET\", \"/enrollments\", nil)\n\tw := httptest.NewRecorder()\n\thandlers.GetEnrollments(w, req)\n\tif w.Code != http.StatusOK {\n\t\tt.Errorf(\"Expected 200, got %d\", w.Code)\n\t}\n}"
+  },
+  {
+    "filename": "internal/routes/routes.go",
+    "code": "package routes\n\nimport (\n\t\"github.com/gorilla/mux\"\n\t\"CourseAPI/internal/handlers\"\n)\n\nfunc Register(r *mux.Router) {\n\t// Course routes\n\tr.HandleFunc(\"/courses\", handlers.CreateCourse).Methods(\"POST\")\n\tr.HandleFunc(\"/courses\", handlers.GetCourses).Methods(\"GET\")\n\tr.HandleFunc(\"/courses/{id}\", handlers.GetCourse).Methods(\"GET\")\n\tr.HandleFunc(\"/courses/{id}\", handlers.UpdateCourse).Methods(\"PUT\")\n\tr.HandleFunc(\"/courses/{id}\", handlers.DeleteCourse).Methods(\"DELETE\")\n\t// Lesson routes\n\tr.HandleFunc(\"/lessons\", handlers.CreateLesson).Methods(\"POST\")\n\tr.HandleFunc(\"/lessons\", handlers.GetLessons).Methods(\"GET\")\n\tr.HandleFunc(\"/lessons/{id}\", handlers.GetLesson).Methods(\"GET\")\n\tr.HandleFunc(\"/lessons/{id}\", handlers.UpdateLesson).Methods(\"PUT\")\n\tr.HandleFunc(\"/lessons/{id}\", handlers.DeleteLesson).Methods(\"DELETE\")\n\t// Enrollment routes\n\tr.HandleFunc(\"/enrollments\", handlers.CreateEnrollment).Methods(\"POST\")\n\tr.HandleFunc(\"/enrollments\", handlers.GetEnrollments).Methods(\"GET\")\n\tr.HandleFunc(\"/enrollments/{id}\", handlers.GetEnrollment).Methods(\"GET\")\n\tr.HandleFunc(\"/enrollments/{id}\", handlers.UpdateEnrollment).Methods(\"PUT\")\n\tr.HandleFunc(\"/enrollments/{id}\", handlers.DeleteEnrollment).Methods(\"DELETE\")\n}"
+  },
+  {
+    "filename": "cmd/main.go",
+    "code": "package main\n\nimport (\n\t\"log\"\n\t\"net/http\"\n\t\"github.com/gorilla/mux\"\n\t\"CourseAPI/internal/routes\"\n)\n\nfunc main() {\n\tr := mux.NewRouter()\n\troutes.Register(r)\n\tlog.Println(\"Server listening on :8080\")\n\tlog.Fatal(http.ListenAndServe(\":8080\", r))\n}"
+  },
+  {
+    "filename": "tasks.md",
+    "code": "# Lab Tasks\n\n1. Implement the GetCourse handler to return a single course by ID\n2. Add validation for required fields in CreateCourse handler\n3. Write additional test cases for UpdateCourse and DeleteCourse handlers\n4. Implement error handling for course not found scenarios\n5. Add pagination support for the GetCourses endpoint\n6. Implement the GetLesson handler to return a single lesson by ID\n7. Implement the GetEnrollment handler to return a single enrollment by ID\n8. Implement payment processing logic for enrollments\n"
+  }
+]
+--- END ---
+🧾 Saved ML metrics → experiments/CourseAPI/gen_metrics.json
+2025/10/19 12:05:47 ⚠️  ML generation failed once: failed to parse repaired output: json parse error: invalid character 'e' after object key:value pair
+2025/10/19 12:05:47 🔁 Retrying with relaxed mode...
+2025/10/19 12:05:47 🪄 Using relaxed ML generation mode (cleaning JSON output)...
+⏱️  Initial model call took 34.511272155s
+✅ Parsed 12 files
+
+📊 Generation Summary:
+  • Duration: 34.511959856s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+✅ CourseAPI generation completed successfully
+🧾 Saved ML metrics → experiments/CourseAPI/gen_metrics.json
+2025/10/19 12:06:22 ✅ Normal ML generation succeeded — no relaxed mode needed.
+📝 Processing: internal/models/course.go
+✅ Written: experiments/out/CourseAPI/internal/models/course.go
+📝 Processing: internal/models/lesson.go
+✅ Written: experiments/out/CourseAPI/internal/models/lesson.go
+📝 Processing: internal/models/enrollment.go
+✅ Written: experiments/out/CourseAPI/internal/models/enrollment.go
+📝 Processing: internal/handlers/course.go
+🔧 Fixed handler signature for CreateCourse
+🔧 Fixed handler signature for GetCourses
+🔧 Fixed handler signature for GetCourse
+🔧 Fixed handler signature for UpdateCourse
+🔧 Fixed handler signature for DeleteCourse
+✅ Written: experiments/out/CourseAPI/internal/handlers/course.go
+📝 Processing: internal/handlers/lesson.go
+🔧 Fixed handler signature for CreateLesson
+🔧 Fixed handler signature for GetLessons
+🔧 Fixed handler signature for GetLesson
+🔧 Fixed handler signature for UpdateLesson
+🔧 Fixed handler signature for DeleteLesson
+✅ Written: experiments/out/CourseAPI/internal/handlers/lesson.go
+📝 Processing: internal/handlers/enrollment.go
+🔧 Fixed handler signature for CreateEnrollment
+🔧 Fixed handler signature for GetEnrollments
+🔧 Fixed handler signature for GetEnrollment
+🔧 Fixed handler signature for UpdateEnrollment
+🔧 Fixed handler signature for DeleteEnrollment
+✅ Written: experiments/out/CourseAPI/internal/handlers/enrollment.go
+📝 Processing: internal/handlers/course_test.go
+🔧 Fixed test signature for TestCreateCourse
+🔧 Fixed test signature for TestGetCourses
+✅ Auto-fixed test signatures in internal/handlers/course_test.go
+✅ Written: experiments/out/CourseAPI/internal/handlers/course_test.go
+📝 Processing: internal/handlers/lesson_test.go
+🔧 Fixed test signature for TestCreateLesson
+🔧 Fixed test signature for TestGetLessons
+✅ Auto-fixed test signatures in internal/handlers/lesson_test.go
+✅ Written: experiments/out/CourseAPI/internal/handlers/lesson_test.go
+📝 Processing: internal/handlers/enrollment_test.go
+🔧 Fixed test signature for TestCreateEnrollment
+🔧 Fixed test signature for TestGetEnrollments
+✅ Auto-fixed test signatures in internal/handlers/enrollment_test.go
+✅ Written: experiments/out/CourseAPI/internal/handlers/enrollment_test.go
+📝 Processing: internal/routes/routes.go
+🔧 Fixed Register function parameter
+✅ Written: experiments/out/CourseAPI/internal/routes/routes.go
+📝 Processing: cmd/main.go
+✅ Written: experiments/out/CourseAPI/cmd/main.go
+📝 Processing: tasks.md
+⚠️  Syntax validation failed for tasks.md: temp.go:1:1: illegal character U+0023 '#'
+🔧 Attempting additional fixes...
+❌ Could not auto-fix syntax errors in tasks.md
+✅ Written: experiments/out/CourseAPI/tasks.md
+
+🔧 Total rule-based fixes applied: 25
+
+🔧 Running auto-fix on generated files...
+
+🔧 Auto-fixing all files in: experiments/out/CourseAPI
+
+📝 Fixing test function signatures...
+  ✅ Fixed test signatures in course_test.go
+  ✅ Fixed test signatures in enrollment_test.go
+  ✅ Fixed test signatures in lesson_test.go
+
+📝 Fixing handler function signatures...
+
+📝 Fixing routes Register function...
+
+📝 Fixing missing commas in struct literals...
+
+📝 Ensuring test file imports...
+
+✅ Applied 3 fixes total!
+✅ Auto-fix completed successfully
+
+🔍 Validating Go syntax...
+✅ All generated files have valid Go syntax
+2025/10/19 12:06:22 ✅ Generated 3 test file(s)
+
+🔧 Fixing import paths...
+2025/10/19 12:06:22 🔧 Detected module name: CourseAPI — fixing imports...
+2025/10/19 12:06:22 ✅ No import fixes needed
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+
+🔍 Final syntax validation after fixes...
+✅ All syntax errors resolved
+✅ ML generation completed (34.51s)
+📁 Saved per-package coverage → experiments/out/CourseAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/CourseAPI/internal/handlers ---
+=== RUN   TestCreateCourse
+--- PASS: TestCreateCourse (0.00s)
+=== RUN   TestGetCourses
+--- PASS: TestGetCourses (0.00s)
+=== RUN   TestCreateEnrollment
+--- PASS: TestCreateEnrollment (0.00s)
+=== RUN   TestGetEnrollments
+--- PASS: TestGetEnrollments (0.00s)
+=== RUN   TestCreateLesson
+--- PASS: TestCreateLesson (0.00s)
+=== RUN   TestGetLessons
+--- PASS: TestGetLessons (0.00s)
+PASS
+coverage: 53.3% of statements
+ok  	CourseAPI/internal/handlers	0.003s
+
+------------------------
+✅ Validation completed in 0.80s
+
+📊 Summary for CourseAPI:
+  • BuildSuccess = true
+  • LintWarnings = 0
+  • TestsPass    = true
+  • Coverage     = 53.3%
+  • ML Duration  = 0s (repair 0)
+  • Rule Fixes   = 0
+🧾 Appended 5 experiments into experiments/logs/summary.csv
+
+🧾 Generating Markdown summary from JSON metrics...
+📊 Markdown results saved → experiments/logs/results.md
+✅ Summary successfully written to experiments/logs/results.md
+
+✅ Experiment complete.

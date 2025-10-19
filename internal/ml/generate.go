@@ -41,7 +41,7 @@ func Generate(s Schema) ([]GenFile, GenerationMetrics, error) {
 	client := openai.NewClient(apiKey)
 	prompt := BuildPrompt(s)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 180*time.Second)
 	defer cancel()
 
 	startQuery := time.Now()

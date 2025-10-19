@@ -13,7 +13,7 @@ import (
 func TestCreateOrder(t *testing.T) {
 	order := models.Order{
 		UserID:   1,
-		Products: []models.Product{{ID: 1, Name: "Product", Price: 10.0, Stock: 100}},
+		Products: []models.Product{{ID: 1, Name: "Test Product", Price: 10.0, Stock: 100}},
 		Total:    10.0,
 	}
 	body, _ := json.Marshal(order)

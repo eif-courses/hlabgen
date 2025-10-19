@@ -1,2 +1,7 @@
 AppName,BuildSuccess,TestsPass,CoveragePct,MLDurationSec,RepairAttempts
+AuctionAPI,true,true,53.3,0.00,0
+BlogAPI,true,true,53.3,0.00,0
+CarRentalAPI,true,true,53.3,0.00,0
+ClinicAPI,true,true,53.3,0.00,0
+CourseAPI,true,true,53.3,0.00,0
 EcommerceAPI,true,true,53.3,0.00,0

@@ -1,5 +1,5 @@
 # =====================================================
-# 🧪 HLabGen Experiment Automation Makefile (Enhanced JSON Edition)
+# 🧪 HLabGen Experiment Automation Makefile (JSON Edition - Final)
 # =====================================================
 
 # --- Configuration Defaults ---
@@ -8,7 +8,6 @@ INPUT_DIR   ?= experiments/input
 OUT_DIR     ?= experiments/out
 LOG_DIR     ?= experiments/logs
 RESULTS_MD  ?= $(LOG_DIR)/results.md
-SUMMARY_CSV ?= $(LOG_DIR)/summary.csv  # legacy compatibility
 
 # Automatically detect all input files (JSONs)
 INPUT_FILES := $(wildcard $(INPUT_DIR)/*.json)
@@ -36,10 +35,9 @@ help:
 	@echo "  make experiment APP=<name>   - Run full pipeline for one app"
 	@echo "  make all-experiments         - Run ALL experiments"
 	@echo "  make report                  - Generate Markdown report from JSON metrics"
-	@echo "  make analyze                 - (Legacy) Aggregate CSV metrics"
 	@echo "  make list                    - List available experiments"
-	@echo "  make clean                   - Clean all outputs"
-	@echo "  make compare                 - Compare experiment results"
+	@echo "  make clean                   - Clean all outputs and logs"
+	@echo "  make quick-test              - Run a quick 3-app smoke test"
 	@echo ""
 	@echo "$(COLOR_YELLOW)Available apps:$(COLOR_RESET)"
 	@for file in $(INPUT_FILES); do echo "  - $$(basename $$file .json)"; done
@@ -69,7 +67,7 @@ validate:
 	@go run ./cmd/hlabgen -validate -out $(OUT_DIR)/$(APP)
 	@echo "$(COLOR_GREEN)✅ Validation done for $(APP)$(COLOR_RESET)"
 
-# 3️⃣ Full pipeline for one app (generate + analyze)
+# 3️⃣ Full pipeline for one app (generate + report)
 experiment:
 	@if [ -z "$(APP)" ]; then \
 		echo "$(COLOR_RED)❌ Please specify APP=<AppName>$(COLOR_RESET)"; \
@@ -78,7 +76,7 @@ experiment:
 	@$(MAKE) generate APP=$(APP)
 	@$(MAKE) report
 
-# 4️⃣ Run all experiments (generate all)
+# 4️⃣ Run all experiments
 all-experiments:
 	@echo "$(COLOR_BLUE)🧬 Running all experiments in $(INPUT_DIR)...$(COLOR_RESET)"
 	@mkdir -p $(LOG_DIR)
@@ -111,29 +109,14 @@ report:
 	@go run ./cmd/report
 	@echo "$(COLOR_GREEN)✅ Markdown report ready: $(RESULTS_MD)$(COLOR_RESET)"
 
-# 6️⃣ (Legacy) Aggregate coverage + ML metrics CSV
-analyze:
-	@echo "$(COLOR_YELLOW)⚠️ Using legacy CSV aggregator (consider 'make report')$(COLOR_RESET)"
-	@go run ./cmd/analyze
-	@echo "$(COLOR_GREEN)✅ Analysis complete$(COLOR_RESET)"
-
-# 7️⃣ Compare results (CSV only)
-compare:
-	@if [ ! -f "$(SUMMARY_CSV)" ]; then \
-		echo "$(COLOR_RED)❌ No summary.csv found. Run 'make analyze' first.$(COLOR_RESET)"; \
-		exit 1; \
-	fi
-	@echo "$(COLOR_BLUE)📊 Comparing Experiments$(COLOR_RESET)"
-	@grep -E "Blog|Recipe|Library|Task|Shop|Social" $(SUMMARY_CSV) || echo "No comparison data"
-
-# 8️⃣ Clean everything
+# 6️⃣ Clean everything
 clean:
 	@echo "$(COLOR_YELLOW)🧹 Cleaning outputs and logs...$(COLOR_RESET)"
 	@rm -rf $(OUT_DIR)/*
 	@rm -rf $(LOG_DIR)/*
 	@echo "$(COLOR_GREEN)✅ Cleaned$(COLOR_RESET)"
 
-# 9️⃣ Quick smoke test
+# 7️⃣ Quick smoke test
 quick-test:
 	@echo "$(COLOR_BLUE)🧪 Running quick test (3 apps)...$(COLOR_RESET)"
 	@$(MAKE) experiment APP=LibraryAPI
@@ -141,7 +124,7 @@ quick-test:
 	@$(MAKE) experiment APP=TaskManagerAPI
 	@echo "$(COLOR_GREEN)✅ Quick test complete$(COLOR_RESET)"
 
-# 🔧 Utilities
+# 8️⃣ Utility - List available experiments
 list:
 	@echo "$(COLOR_BLUE)📂 Available experiment configurations:$(COLOR_RESET)"
 	@for file in $(INPUT_FILES); do \
@@ -150,4 +133,4 @@ list:
 		printf "  $(COLOR_GREEN)%-15s$(COLOR_RESET) [%s]\n" $$app $$diff; \
 	done
 
-.PHONY: help generate validate experiment all-experiments report analyze compare clean list quick-test
+.PHONY: help generate validate experiment all-experiments report clean list quick-test

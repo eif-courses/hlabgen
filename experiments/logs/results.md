@@ -1,4 +1,11 @@
 # Experimental Evaluation Results
 
-| App | Primary Success | Repair Attempts | Rule Fixes | Final Success | Build Success | Tests Pass | Coverage (%) | Duration (s) |
-| EcommerceAPI | false | 0 | 0 | false | false | false | 0.0 | 0.00 |
+| App | Mode | Primary Success | Repair Attempts | Rule Fixes | Final Success | Duration (s) | Error |
+|-----|------|----------------|----------------|-------------|----------------|---------------|-------|
+| AuctionAPI | Normal | true | 0 | 0 | true | 0.00 |  |
+| BlogAPI | Normal | true | 0 | 0 | true | 0.00 |  |
+| CarRentalAPI | Normal | true | 0 | 0 | true | 0.00 |  |
+| CarRentalAPI | Relaxed | true | 0 | 0 | true | 0.00 |  |
+| ClinicAPI | Normal | true | 0 | 0 | true | 0.00 |  |
+| CourseAPI | Normal | true | 0 | 0 | true | 0.00 |  |
+| EcommerceAPI | Normal | true | 0 | 0 | true | 0.00 |  |

@@ -1,0 +1,16 @@
+FinanceAPI
+FitnessAPI
+FoodDeliveryAPI
+HealthAPI
+HotelAPI
+InventoryAPI
+LibraryAPI
+MovieAPI
+MusicAPI
+NewsAPI
+PortfolioAPI
+ProjectAPI
+RecipeAPI
+ResearchAPI
+SchoolAPI
+ShopAPI

@@ -13,7 +13,7 @@ import (
 func TestCreateCart(t *testing.T) {
 	cart := models.Cart{
 		UserID:   1,
-		Products: []models.Product{{ID: 1, Name: "Product", Price: 10.0, Stock: 100}},
+		Products: []models.Product{{ID: 1, Name: "Test Product", Price: 10.0, Stock: 100}},
 	}
 	body, _ := json.Marshal(cart)
 	req := httptest.NewRequest("POST", "/carts", bytes.NewBuffer(body))
