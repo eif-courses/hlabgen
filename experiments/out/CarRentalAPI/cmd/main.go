@@ -1,3 +1,4 @@
+// Auto-generated scaffold for CarRentalAPI (2025-10-19 12:27:25)
 package main
 
 import (

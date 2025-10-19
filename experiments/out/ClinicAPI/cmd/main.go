@@ -1,3 +1,4 @@
+// Auto-generated scaffold for ClinicAPI (2025-10-19 12:27:28)
 package main
 
 import (

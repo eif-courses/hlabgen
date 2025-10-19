@@ -1,11 +1,11 @@
 {
   "app_name": "CourseAPI",
-  "duration_sec": 34.511959856,
-  "end_time": "2025-10-19T12:06:22+03:00",
+  "duration_sec": 28.498191863,
+  "end_time": "2025-10-19T12:18:33+03:00",
   "error_message": "",
   "final_success": true,
   "primary_success": true,
   "repair_attempts": 0,
   "rule_fixes": 0,
-  "start_time": "2025-10-19T12:05:47+03:00"
+  "start_time": "2025-10-19T12:18:05+03:00"
 }

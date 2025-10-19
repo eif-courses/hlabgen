@@ -38,25 +38,29 @@ func Generate(s Schema) ([]GenFile, GenerationMetrics, error) {
 		return nil, metrics, errors.New("OPENAI_API_KEY environment variable not set")
 	}
 
-	client := openai.NewClient(apiKey)
+	// Configure client with optional EU region
+	config := openai.DefaultConfig(apiKey)
+	baseURL := os.Getenv("OPENAI_BASE_URL")
+	if baseURL != "" {
+		config.BaseURL = baseURL
+		fmt.Printf("🌍 Using custom endpoint: %s\n", baseURL)
+	} else {
+		// Default to EU if you want, or leave as default global
+		// config.BaseURL = "https://eu.api.openai.com/v1"
+	}
+
+	client := openai.NewClientWithConfig(config)
 	prompt := BuildPrompt(s)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 180*time.Second)
 	defer cancel()
 
-	startQuery := time.Now()
-	resp, err := client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
-		Model: openai.GPT4oMini,
-		Messages: []openai.ChatCompletionMessage{
-			{Role: openai.ChatMessageRoleUser, Content: prompt},
-		},
-		Temperature: 0.2,
-	})
+	// Call with retry logic and model fallback
+	resp, err := callWithRetry(ctx, client, prompt, 0.2)
 	if err != nil {
 		metrics.ErrorMessage = fmt.Sprintf("initial query failed: %v", err)
 		return nil, metrics, err
 	}
-	fmt.Printf("⏱️  Initial model call took %v\n", time.Since(startQuery))
 
 	if len(resp.Choices) == 0 {
 		metrics.ErrorMessage = "no response choices from model"
@@ -134,6 +138,68 @@ func Generate(s Schema) ([]GenFile, GenerationMetrics, error) {
 	return files, metrics, nil
 }
 
+// callWithRetry attempts API call with exponential backoff and model fallback
+func callWithRetry(ctx context.Context, client *openai.Client, prompt string, temperature float32) (openai.ChatCompletionResponse, error) {
+	models := []string{openai.GPT3Dot5Turbo, openai.GPT3Dot5Turbo16K}
+
+	maxRetries := 3
+
+	var lastErr error
+
+	for _, model := range models {
+		fmt.Printf("🤖 Trying model: %s\n", model)
+
+		for attempt := 0; attempt < maxRetries; attempt++ {
+			if attempt > 0 {
+				// Exponential backoff: 1s, 4s, 9s
+				waitTime := time.Duration(attempt*attempt) * time.Second
+				fmt.Printf("⏳ Retry attempt %d/%d after %v...\n", attempt+1, maxRetries, waitTime)
+				time.Sleep(waitTime)
+			}
+
+			startQuery := time.Now()
+			resp, err := client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
+				Model: model,
+				Messages: []openai.ChatCompletionMessage{
+					{Role: openai.ChatMessageRoleUser, Content: prompt},
+				},
+				Temperature: temperature,
+			})
+
+			if err == nil {
+				fmt.Printf("⏱️  Model call took %v (model: %s, attempt: %d)\n",
+					time.Since(startQuery), model, attempt+1)
+				return resp, nil
+			}
+
+			lastErr = err
+
+			// Check if it's a retryable error (503, capacity, rate limit)
+			errStr := err.Error()
+			isRetryable := strings.Contains(errStr, "503") ||
+				strings.Contains(errStr, "capacity") ||
+				strings.Contains(errStr, "overloaded") ||
+				strings.Contains(errStr, "429")
+
+			if isRetryable {
+				fmt.Printf("⚠️  Retryable error on attempt %d with %s: %v\n", attempt+1, model, err)
+				if attempt < maxRetries-1 {
+					continue // Try again with same model
+				}
+				// Max retries reached for this model, try next model
+				fmt.Printf("❌ Max retries reached for %s, trying next model...\n", model)
+				break
+			}
+
+			// Non-retryable error (auth, invalid request, etc.)
+			fmt.Printf("❌ Non-retryable error with %s: %v\n", model, err)
+			return openai.ChatCompletionResponse{}, err
+		}
+	}
+
+	return openai.ChatCompletionResponse{}, fmt.Errorf("all models exhausted, last error: %w", lastErr)
+}
+
 // --- Parsing and Repair ---
 
 func tryParseModelOutput(content string) ([]GenFile, error) {
@@ -184,16 +250,12 @@ Return ONLY the corrected JSON (no explanations, no markdown).
 Input:
 %s`, broken)
 
-	resp, err := client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
-		Model: openai.GPT4oMini,
-		Messages: []openai.ChatCompletionMessage{
-			{Role: openai.ChatMessageRoleUser, Content: repairPrompt},
-		},
-		Temperature: 0.0,
-	})
+	// Use retry logic for repair too
+	resp, err := callWithRetry(ctx, client, repairPrompt, 0.0)
 	if err != nil {
 		return "", err
 	}
+
 	if len(resp.Choices) == 0 {
 		return "", errors.New("no repair response from model")
 	}

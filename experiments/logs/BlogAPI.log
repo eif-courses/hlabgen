@@ -1,198 +1,23 @@
 
 🚀 Starting generation for app: BlogAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/19 11:58:52 🧠 Starting ML-based code generation...
-⏱️  Initial model call took 33.348153193s
-❌ JSON error: invalid character 'e' after object key:value pair
-⚠️ Primary parse failed, retrying with JSON repair prompt...
-🔁 Repair call took 35.76126259s
-❌ JSON error: invalid character 'e' after object key:value pair
---- CLEANED JSON ---
-[
-  {
-    "filename": "internal/models/post.go",
-    "code": "package models\n\ntype Post struct {\n\tID      int    `json:\"id\"`\n\tTitle   string `json:\"title\"`\n\tContent string `json:\"content\"`\n\tAuthorID int   `json:\"author_id\"`\n}\n"
-  },
-  {
-    "filename": "internal/models/comment.go",
-    "code": "package models\n\ntype Comment struct {\n\tID     int    `json:\"id\"`\n\tPostID int    `json:\"post_id\"`\n\tContent string `json:\"content\"`\n\tAuthorID int   `json:\"author_id\"`\n}\n"
-  },
-  {
-    "filename": "internal/models/author.go",
-    "code": "package models\n\ntype Author struct {\n\tID       int    `json:\"id\"`\n\tUsername string `json:\"username\"`\n\tEmail    string `json:\"email\"`\n\tPassword string `json:\"password\"`\n}\n"
-  },
-  {
-    "filename": "internal/handlers/post.go",
-    "code": "package handlers\n\nimport (\n\t"encoding/json\"\n\t"net/http\"\n\t\"BlogAPI/internal/models\"\n)\n\nvar posts []models.Post\n\nfunc CreatePost(w http.ResponseWriter, r *http.Request) {\n\tvar post models.Post\n\tif r.Body == nil {\n\t\thttp.Error(w, \"missing body\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif err := json.NewDecoder(r.Body).Decode(&post); err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}\n\tposts = append(posts, post)\n\tw.WriteHeader(http.StatusCreated)\n\tjson.NewEncoder(w).Encode(post)\n}\n\nfunc GetPosts(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(posts)\n}\n\nfunc GetPost(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for getting a single post\n\tw.WriteHeader(http.StatusOK)\n}\n\nfunc UpdatePost(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for updating a post\n\tw.WriteHeader(http.StatusOK)\n}\n\nfunc DeletePost(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for deleting a post\n\tw.WriteHeader(http.StatusNoContent)\n}\n"
-  },
-  {
-    "filename": "internal/handlers/comment.go",
-    "code": "package handlers\n\nimport (\n\t"encoding/json\"\n\t"net/http\"\n\t\"BlogAPI/internal/models\"\n)\n\nvar comments []models.Comment\n\nfunc CreateComment(w http.ResponseWriter, r *http.Request) {\n\tvar comment models.Comment\n\tif r.Body == nil {\n\t\thttp.Error(w, \"missing body\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif err := json.NewDecoder(r.Body).Decode(&comment); err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}\n\tcomments = append(comments, comment)\n\tw.WriteHeader(http.StatusCreated)\n\tjson.NewEncoder(w).Encode(comment)\n}\n\nfunc GetComments(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(comments)\n}\n\nfunc GetComment(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for getting a single comment\n\tw.WriteHeader(http.StatusOK)\n}\n\nfunc UpdateComment(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for updating a comment\n\tw.WriteHeader(http.StatusOK)\n}\n\nfunc DeleteComment(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for deleting a comment\n\tw.WriteHeader(http.StatusNoContent)\n}\n"
-  },
-  {
-    "filename": "internal/handlers/author.go",
-    "code": "package handlers\n\nimport (\n\t"encoding/json\"\n\t"net/http\"\n\t\"BlogAPI/internal/models\"\n)\n\nvar authors []models.Author\n\nfunc CreateAuthor(w http.ResponseWriter, r *http.Request) {\n\tvar author models.Author\n\tif r.Body == nil {\n\t\thttp.Error(w, \"missing body\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif err := json.NewDecoder(r.Body).Decode(&author); err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}\n\tauthors = append(authors, author)\n\tw.WriteHeader(http.StatusCreated)\n\tjson.NewEncoder(w).Encode(author)\n}\n\nfunc GetAuthors(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(authors)\n}\n\nfunc GetAuthor(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for getting a single author\n\tw.WriteHeader(http.StatusOK)\n}\n\nfunc UpdateAuthor(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for updating an author\n\tw.WriteHeader(http.StatusOK)\n}\n\nfunc DeleteAuthor(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for deleting an author\n\tw.WriteHeader(http.StatusNoContent)\n}\n"
-  },
-  {
-    "filename": "internal/handlers/post_test.go",
-    "code": "package handlers_test\n\nimport (\n\t"bytes\"\n\t"encoding/json\"\n\t"net/http\"\n\t"net/http/httptest\"\n\t"testing\"\n\t\"BlogAPI/internal/handlers\"\n\t\"BlogAPI/internal/models\"\n)\n\nfunc TestCreatePost(t *testing.T) {\n\tpost := models.Post{\n\t\tTitle:   \"Test Post\",\n\t\tContent: \"This is a test post.\",\n\t\tAuthorID: 1,\n\t}\n\tbody, _ := json.Marshal(post)\n\treq := httptest.NewRequest(\"POST\", \"/posts\", bytes.NewBuffer(body))\n\tw := httptest.NewRecorder()\n\thandlers.CreatePost(w, req)\n\tif w.Code != http.StatusCreated {\n\t\tt.Errorf(\"Expected 201, got %d\", w.Code)\n\t}\n}\n\nfunc TestGetPosts(t *testing.T) {\n\treq := httptest.NewRequest(\"GET\", \"/posts\", nil)\n\tw := httptest.NewRecorder()\n\thandlers.GetPosts(w, req)\n\tif w.Code != http.StatusOK {\n\t\tt.Errorf(\"Expected 200, got %d\", w.Code)\n\t}\n}\n"
-  },
-  {
-    "filename": "internal/handlers/comment_test.go",
-    "code": "package handlers_test\n\nimport (\n\t"bytes\"\n\t"encoding/json\"\n\t"net/http\"\n\t"net/http/httptest\"\n\t"testing\"\n\t\"BlogAPI/internal/handlers\"\n\t\"BlogAPI/internal/models\"\n)\n\nfunc TestCreateComment(t *testing.T) {\n\tcomment := models.Comment{\n\t\tPostID: 1,\n\t\tContent: \"This is a test comment.\",\n\t\tAuthorID: 1,\n\t}\n\tbody, _ := json.Marshal(comment)\n\treq := httptest.NewRequest(\"POST\", \"/comments\", bytes.NewBuffer(body))\n\tw := httptest.NewRecorder()\n\thandlers.CreateComment(w, req)\n\tif w.Code != http.StatusCreated {\n\t\tt.Errorf(\"Expected 201, got %d\", w.Code)\n\t}\n}\n\nfunc TestGetComments(t *testing.T) {\n\treq := httptest.NewRequest(\"GET\", \"/comments\", nil)\n\tw := httptest.NewRecorder()\n\thandlers.GetComments(w, req)\n\tif w.Code != http.StatusOK {\n\t\tt.Errorf(\"Expected 200, got %d\", w.Code)\n\t}\n}\n"
-  },
-  {
-    "filename": "internal/handlers/author_test.go",
-    "code": "package handlers_test\n\nimport (\n\t"bytes\"\n\t"encoding/json\"\n\t"net/http\"\n\t"net/http/httptest\"\n\t"testing\"\n\t\"BlogAPI/internal/handlers\"\n\t\"BlogAPI/internal/models\"\n)\n\nfunc TestCreateAuthor(t *testing.T) {\n\tauthor := models.Author{\n\t\tUsername: \"testuser\",\n\t\tEmail:    \"test@example.com\",\n\t\tPassword: \"password\",\n\t}\n\tbody, _ := json.Marshal(author)\n\treq := httptest.NewRequest(\"POST\", \"/authors\", bytes.NewBuffer(body))\n\tw := httptest.NewRecorder()\n\thandlers.CreateAuthor(w, req)\n\tif w.Code != http.StatusCreated {\n\t\tt.Errorf(\"Expected 201, got %d\", w.Code)\n\t}\n}\n\nfunc TestGetAuthors(t *testing.T) {\n\treq := httptest.NewRequest(\"GET\", \"/authors\", nil)\n\tw := httptest.NewRecorder()\n\thandlers.GetAuthors(w, req)\n\tif w.Code != http.StatusOK {\n\t\tt.Errorf(\"Expected 200, got %d\", w.Code)\n\t}\n}\n"
-  },
-  {
-    "filename": "internal/routes/routes.go",
-    "code": "package routes\n\nimport (\n\t\"github.com/gorilla/mux\"\n\t\"BlogAPI/internal/handlers\"\n)\n\nfunc Register(r *mux.Router) {\n\t// Post routes\n\tr.HandleFunc(\"/posts\", handlers.CreatePost).Methods(\"POST\")\n\tr.HandleFunc(\"/posts\", handlers.GetPosts).Methods(\"GET\")\n\tr.HandleFunc(\"/posts/{id}\", handlers.GetPost).Methods(\"GET\")\n\tr.HandleFunc(\"/posts/{id}\", handlers.UpdatePost).Methods(\"PUT\")\n\tr.HandleFunc(\"/posts/{id}\", handlers.DeletePost).Methods(\"DELETE\")\n\t// Comment routes\n\tr.HandleFunc(\"/comments\", handlers.CreateComment).Methods(\"POST\")\n\tr.HandleFunc(\"/comments\", handlers.GetComments).Methods(\"GET\")\n\tr.HandleFunc(\"/comments/{id}\", handlers.GetComment).Methods(\"GET\")\n\tr.HandleFunc(\"/comments/{id}\", handlers.UpdateComment).Methods(\"PUT\")\n\tr.HandleFunc(\"/comments/{id}\", handlers.DeleteComment).Methods(\"DELETE\")\n\t// Author routes\n\tr.HandleFunc(\"/authors\", handlers.CreateAuthor).Methods(\"POST\")\n\tr.HandleFunc(\"/authors\", handlers.GetAuthors).Methods(\"GET\")\n\tr.HandleFunc(\"/authors/{id}\", handlers.GetAuthor).Methods(\"GET\")\n\tr.HandleFunc(\"/authors/{id}\", handlers.UpdateAuthor).Methods(\"PUT\")\n\tr.HandleFunc(\"/authors/{id}\", handlers.DeleteAuthor).Methods(\"DELETE\")\n}\n"
-  },
-  {
-    "filename": "cmd/main.go",
-    "code": "package main\n\nimport (\n\t\"log\"\n\t\"net/http\"\n\t\"github.com/gorilla/mux\"\n\t\"BlogAPI/internal/routes\"\n)\n\nfunc main() {\n\tr := mux.NewRouter()\n\troutes.Register(r)\n\tlog.Println(\"Server listening on :8080\")\n\tlog.Fatal(http.ListenAndServe(\":8080\", r))\n}\n"
-  },
-  {
-    "filename": "tasks.md",
-    "code": "# Lab Tasks\n\n1. Implement the GetPost handler to return a single post by ID\n2. Implement the GetComment handler to return a single comment by ID\n3. Implement the GetAuthor handler to return a single author by ID\n4. Add validation for required fields in CreatePost, CreateComment, and CreateAuthor handlers\n5. Write additional test cases for UpdatePost, UpdateComment, and UpdateAuthor handlers\n6. Implement error handling for post, comment, and author not found scenarios\n7. Add pagination support for the GetPosts and GetComments endpoints\n"
-  }
-]
---- END ---
-🧾 Saved ML metrics → experiments/BlogAPI/gen_metrics.json
-2025/10/19 12:00:01 ⚠️  ML generation failed once: failed to parse repaired output: json parse error: invalid character 'e' after object key:value pair
-2025/10/19 12:00:01 🔁 Retrying with relaxed mode...
-2025/10/19 12:00:01 🪄 Using relaxed ML generation mode (cleaning JSON output)...
-⏱️  Initial model call took 36.63423405s
-✅ Parsed 12 files
-
-📊 Generation Summary:
-  • Duration: 36.634653653s
-  • Primary Success: true
-  • Repair Attempts: 0
-  • Final Success: true
-  • Error: 
-✅ BlogAPI generation completed successfully
-🧾 Saved ML metrics → experiments/BlogAPI/gen_metrics.json
-2025/10/19 12:00:38 ✅ Normal ML generation succeeded — no relaxed mode needed.
-📝 Processing: internal/models/post.go
-✅ Written: experiments/out/BlogAPI/internal/models/post.go
-📝 Processing: internal/models/comment.go
-✅ Written: experiments/out/BlogAPI/internal/models/comment.go
-📝 Processing: internal/models/author.go
-✅ Written: experiments/out/BlogAPI/internal/models/author.go
-📝 Processing: internal/handlers/post.go
-🔧 Fixed handler signature for CreatePost
-🔧 Fixed handler signature for GetPosts
-🔧 Fixed handler signature for GetPost
-🔧 Fixed handler signature for UpdatePost
-🔧 Fixed handler signature for DeletePost
-✅ Written: experiments/out/BlogAPI/internal/handlers/post.go
-📝 Processing: internal/handlers/comment.go
-🔧 Fixed handler signature for CreateComment
-🔧 Fixed handler signature for GetComments
-🔧 Fixed handler signature for GetComment
-🔧 Fixed handler signature for UpdateComment
-🔧 Fixed handler signature for DeleteComment
-✅ Written: experiments/out/BlogAPI/internal/handlers/comment.go
-📝 Processing: internal/handlers/author.go
-🔧 Fixed handler signature for CreateAuthor
-🔧 Fixed handler signature for GetAuthors
-🔧 Fixed handler signature for GetAuthor
-🔧 Fixed handler signature for UpdateAuthor
-🔧 Fixed handler signature for DeleteAuthor
-✅ Written: experiments/out/BlogAPI/internal/handlers/author.go
-📝 Processing: internal/handlers/post_test.go
-🔧 Fixed test signature for TestCreatePost
-🔧 Fixed test signature for TestGetPosts
-✅ Auto-fixed test signatures in internal/handlers/post_test.go
-✅ Written: experiments/out/BlogAPI/internal/handlers/post_test.go
-📝 Processing: internal/handlers/comment_test.go
-🔧 Fixed test signature for TestCreateComment
-🔧 Fixed test signature for TestGetComments
-✅ Auto-fixed test signatures in internal/handlers/comment_test.go
-✅ Written: experiments/out/BlogAPI/internal/handlers/comment_test.go
-📝 Processing: internal/handlers/author_test.go
-🔧 Fixed test signature for TestCreateAuthor
-🔧 Fixed test signature for TestGetAuthors
-✅ Auto-fixed test signatures in internal/handlers/author_test.go
-✅ Written: experiments/out/BlogAPI/internal/handlers/author_test.go
-📝 Processing: internal/routes/routes.go
-🔧 Fixed Register function parameter
-✅ Written: experiments/out/BlogAPI/internal/routes/routes.go
-📝 Processing: cmd/main.go
-✅ Written: experiments/out/BlogAPI/cmd/main.go
-📝 Processing: tasks.md
-⚠️  Syntax validation failed for tasks.md: temp.go:1:1: illegal character U+0023 '#'
-🔧 Attempting additional fixes...
-❌ Could not auto-fix syntax errors in tasks.md
-✅ Written: experiments/out/BlogAPI/tasks.md
-
-🔧 Total rule-based fixes applied: 25
-
-🔧 Running auto-fix on generated files...
-
-🔧 Auto-fixing all files in: experiments/out/BlogAPI
-
-📝 Fixing test function signatures...
-  ✅ Fixed test signatures in author_test.go
-  ✅ Fixed test signatures in comment_test.go
-  ✅ Fixed test signatures in post_test.go
-
-📝 Fixing handler function signatures...
-
-📝 Fixing routes Register function...
-
-📝 Fixing missing commas in struct literals...
-
-📝 Ensuring test file imports...
-
-✅ Applied 3 fixes total!
-✅ Auto-fix completed successfully
-
-🔍 Validating Go syntax...
-✅ All generated files have valid Go syntax
-2025/10/19 12:00:38 ✅ Generated 3 test file(s)
-
-🔧 Fixing import paths...
-2025/10/19 12:00:38 🔧 Detected module name: BlogAPI — fixing imports...
-2025/10/19 12:00:38 ✅ No import fixes needed
-🔧 Running go mod tidy...
-✅ Dependencies tidied
-
-🔍 Final syntax validation after fixes...
-✅ All syntax errors resolved
-✅ ML generation completed (36.63s)
-📁 Saved per-package coverage → experiments/out/BlogAPI/coverage.json
-🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
-
---- go test summary ---
-
---- experiments/out/BlogAPI/internal/handlers ---
-=== RUN   TestCreateAuthor
---- PASS: TestCreateAuthor (0.00s)
-=== RUN   TestGetAuthors
---- PASS: TestGetAuthors (0.00s)
-=== RUN   TestCreateComment
---- PASS: TestCreateComment (0.00s)
-=== RUN   TestGetComments
---- PASS: TestGetComments (0.00s)
-=== RUN   TestCreatePost
---- PASS: TestCreatePost (0.00s)
-=== RUN   TestGetPosts
---- PASS: TestGetPosts (0.00s)
-PASS
-coverage: 53.3% of statements
-ok  	BlogAPI/internal/handlers	0.005s
-
-------------------------
-✅ Validation completed in 0.72s
+2025/10/19 12:27:21 🧠 Starting ML-based code generation...
+2025/10/19 12:27:22 ⚠️  ML generation failed once: error, status code: 503, status: 503 Service Unavailable, message: No available capacity was found for the model
+2025/10/19 12:27:22 🔁 Retrying with relaxed mode...
+2025/10/19 12:27:22 🪄 Using relaxed ML generation mode (cleaning JSON output)...
+2025/10/19 12:27:24 🧹 Cleaning malformed JSON output after error: error, status code: 503, status: 503 Service Unavailable, message: No available capacity was found for the model
+2025/10/19 12:27:24 🔁 Retrying ML generation in relaxed mode (second API call)...
+2025/10/19 12:27:25 ❌ Relaxed ML generation still failed: error, status code: 503, status: 503 Service Unavailable, message: No available capacity was found for the model
+🧾 Saved ML metrics → experiments/BlogAPI/gen_metrics_relaxed.json
+2025/10/19 12:27:25 ❌ ML generation failed completely — falling back to rule-based only: error, status code: 503, status: 503 Service Unavailable, message: No available capacity was found for the model
+⚠️  No test files detected — skipping tests.
+✅ Validation completed in 0.32s
 
 📊 Summary for BlogAPI:
   • BuildSuccess = true
   • LintWarnings = 0
-  • TestsPass    = true
-  • Coverage     = 53.3%
+  • TestsPass    = false
+  • Coverage     = 0.0%
   • ML Duration  = 0s (repair 0)
   • Rule Fixes   = 0
 🧾 Appended 2 experiments into experiments/logs/summary.csv

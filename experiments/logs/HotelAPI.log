@@ -1,4 +1,29 @@
 
 🚀 Starting generation for app: HotelAPI (mode=hybrid)
 ✅ Rule-based scaffold created
-2025/10/19 12:10:01 🧠 Starting ML-based code generation...
+2025/10/19 12:27:48 🧠 Starting ML-based code generation...
+2025/10/19 12:27:50 ⚠️  ML generation failed once: error, status code: 503, status: 503 Service Unavailable, message: No available capacity was found for the model
+2025/10/19 12:27:50 🔁 Retrying with relaxed mode...
+2025/10/19 12:27:50 🪄 Using relaxed ML generation mode (cleaning JSON output)...
+2025/10/19 12:27:51 🧹 Cleaning malformed JSON output after error: error, status code: 503, status: 503 Service Unavailable, message: No available capacity was found for the model
+2025/10/19 12:27:51 🔁 Retrying ML generation in relaxed mode (second API call)...
+2025/10/19 12:27:52 ❌ Relaxed ML generation still failed: error, status code: 503, status: 503 Service Unavailable, message: No available capacity was found for the model
+🧾 Saved ML metrics → experiments/HotelAPI/gen_metrics_relaxed.json
+2025/10/19 12:27:52 ❌ ML generation failed completely — falling back to rule-based only: error, status code: 503, status: 503 Service Unavailable, message: No available capacity was found for the model
+⚠️  No test files detected — skipping tests.
+✅ Validation completed in 0.34s
+
+📊 Summary for HotelAPI:
+  • BuildSuccess = true
+  • LintWarnings = 0
+  • TestsPass    = false
+  • Coverage     = 0.0%
+  • ML Duration  = 0s (repair 0)
+  • Rule Fixes   = 0
+🧾 Appended 11 experiments into experiments/logs/summary.csv
+
+🧾 Generating Markdown summary from JSON metrics...
+📊 Markdown results saved → experiments/logs/results.md
+✅ Summary successfully written to experiments/logs/results.md
+
+✅ Experiment complete.
