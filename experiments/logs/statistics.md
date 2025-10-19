@@ -18,11 +18,11 @@
 
 ## Repair Attempts Statistics
 
-- **Mean**: 0.38 attempts
-- **Std Dev**: 0.48 attempts
+- **Mean**: 0.00 attempts
+- **Std Dev**: 0.00 attempts
 - **Min**: 0.00 attempts
-- **Max**: 1.00 attempts
-- **95% CI**: [0.22, 0.53] attempts
+- **Max**: 0.00 attempts
+- **95% CI**: [0.00, 0.00] attempts
 
 ## Rule Fixes Statistics
 
@@ -42,6 +42,6 @@
 
 ## Success Rate Analysis
 
-- **Overall Success Rate**: 91.9% (34/37)
-- **Primary Success Rate** (no repairs): 62.2%
-- **Recovery Rate** (success after repair): 78.6%
+- **Overall Success Rate**: 100.0% (1/1)
+- **Primary Success Rate** (no repairs): 100.0%
+- **Recovery Rate** (success after repair): 0.0%

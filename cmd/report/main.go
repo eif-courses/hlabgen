@@ -75,14 +75,18 @@ func generateStandardReport(results []report.ExperimentResult, outputDir string)
 func generateComparativeReport(results []report.ExperimentResult, buildMetrics map[string]BuildMetrics, outputDir string) {
 	outputPath := filepath.Join(outputDir, "comparative.md")
 
-	// Group by mode (based on relaxed flag or error patterns)
+	// ✅ FIXED: Use the Mode field directly, NOT the RuleFixes/RepairAttempts logic
 	var hybrid, mlOnly, rulesOnly []report.ExperimentResult
 	for _, r := range results {
-		if r.RuleFixes > 0 && r.RepairAttempts > 0 {
+		switch r.Mode {
+		case "hybrid":
 			hybrid = append(hybrid, r)
-		} else if r.RepairAttempts > 0 {
+		case "ml":
 			mlOnly = append(mlOnly, r)
-		} else {
+		case "rules":
+			rulesOnly = append(rulesOnly, r)
+		default:
+			// Unknown mode, skip or categorize as rules
 			rulesOnly = append(rulesOnly, r)
 		}
 	}
@@ -141,7 +145,6 @@ func generateComparativeReport(results []report.ExperimentResult, buildMetrics m
 	}
 	fmt.Printf("✅ Comparative report: %s\n", outputPath)
 }
-
 func generateStatisticsReport(results []report.ExperimentResult, buildMetrics map[string]BuildMetrics, outputDir string) {
 	outputPath := filepath.Join(outputDir, "statistics.md")
 
@@ -370,15 +373,15 @@ func generateAllReports(results []report.ExperimentResult, buildMetrics map[stri
 	fmt.Println("✅ All reports generated successfully!")
 }
 
+// ============================================================================
 // Helper functions
+// ============================================================================
 
 type BuildMetrics struct {
 	BuildSuccess bool    `json:"build_success"`
 	TestsPass    bool    `json:"tests_pass"`
 	CoveragePct  float64 `json:"coverage_pct"`
 }
-
-// In cmd/report/main.go, update the loadBuildMetrics function:
 
 func loadBuildMetrics(baseDir string) map[string]BuildMetrics {
 	metrics := make(map[string]BuildMetrics)

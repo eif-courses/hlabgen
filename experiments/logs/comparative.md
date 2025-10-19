@@ -2,19 +2,18 @@
 
 ## Overview
 
-- **Total Experiments**: 37
-- **Hybrid Mode**: 0 experiments
-- **ML Only**: 14 experiments
-- **Rules Only**: 23 experiments
+- **Total Experiments**: 1
+- **Hybrid Mode**: 1 experiments
+- **ML Only**: 0 experiments
+- **Rules Only**: 0 experiments
 
 ## Success Rates by Mode
 
 | Mode | Experiments | Success Rate | Avg Coverage | Avg Duration (s) | Avg Repairs |
 |------|-------------|--------------|--------------|------------------|-------------|
-| ML Only | 14 | 78.6% | 0.0% | 0.00 | 1.0 |
-| Rules Only | 23 | 100.0% | 0.0% | 0.00 | 0.0 |
+| Hybrid | 1 | 100.0% | 0.0% | 0.00 | 0.0 |
 
 ## Key Findings
 
 - Average rule fixes applied: 0.0 per experiment
-- Overall success rate: **91.9%**
+- Overall success rate: **100.0%**
