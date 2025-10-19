@@ -317,7 +317,7 @@ func main() {
 		fmt.Println("✅ Summary successfully written to experiments/logs/results.md")
 	}
 
-	fmt.Println("\n✅ Experiment complete.")
+	fmt.Println("\n✅ Experiment complete..")
 }
 
 // --- Helper: Convert []GenFile → []assemble.File ---
