@@ -1,0 +1,10 @@
+App: ProjectAPI
+Mode: hybrid
+Timestamp: 2025-10-19T21:43:56+03:00
+OpenAI Model: gpt-4o-mini
+BuildSuccess: true
+TestsPass: true
+Coverage: 53.3%
+Duration: 26.971236267s
+RepairAttempts: 0
+RuleFixes: 25

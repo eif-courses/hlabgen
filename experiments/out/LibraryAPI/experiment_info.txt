@@ -1,0 +1,10 @@
+App: LibraryAPI
+Mode: hybrid
+Timestamp: 2025-10-19T21:40:58+03:00
+OpenAI Model: gpt-4o-mini
+BuildSuccess: true
+TestsPass: true
+Coverage: 35.6%
+Duration: 36.334166876s
+RepairAttempts: 0
+RuleFixes: 25

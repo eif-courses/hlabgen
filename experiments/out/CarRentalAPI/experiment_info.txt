@@ -1,0 +1,10 @@
+App: CarRentalAPI
+Mode: hybrid
+Timestamp: 2025-10-19T21:25:58+03:00
+OpenAI Model: gpt-4o-mini
+BuildSuccess: true
+TestsPass: true
+Coverage: 53.3%
+Duration: 34.667112806s
+RepairAttempts: 0
+RuleFixes: 25

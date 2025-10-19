@@ -1,0 +1,217 @@
+
+🚀 Starting generation for app: VotingAPI (mode=hybrid)
+✅ Rule-based scaffold created
+2025/10/19 21:51:45 🧠 Starting ML-based code generation...
+🌍 Using custom endpoint: https://api.openai.com/v1
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 28.866105107s (model: gpt-4o-mini, attempt: 1)
+❌ JSON error: invalid character 'e' after object key:value pair
+⚠️ Primary parse failed, retrying with JSON repair prompt...
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 33.534889365s (model: gpt-4o-mini, attempt: 1)
+🔁 Repair call took 33.534925713s
+❌ JSON error: invalid character 'e' after object key:value pair
+--- CLEANED JSON ---
+[
+  {
+    "filename": "internal/models/election.go",
+    "code": "package models\n\ntype Election struct {\n\tID          string   `json:\"id\"`\n\tTitle       string   `json:\"title\"`\n\tDescription string   `json:\"description\"`\n\tCandidates   []Candidate `json:\"candidates\"`\n}"
+  },
+  {
+    "filename": "internal/models/candidate.go",
+    "code": "package models\n\ntype Candidate struct {\n\tID        string `json:\"id\"`\n\tName      string `json:\"name\"`\n\tElectionID string `json:\"election_id\"`\n}"
+  },
+  {
+    "filename": "internal/models/vote.go",
+    "code": "package models\n\ntype Vote struct {\n\tID         string `json:\"id\"`\n\tElectionID string `json:\"election_id\"`\n\tCandidateID string `json:\"candidate_id\"`\n\tUserID     string `json:\"user_id\"`\n}"
+  },
+  {
+    "filename": "internal/handlers/election.go",
+    "code": "package handlers\n\nimport (\n\t"encoding/json\n\t"net/http\"\n\t\"VotingAPI/internal/models\"\n)\n\nvar elections []models.Election\n\nfunc CreateElection(w http.ResponseWriter, r *http.Request) {\n\tvar election models.Election\n\tif r.Body == nil {\n\t\thttp.Error(w, \"missing body\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif err := json.NewDecoder(r.Body).Decode(&election); err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}\n\telections = append(elections, election)\n\tw.WriteHeader(http.StatusCreated)\n\tjson.NewEncoder(w).Encode(election)\n}\n\nfunc GetElections(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(elections)\n}\n\nfunc GetElection(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for getting a single election\n\tw.WriteHeader(http.StatusOK)\n}\n\nfunc UpdateElection(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for updating an election\n\tw.WriteHeader(http.StatusOK)\n}\n\nfunc DeleteElection(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for deleting an election\n\tw.WriteHeader(http.StatusNoContent)\n}"
+  },
+  {
+    "filename": "internal/handlers/candidate.go",
+    "code": "package handlers\n\nimport (\n\t"encoding/json\n\t"net/http\"\n\t\"VotingAPI/internal/models\"\n)\n\nvar candidates []models.Candidate\n\nfunc CreateCandidate(w http.ResponseWriter, r *http.Request) {\n\tvar candidate models.Candidate\n\tif r.Body == nil {\n\t\thttp.Error(w, \"missing body\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif err := json.NewDecoder(r.Body).Decode(&candidate); err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}\n\tcandidates = append(candidates, candidate)\n\tw.WriteHeader(http.StatusCreated)\n\tjson.NewEncoder(w).Encode(candidate)\n}\n\nfunc GetCandidates(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(candidates)\n}\n\nfunc GetCandidate(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for getting a single candidate\n\tw.WriteHeader(http.StatusOK)\n}\n\nfunc UpdateCandidate(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for updating a candidate\n\tw.WriteHeader(http.StatusOK)\n}\n\nfunc DeleteCandidate(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for deleting a candidate\n\tw.WriteHeader(http.StatusNoContent)\n}"
+  },
+  {
+    "filename": "internal/handlers/vote.go",
+    "code": "package handlers\n\nimport (\n\t"encoding/json\n\t"net/http\"\n\t\"VotingAPI/internal/models\"\n)\n\nvar votes []models.Vote\n\nfunc CreateVote(w http.ResponseWriter, r *http.Request) {\n\tvar vote models.Vote\n\tif r.Body == nil {\n\t\thttp.Error(w, \"missing body\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif err := json.NewDecoder(r.Body).Decode(&vote); err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}\n\tvotes = append(votes, vote)\n\tw.WriteHeader(http.StatusCreated)\n\tjson.NewEncoder(w).Encode(vote)\n}\n\nfunc GetVotes(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(votes)\n}\n\nfunc GetVote(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for getting a single vote\n\tw.WriteHeader(http.StatusOK)\n}\n\nfunc UpdateVote(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for updating a vote\n\tw.WriteHeader(http.StatusOK)\n}\n\nfunc DeleteVote(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for deleting a vote\n\tw.WriteHeader(http.StatusNoContent)\n}"
+  },
+  {
+    "filename": "internal/handlers/election_test.go",
+    "code": "package handlers_test\n\nimport (\n\t"bytes\"\n\t"encoding/json\"\n\t"net/http\"\n\t"net/http/httptest\"\n\t"testing\"\n\t\"VotingAPI/internal/handlers\"\n\t\"VotingAPI/internal/models\"\n)\n\nfunc TestCreateElection(t *testing.T) {\n\telection := models.Election{\n\t\tTitle:       \"Test Election\",\n\t\tDescription: \"This is a test election\",\n\t}\n\tbody, _ := json.Marshal(election)\n\treq := httptest.NewRequest(\"POST\", \"/elections\", bytes.NewBuffer(body))\n\tw := httptest.NewRecorder()\n\thandlers.CreateElection(w, req)\n\tif w.Code != http.StatusCreated {\n\t\tt.Errorf(\"Expected 201, got %d\", w.Code)\n\t}\n}\n\nfunc TestGetElections(t *testing.T) {\n\treq := httptest.NewRequest(\"GET\", \"/elections\", nil)\n\tw := httptest.NewRecorder()\n\thandlers.GetElections(w, req)\n\tif w.Code != http.StatusOK {\n\t\tt.Errorf(\"Expected 200, got %d\", w.Code)\n\t}\n}"
+  },
+  {
+    "filename": "internal/handlers/candidate_test.go",
+    "code": "package handlers_test\n\nimport (\n\t"bytes\"\n\t"encoding/json\"\n\t"net/http\"\n\t"net/http/httptest\"\n\t"testing\"\n\t\"VotingAPI/internal/handlers\"\n\t\"VotingAPI/internal/models\"\n)\n\nfunc TestCreateCandidate(t *testing.T) {\n\tcandidate := models.Candidate{\n\t\tName:      \"Test Candidate\",\n\t\tElectionID: \"1\",\n\t}\n\tbody, _ := json.Marshal(candidate)\n\treq := httptest.NewRequest(\"POST\", \"/candidates\", bytes.NewBuffer(body))\n\tw := httptest.NewRecorder()\n\thandlers.CreateCandidate(w, req)\n\tif w.Code != http.StatusCreated {\n\t\tt.Errorf(\"Expected 201, got %d\", w.Code)\n\t}\n}\n\nfunc TestGetCandidates(t *testing.T) {\n\treq := httptest.NewRequest(\"GET\", \"/candidates\", nil)\n\tw := httptest.NewRecorder()\n\thandlers.GetCandidates(w, req)\n\tif w.Code != http.StatusOK {\n\t\tt.Errorf(\"Expected 200, got %d\", w.Code)\n\t}\n}"
+  },
+  {
+    "filename": "internal/handlers/vote_test.go",
+    "code": "package handlers_test\n\nimport (\n\t"bytes\"\n\t"encoding/json\"\n\t"net/http\"\n\t"net/http/httptest\"\n\t"testing\"\n\t\"VotingAPI/internal/handlers\"\n\t\"VotingAPI/internal/models\"\n)\n\nfunc TestCreateVote(t *testing.T) {\n\tvote := models.Vote{\n\t\tElectionID: \"1\",\n\t\tCandidateID: \"1\",\n\t\tUserID: \"user1\",\n\t}\n\tbody, _ := json.Marshal(vote)\n\treq := httptest.NewRequest(\"POST\", \"/votes\", bytes.NewBuffer(body))\n\tw := httptest.NewRecorder()\n\thandlers.CreateVote(w, req)\n\tif w.Code != http.StatusCreated {\n\t\tt.Errorf(\"Expected 201, got %d\", w.Code)\n\t}\n}\n\nfunc TestGetVotes(t *testing.T) {\n\treq := httptest.NewRequest(\"GET\", \"/votes\", nil)\n\tw := httptest.NewRecorder()\n\thandlers.GetVotes(w, req)\n\tif w.Code != http.StatusOK {\n\t\tt.Errorf(\"Expected 200, got %d\", w.Code)\n\t}\n}"
+  },
+  {
+    "filename": "internal/routes/routes.go",
+    "code": "package routes\n\nimport (\n\t\"github.com/gorilla/mux\"\n\t\"VotingAPI/internal/handlers\"\n)\n\nfunc Register(r *mux.Router) {\n\t// Election routes\n\tr.HandleFunc(\"/elections\", handlers.CreateElection).Methods(\"POST\")\n\tr.HandleFunc(\"/elections\", handlers.GetElections).Methods(\"GET\")\n\tr.HandleFunc(\"/elections/{id}\", handlers.GetElection).Methods(\"GET\")\n\tr.HandleFunc(\"/elections/{id}\", handlers.UpdateElection).Methods(\"PUT\")\n\tr.HandleFunc(\"/elections/{id}\", handlers.DeleteElection).Methods(\"DELETE\")\n\t// Candidate routes\n\tr.HandleFunc(\"/candidates\", handlers.CreateCandidate).Methods(\"POST\")\n\tr.HandleFunc(\"/candidates\", handlers.GetCandidates).Methods(\"GET\")\n\tr.HandleFunc(\"/candidates/{id}\", handlers.GetCandidate).Methods(\"GET\")\n\tr.HandleFunc(\"/candidates/{id}\", handlers.UpdateCandidate).Methods(\"PUT\")\n\tr.HandleFunc(\"/candidates/{id}\", handlers.DeleteCandidate).Methods(\"DELETE\")\n\t// Vote routes\n\tr.HandleFunc(\"/votes\", handlers.CreateVote).Methods(\"POST\")\n\tr.HandleFunc(\"/votes\", handlers.GetVotes).Methods(\"GET\")\n\tr.HandleFunc(\"/votes/{id}\", handlers.GetVote).Methods(\"GET\")\n\tr.HandleFunc(\"/votes/{id}\", handlers.UpdateVote).Methods(\"PUT\")\n\tr.HandleFunc(\"/votes/{id}\", handlers.DeleteVote).Methods(\"DELETE\")\n}"
+  },
+  {
+    "filename": "cmd/main.go",
+    "code": "package main\n\nimport (\n\t\"log\"\n\t\"net/http\"\n\t\"github.com/gorilla/mux\"\n\t\"VotingAPI/internal/routes\"\n)\n\nfunc main() {\n\tr := mux.NewRouter()\n\troutes.Register(r)\n\tlog.Println(\"Server listening on :8080\")\n\tlog.Fatal(http.ListenAndServe(\":8080\", r))\n}"
+  },
+  {
+    "filename": "tasks.md",
+    "code": "# Lab Tasks\n\n1. Implement the GetElection handler to return a single election by ID\n2. Add validation for required fields in CreateElection handler\n3. Write additional test cases for UpdateElection and DeleteElection handlers\n4. Implement error handling for election not found scenarios\n5. Add pagination support for the GetElections endpoint\n6. Implement the GetCandidate handler to return a single candidate by ID\n7. Implement the GetVote handler to return a single vote by ID\n8. Add validation for required fields in CreateVote handler\n9. Implement error handling for vote not found scenarios\n10. Add transactional order processing logic for voting"
+  }
+]
+--- END ---
+🧾 Saved ML metrics → experiments/VotingAPI/gen_metrics.json
+2025/10/19 21:52:47 ⚠️  ML generation failed once: failed to parse repaired output: json parse error: invalid character 'e' after object key:value pair
+2025/10/19 21:52:47 🔁 Retrying with relaxed mode...
+2025/10/19 21:52:47 🪄 Using relaxed ML generation mode (cleaning JSON output)...
+🌍 Using custom endpoint: https://api.openai.com/v1
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 40.93104741s (model: gpt-4o-mini, attempt: 1)
+❌ JSON error: invalid character 'e' after object key:value pair
+⚠️ Primary parse failed, retrying with JSON repair prompt...
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 40.181013036s (model: gpt-4o-mini, attempt: 1)
+🔁 Repair call took 40.181044611s
+✅ Parsed 12 files
+
+📊 Generation Summary:
+  • Duration: 1m21.112490275s
+  • Primary Success: false
+  • Repair Attempts: 1
+  • Final Success: true
+  • Error: 
+✅ VotingAPI generation completed successfully
+🧾 Saved ML metrics → experiments/VotingAPI/gen_metrics.json
+2025/10/19 21:54:09 ✅ Normal ML generation succeeded — no relaxed mode needed.
+📝 Processing: internal/models/election.go
+✅ Written: experiments/out/VotingAPI/internal/models/election.go
+📝 Processing: internal/models/candidate.go
+✅ Written: experiments/out/VotingAPI/internal/models/candidate.go
+📝 Processing: internal/models/vote.go
+✅ Written: experiments/out/VotingAPI/internal/models/vote.go
+📝 Processing: internal/handlers/election.go
+🔧 Fixed handler signature for CreateElection
+🔧 Fixed handler signature for GetElections
+🔧 Fixed handler signature for GetElection
+🔧 Fixed handler signature for UpdateElection
+🔧 Fixed handler signature for DeleteElection
+✅ Written: experiments/out/VotingAPI/internal/handlers/election.go
+📝 Processing: internal/handlers/candidate.go
+🔧 Fixed handler signature for CreateCandidate
+🔧 Fixed handler signature for GetCandidates
+🔧 Fixed handler signature for GetCandidate
+🔧 Fixed handler signature for UpdateCandidate
+🔧 Fixed handler signature for DeleteCandidate
+✅ Written: experiments/out/VotingAPI/internal/handlers/candidate.go
+📝 Processing: internal/handlers/vote.go
+🔧 Fixed handler signature for CreateVote
+🔧 Fixed handler signature for GetVotes
+🔧 Fixed handler signature for GetVote
+🔧 Fixed handler signature for UpdateVote
+🔧 Fixed handler signature for DeleteVote
+✅ Written: experiments/out/VotingAPI/internal/handlers/vote.go
+📝 Processing: internal/handlers/election_test.go
+🔧 Fixed test signature for TestCreateElection
+🔧 Fixed test signature for TestGetElections
+✅ Auto-fixed test signatures in internal/handlers/election_test.go
+✅ Written: experiments/out/VotingAPI/internal/handlers/election_test.go
+📝 Processing: internal/handlers/candidate_test.go
+🔧 Fixed test signature for TestCreateCandidate
+🔧 Fixed test signature for TestGetCandidates
+✅ Auto-fixed test signatures in internal/handlers/candidate_test.go
+✅ Written: experiments/out/VotingAPI/internal/handlers/candidate_test.go
+📝 Processing: internal/handlers/vote_test.go
+🔧 Fixed test signature for TestCreateVote
+🔧 Fixed test signature for TestGetVotes
+✅ Auto-fixed test signatures in internal/handlers/vote_test.go
+✅ Written: experiments/out/VotingAPI/internal/handlers/vote_test.go
+📝 Processing: internal/routes/routes.go
+🔧 Fixed Register function parameter
+✅ Written: experiments/out/VotingAPI/internal/routes/routes.go
+📝 Processing: cmd/main.go
+✅ Written: experiments/out/VotingAPI/cmd/main.go
+📝 Processing: tasks.md
+⚠️  Syntax validation failed for tasks.md: temp.go:1:1: illegal character U+0023 '#'
+🔧 Attempting additional fixes...
+❌ Could not auto-fix syntax errors in tasks.md
+✅ Written: experiments/out/VotingAPI/tasks.md
+
+🔧 Total rule-based fixes applied: 25
+
+🔧 Running auto-fix on generated files...
+
+🔧 Auto-fixing all files in: experiments/out/VotingAPI
+
+📝 Fixing test function signatures...
+  ✅ Fixed test signatures in candidate_test.go
+  ✅ Fixed test signatures in election_test.go
+  ✅ Fixed test signatures in vote_test.go
+
+📝 Fixing handler function signatures...
+
+📝 Fixing routes Register function...
+
+📝 Fixing missing commas in struct literals...
+
+📝 Ensuring test file imports...
+
+✅ Applied 3 fixes total!
+✅ Auto-fix completed successfully
+
+🔍 Validating Go syntax...
+✅ All generated files have valid Go syntax
+2025/10/19 21:54:09 ✅ Generated 3 test file(s)
+
+🔧 Fixing import paths...
+2025/10/19 21:54:09 🔧 Detected module name: VotingAPI — fixing imports...
+2025/10/19 21:54:09 ✅ No import fixes needed
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+
+🔍 Final syntax validation after fixes...
+✅ All syntax errors resolved
+✅ ML generation completed (81.11s)
+📁 Saved per-package coverage → experiments/out/VotingAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/VotingAPI/internal/handlers ---
+=== RUN   TestCreateCandidate
+--- PASS: TestCreateCandidate (0.00s)
+=== RUN   TestGetCandidates
+--- PASS: TestGetCandidates (0.00s)
+=== RUN   TestCreateElection
+--- PASS: TestCreateElection (0.00s)
+=== RUN   TestGetElections
+--- PASS: TestGetElections (0.00s)
+=== RUN   TestCreateVote
+--- PASS: TestCreateVote (0.00s)
+=== RUN   TestGetVotes
+--- PASS: TestGetVotes (0.00s)
+PASS
+coverage: 53.3% of statements
+ok  	VotingAPI/internal/handlers	0.002s
+
+------------------------
+✅ Validation completed in 1.07s
+
+📊 Summary for VotingAPI:
+  • BuildSuccess = true
+  • LintWarnings = 3
+  • TestsPass    = true
+  • Coverage     = 53.3%
+  • Generation Duration = 1m21.112490275s
+  • Repair Attempts = 1
+  • Rule Fixes   = 25
+  • Mode: hybrid
+🧾 Appended 30 experiments into experiments/logs/summary.csv
+
+🧾 Generating Markdown summary from JSON metrics...
+📊 Markdown results saved → experiments/logs/results.md
+✅ Summary successfully written to experiments/logs/results.md
+
+✅ Experiment complete..

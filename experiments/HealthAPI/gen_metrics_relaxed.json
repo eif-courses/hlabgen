@@ -1,0 +1,11 @@
+{
+  "app_name": "HealthAPI",
+  "duration_sec": 67.281336112,
+  "end_time": "2025-10-19T21:36:27+03:00",
+  "error_message": "failed to parse repaired output: json parse error: invalid character 'e' after object key:value pair",
+  "final_success": false,
+  "primary_success": false,
+  "repair_attempts": 1,
+  "rule_fixes": 0,
+  "start_time": "2025-10-19T21:35:20+03:00"
+}

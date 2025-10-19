@@ -1,0 +1,10 @@
+App: WarehouseAPI
+Mode: hybrid
+Timestamp: 2025-10-19T21:54:41+03:00
+OpenAI Model: gpt-4o-mini
+BuildSuccess: true
+TestsPass: true
+Coverage: 53.3%
+Duration: 29.686239241s
+RepairAttempts: 0
+RuleFixes: 25
