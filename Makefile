@@ -711,6 +711,170 @@ config:
 	@echo "$(COLOR_CYAN)Archive Dir:$(COLOR_RESET)    $(ARCHIVE_DIR)"
 	@echo ""
 	@echo "$(COLOR_CYAN)Environment:$(COLOR_RESET)"
+
+
+
+
+
+# Run experiments N times for statistical analysis
+multi-run:
+	@if [ -z "$(RUNS)" ]; then \
+		RUNS=5; \
+	else \
+		RUNS=$(RUNS); \
+	fi; \
+	echo "$(COLOR_BLUE)╔════════════════════════════════════════════════════════════╗$(COLOR_RESET)"; \
+	echo "$(COLOR_BLUE)║  🔬 Running $$RUNS iterations for statistical analysis    ║$(COLOR_RESET)"; \
+	echo "$(COLOR_BLUE)╚════════════════════════════════════════════════════════════╝$(COLOR_RESET)"; \
+	start_time=$$(date +%s); \
+	for i in $$(seq 1 $$RUNS); do \
+		echo ""; \
+		echo "$(COLOR_CYAN)══════════════════════════════════════════════════════════════"; \
+		echo "🔬 Iteration $$i of $$RUNS"; \
+		echo "══════════════════════════════════════════════════════════════$(COLOR_RESET)"; \
+		$(MAKE) all-experiments; \
+		echo "$(COLOR_BLUE)📦 Archiving run $$i...$(COLOR_RESET)"; \
+		$(MAKE) archive-metrics; \
+		if [ $$i -lt $$RUNS ]; then \
+			echo "$(COLOR_YELLOW)🧹 Cleaning for next iteration...$(COLOR_RESET)"; \
+			$(MAKE) clean-code; \
+			sleep 2; \
+		fi; \
+	done; \
+	end_time=$$(date +%s); \
+	duration=$$((end_time - start_time)); \
+	minutes=$$((duration / 60)); \
+	seconds=$$((duration % 60)); \
+	echo ""; \
+	echo "$(COLOR_BLUE)╔════════════════════════════════════════════════════════════╗$(COLOR_RESET)"; \
+	echo "$(COLOR_BLUE)║  ✅ COMPLETED $$RUNS ITERATIONS                             ║$(COLOR_RESET)"; \
+	echo "$(COLOR_BLUE)╚════════════════════════════════════════════════════════════╝$(COLOR_RESET)"; \
+	echo "$(COLOR_GREEN)⏱️  Total time: $$minutes minutes $$seconds seconds$(COLOR_RESET)"; \
+	echo "$(COLOR_CYAN)📊 Archives created: $$RUNS$(COLOR_RESET)"; \
+	$(MAKE) list-archives
+
+# Analyze multiple runs and generate aggregate statistics
+analyze-multi-run:
+	@echo "$(COLOR_BLUE)📊 Analyzing Multiple Experiment Runs$(COLOR_RESET)"
+	@echo "────────────────────────────────────────────────────────"
+	@if [ ! -d "$(ARCHIVE_DIR)" ] || [ -z "$$(ls -A $(ARCHIVE_DIR) 2>/dev/null)" ]; then \
+		echo "$(COLOR_RED)❌ No archived runs found$(COLOR_RESET)"; \
+		echo "$(COLOR_YELLOW)💡 Run 'make multi-run' first$(COLOR_RESET)"; \
+		exit 1; \
+	fi; \
+	run_count=$$(find $(ARCHIVE_DIR) -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l); \
+	echo "$(COLOR_CYAN)Found $$run_count archived runs$(COLOR_RESET)"; \
+	echo ""; \
+	for app in LibraryAPI BlogAPI TaskManagerAPI; do \
+		echo "$(COLOR_GREEN)📊 $$app:$(COLOR_RESET)"; \
+		durations=""; \
+		repairs=""; \
+		successes=0; \
+		total=0; \
+		for archive in $(ARCHIVE_DIR)/metrics_*/; do \
+			if [ -d "$$archive" ]; then \
+				metric_file="$$archive/$${app}_gen_metrics.json"; \
+				if [ -f "$$metric_file" ]; then \
+					total=$$((total + 1)); \
+					duration=$$(grep -o '"duration_sec"[[:space:]]*:[[:space:]]*[0-9.]*' "$$metric_file" | grep -o '[0-9.]*$$'); \
+					repair=$$(grep -o '"repair_attempts"[[:space:]]*:[[:space:]]*[0-9]*' "$$metric_file" | grep -o '[0-9]*$$'); \
+					success=$$(grep -o '"final_success"[[:space:]]*:[[:space:]]*true' "$$metric_file"); \
+					durations="$$durations $$duration"; \
+					repairs="$$repairs $$repair"; \
+					if [ -n "$$success" ]; then \
+						successes=$$((successes + 1)); \
+					fi; \
+				fi; \
+			fi; \
+		done; \
+		if [ $$total -gt 0 ]; then \
+			avg_duration=$$(echo "$$durations" | awk '{sum=0; for(i=1;i<=NF;i++) sum+=$$i; print sum/NF}'); \
+			avg_repairs=$$(echo "$$repairs" | awk '{sum=0; for(i=1;i<=NF;i++) sum+=$$i; print sum/NF}'); \
+			success_rate=$$(echo "scale=1; $$successes * 100 / $$total" | bc); \
+			echo "  • Runs: $$total"; \
+			echo "  • Success rate: $$success_rate% ($$successes/$$total)"; \
+			printf "  • Avg duration: %.2fs\n" $$avg_duration; \
+			printf "  • Avg repairs: %.1f\n" $$avg_repairs; \
+		else \
+			echo "  • No data found"; \
+		fi; \
+		echo ""; \
+	done
+
+# Compare specific run iterations
+compare-runs:
+	@if [ -z "$(RUN1)" ] || [ -z "$(RUN2)" ]; then \
+		echo "$(COLOR_RED)❌ Please specify RUN1=metrics_TIMESTAMP1 RUN2=metrics_TIMESTAMP2$(COLOR_RESET)"; \
+		echo "$(COLOR_YELLOW)Available runs:$(COLOR_RESET)"; \
+		ls -1 $(ARCHIVE_DIR)/ 2>/dev/null | sed 's/^/  • /'; \
+		exit 1; \
+	fi
+	@echo "$(COLOR_BLUE)🔍 Comparing Run 1 vs Run 2$(COLOR_RESET)"
+	@echo "────────────────────────────────────────────────────────"
+	@echo "$(COLOR_CYAN)Run 1:$(COLOR_RESET) $(RUN1)"
+	@echo "$(COLOR_CYAN)Run 2:$(COLOR_RESET) $(RUN2)"
+	@echo ""
+	@for app in LibraryAPI BlogAPI TaskManagerAPI; do \
+		echo "$(COLOR_GREEN)$$app:$(COLOR_RESET)"; \
+		file1="$(ARCHIVE_DIR)/$(RUN1)/$${app}_gen_metrics.json"; \
+		file2="$(ARCHIVE_DIR)/$(RUN2)/$${app}_gen_metrics.json"; \
+		if [ -f "$$file1" ] && [ -f "$$file2" ]; then \
+			dur1=$$(grep -o '"duration_sec"[[:space:]]*:[[:space:]]*[0-9.]*' "$$file1" | grep -o '[0-9.]*$$'); \
+			dur2=$$(grep -o '"duration_sec"[[:space:]]*:[[:space:]]*[0-9.]*' "$$file2" | grep -o '[0-9.]*$$'); \
+			echo "  Run 1 duration: $${dur1}s"; \
+			echo "  Run 2 duration: $${dur2}s"; \
+		else \
+			echo "  Missing data"; \
+		fi; \
+		echo ""; \
+	done
+
+
+
+# Enhanced multi-run analysis with statistics
+analyze-multi-run-stats:
+	@echo "$(COLOR_BLUE)📊 Statistical Analysis of Multiple Runs$(COLOR_RESET)"
+	@echo "────────────────────────────────────────────────────────"
+	@if [ ! -d "$(ARCHIVE_DIR)" ] || [ -z "$$(ls -A $(ARCHIVE_DIR) 2>/dev/null)" ]; then \
+		echo "$(COLOR_RED)❌ No archived runs found$(COLOR_RESET)"; \
+		exit 1; \
+	fi; \
+	run_count=$$(find $(ARCHIVE_DIR) -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l); \
+	echo "$(COLOR_CYAN)Analyzing $$run_count runs$(COLOR_RESET)"; \
+	echo ""; \
+	echo "$(COLOR_BLUE)Results:$(COLOR_RESET)"; \
+	echo ""; \
+	printf "$(COLOR_CYAN)%-20s %-12s %-12s %-12s %-15s$(COLOR_RESET)\n" "App" "Success%" "Duration" "StdDev" "Repairs"; \
+	echo "────────────────────────────────────────────────────────────────────────"; \
+	for app in LibraryAPI BlogAPI TaskManagerAPI; do \
+		durations=""; \
+		repairs=""; \
+		successes=0; \
+		total=0; \
+		for archive in $(ARCHIVE_DIR)/metrics_*/; do \
+			metric_file="$$archive/$${app}_gen_metrics.json"; \
+			if [ -f "$$metric_file" ]; then \
+				total=$$((total + 1)); \
+				duration=$$(grep -o '"duration_sec"[[:space:]]*:[[:space:]]*[0-9.]*' "$$metric_file" | grep -o '[0-9.]*$$'); \
+				repair=$$(grep -o '"repair_attempts"[[:space:]]*:[[:space:]]*[0-9]*' "$$metric_file" | grep -o '[0-9]*$$'); \
+				success=$$(grep -o '"final_success"[[:space:]]*:[[:space:]]*true' "$$metric_file"); \
+				durations="$$durations $$duration"; \
+				repairs="$$repairs $$repair"; \
+				[ -n "$$success" ] && successes=$$((successes + 1)); \
+			fi; \
+		done; \
+		if [ $$total -gt 0 ]; then \
+			success_rate=$$(echo "scale=1; $$successes * 100 / $$total" | bc); \
+			avg_duration=$$(echo "$$durations" | awk '{sum=0; for(i=1;i<=NF;i++) sum+=$$i; printf "%.2f", sum/NF}'); \
+			std_dev=$$(echo "$$durations" | awk -v avg=$$avg_duration '{sum=0; for(i=1;i<=NF;i++) sum+=($$i-avg)^2; printf "%.2f", sqrt(sum/NF)}'); \
+			avg_repairs=$$(echo "$$repairs" | awk '{sum=0; for(i=1;i<=NF;i++) sum+=$$i; printf "%.1f", sum/NF}'); \
+			printf "$(COLOR_GREEN)%-20s$(COLOR_RESET) %-12s %-12s %-12s %-15s\n" \
+				"$$app" "$${success_rate}%" "$${avg_duration}s" "±$${std_dev}s" "$$avg_repairs"; \
+		fi; \
+	done; \
+	echo ""
+
+
 # =====================================================
 # 🎯 Phony Targets
 # =====================================================
@@ -719,4 +883,4 @@ config:
         report reports-all report-comparative report-statistics report-failures report-latex \
         academic-package clean clean-safe clean-code clean-logs clean-archive clean-all \
         clean-dry-run clean-force archive archive-metrics backup list-archives restore-latest \
-        list stats status verify-env watch disk-usage count-loc activity compare config
+        list stats status verify-env watch disk-usage count-loc activity compare config multi-run analyze-multi-run compare-runs analyze-multi-run-stats

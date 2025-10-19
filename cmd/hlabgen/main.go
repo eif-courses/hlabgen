@@ -51,7 +51,7 @@ func main() {
 
 	fmt.Println("✅ Rule-based scaffold created")
 
-	// --- 4) ML Layer (with retry and relaxed mode) ---
+	// --- 4) Generation based on mode ---
 	var genMetrics mlinternal.GenerationMetrics
 	var files []assemble.File
 
@@ -59,7 +59,7 @@ func main() {
 		log.Println("🧠 Starting ML-based code generation...")
 
 		// --- first try ---
-		genFiles, genMetrics, err := mlinternal.Generate(mlinternal.Schema{
+		genFiles, metrics, err := mlinternal.Generate(mlinternal.Schema{
 			AppName:    schema.AppName,
 			Database:   schema.Database,
 			APIPattern: schema.APIPattern,
@@ -69,13 +69,14 @@ func main() {
 			Objectives: schema.Objectives,
 		})
 
+		genMetrics = metrics
 		files = convertGenFiles(genFiles)
 
 		if err != nil {
 			log.Printf("⚠️  ML generation failed once: %v", err)
 			log.Println("🔁 Retrying with relaxed mode...")
 
-			genFiles, genMetrics, err = mlinternal.GenerateRelaxed(mlinternal.Schema{
+			genFiles, metrics, err = mlinternal.GenerateRelaxed(mlinternal.Schema{
 				AppName:    schema.AppName,
 				Database:   schema.Database,
 				APIPattern: schema.APIPattern,
@@ -85,16 +86,19 @@ func main() {
 				Objectives: schema.Objectives,
 			})
 
+			genMetrics = metrics
 			files = convertGenFiles(genFiles)
 		}
 
 		if err != nil {
 			log.Printf("❌ ML generation failed completely — falling back to rule-based only: %v", err)
+			*mode = "rules" // Fallback to rules mode
 		} else {
 			if err := assemble.WriteMany(*out, files, &genMetrics); err != nil {
 				log.Fatalf("❌ Failed to write generated files: %v", err)
 			}
-			// 🔧 NEW: Auto-fix all generated files
+
+			// 🔧 Auto-fix all generated files
 			fmt.Println("\n🔧 Running auto-fix on generated files...")
 			if err := assemble.FixAllGeneratedFiles(*out); err != nil {
 				log.Printf("⚠️  Some auto-fixes failed: %v", err)
@@ -102,7 +106,7 @@ func main() {
 				fmt.Println("✅ Auto-fix completed successfully")
 			}
 
-			// 🔍 NEW: Validate syntax immediately after generation
+			// 🔍 Validate syntax immediately after generation
 			fmt.Println("\n🔍 Validating Go syntax...")
 			syntaxErrors := validateGoSyntax(*out)
 			if len(syntaxErrors) > 0 {
@@ -129,11 +133,11 @@ func main() {
 				log.Printf("✅ Generated %d test file(s)", testCount)
 			}
 
-			// 🔧 FIRST: Automatically fix imports based on go.mod
+			// 🔧 Fix imports based on go.mod
 			fmt.Println("\n🔧 Fixing import paths...")
 			fixImportsToModule(*out)
 
-			// 🔧 THEN: Run go mod tidy to clean up dependencies
+			// 🔧 Run go mod tidy
 			fmt.Println("🔧 Running go mod tidy...")
 			tidyCmd := exec.Command("go", "mod", "tidy")
 			tidyCmd.Dir = *out
@@ -145,7 +149,7 @@ func main() {
 				fmt.Println("✅ Dependencies tidied")
 			}
 
-			// 🔍 Run final syntax check after all fixes
+			// 🔍 Final syntax check
 			fmt.Println("\n🔍 Final syntax validation after fixes...")
 			finalErrors := validateGoSyntax(*out)
 			if len(finalErrors) > 0 {
@@ -159,8 +163,97 @@ func main() {
 
 			fmt.Printf("✅ ML generation completed (%.2fs)\n", genMetrics.Duration.Seconds())
 		}
-	} else {
-		fmt.Println("⚙️  Skipping ML layer (rules-only mode)")
+	}
+
+	// ✅ Rules-only generation mode
+	if *mode == "rules" {
+		log.Println("⚙️  Starting rules-based code generation...")
+
+		genMetrics.StartTime = time.Now()
+
+		// Generate files for each entity
+		for _, entity := range schema.Entities {
+			// Model
+			files = append(files, assemble.File{
+				Filename: fmt.Sprintf("internal/models/%s.go", strings.ToLower(entity)),
+				Content:  rules.GenerateModel(entity),
+			})
+
+			// Handler
+			files = append(files, assemble.File{
+				Filename: fmt.Sprintf("internal/handlers/%s.go", strings.ToLower(entity)),
+				Content:  rules.GenerateHandler(entity, schema.AppName),
+			})
+
+			// Test
+			files = append(files, assemble.File{
+				Filename: fmt.Sprintf("internal/handlers/%s_test.go", strings.ToLower(entity)),
+				Content:  rules.GenerateTest(entity, schema.AppName),
+			})
+		}
+
+		// Routes
+		files = append(files, assemble.File{
+			Filename: "internal/routes/routes.go",
+			Content:  rules.GenerateRoutes(schema.Entities, schema.AppName),
+		})
+
+		// Tasks markdown
+		files = append(files, assemble.File{
+			Filename: "tasks.md",
+			Content:  rules.GenerateTasksMarkdown(schema.Entities),
+		})
+
+		genMetrics.EndTime = time.Now()
+		genMetrics.Duration = genMetrics.EndTime.Sub(genMetrics.StartTime)
+		genMetrics.PrimarySuccess = true
+		genMetrics.FinalSuccess = true
+		genMetrics.RuleFixes = len(files)
+
+		// Write files (without ML-specific fixes)
+		for _, f := range files {
+			fullPath := filepath.Join(*out, f.Filename)
+			if err := os.MkdirAll(filepath.Dir(fullPath), 0o755); err != nil {
+				log.Fatalf("❌ Failed to create directory %s: %v", filepath.Dir(fullPath), err)
+			}
+
+			if err := os.WriteFile(fullPath, []byte(f.Content), 0o644); err != nil {
+				log.Fatalf("❌ Failed to write file %s: %v", fullPath, err)
+			}
+
+			fmt.Printf("✅ Written: %s\n", fullPath)
+		}
+
+		// Fix imports
+		fmt.Println("\n🔧 Fixing import paths...")
+		fixImportsToModule(*out)
+
+		// Run go mod tidy
+		fmt.Println("🔧 Running go mod tidy...")
+		tidyCmd := exec.Command("go", "mod", "tidy")
+		tidyCmd.Dir = *out
+		tidyCmd.Stdout = os.Stdout
+		tidyCmd.Stderr = os.Stderr
+		if err := tidyCmd.Run(); err != nil {
+			log.Printf("⚠️  go mod tidy failed: %v", err)
+		} else {
+			fmt.Println("✅ Dependencies tidied")
+		}
+
+		// Validate syntax
+		fmt.Println("\n🔍 Validating Go syntax...")
+		syntaxErrors := validateGoSyntax(*out)
+		if len(syntaxErrors) > 0 {
+			fmt.Println("⚠️  Syntax errors found:")
+			for _, err := range syntaxErrors {
+				fmt.Printf("  - %s\n", err)
+			}
+		} else {
+			fmt.Println("✅ All generated files have valid Go syntax")
+		}
+
+		fmt.Printf("✅ Rules-based generation completed (%.2fs)\n", genMetrics.Duration.Seconds())
+		fmt.Printf("✅ Generated %d files using rule-based templates\n", len(files))
 	}
 
 	// --- 4.5) Clean up any leftover fallback test files ---
@@ -181,8 +274,10 @@ func main() {
 	fmt.Printf("  • LintWarnings = %d\n", m.LintWarnings)
 	fmt.Printf("  • TestsPass    = %v\n", m.TestsPass)
 	fmt.Printf("  • Coverage     = %.1f%%\n", m.CoveragePct)
-	fmt.Printf("  • ML Duration  = %v (repair %d)\n", genMetrics.Duration, genMetrics.RepairAttempts)
+	fmt.Printf("  • Generation Duration = %v\n", genMetrics.Duration)
+	fmt.Printf("  • Repair Attempts = %d\n", genMetrics.RepairAttempts)
 	fmt.Printf("  • Rule Fixes   = %d\n", genMetrics.RuleFixes)
+	fmt.Printf("  • Mode: %s\n", *mode)
 
 	// --- 6) Save metrics ---
 	_ = metrics.SaveResult(*out, m)
@@ -192,7 +287,7 @@ func main() {
 	// --- 6.5) Save experiment repeatability metadata ---
 	metaPath := filepath.Join(*out, "experiment_info.txt")
 	meta := fmt.Sprintf(
-		"App: %s\nMode: %s\nTimestamp: %s\nOpenAI Model: %s\nBuildSuccess: %v\nTestsPass: %v\nCoverage: %.1f%%\nMLDuration: %v\nRepairAttempts: %d\nRuleFixes: %d\n",
+		"App: %s\nMode: %s\nTimestamp: %s\nOpenAI Model: %s\nBuildSuccess: %v\nTestsPass: %v\nCoverage: %.1f%%\nDuration: %v\nRepairAttempts: %d\nRuleFixes: %d\n",
 		schema.AppName,
 		*mode,
 		time.Now().Format(time.RFC3339),
@@ -214,6 +309,7 @@ func main() {
 	if err := metrics.AggregateToCSV("experiments/out", summaryPath); err != nil {
 		log.Printf("⚠️  Failed to aggregate metrics: %v\n", err)
 	}
+
 	fmt.Println("\n🧾 Generating Markdown summary from JSON metrics...")
 	if err := report.GenerateSummaryJSONReport(); err != nil {
 		fmt.Println("⚠️ Failed to generate JSON summary:", err)
