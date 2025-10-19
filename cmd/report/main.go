@@ -378,12 +378,16 @@ type BuildMetrics struct {
 	CoveragePct  float64 `json:"coverage_pct"`
 }
 
+// In cmd/report/main.go, update the loadBuildMetrics function:
+
 func loadBuildMetrics(baseDir string) map[string]BuildMetrics {
 	metrics := make(map[string]BuildMetrics)
 
+	// First try: look in experiments/out/
 	entries, err := os.ReadDir(filepath.Join(baseDir, "out"))
 	if err != nil {
-		return metrics
+		// Second try: look directly in baseDir
+		entries, _ = os.ReadDir(baseDir)
 	}
 
 	for _, e := range entries {
@@ -392,16 +396,26 @@ func loadBuildMetrics(baseDir string) map[string]BuildMetrics {
 		}
 
 		appName := e.Name()
-		metricsPath := filepath.Join(baseDir, "out", appName, "metrics.json")
 
-		data, err := os.ReadFile(metricsPath)
-		if err != nil {
-			continue
+		// Try multiple possible locations
+		possiblePaths := []string{
+			filepath.Join(baseDir, "out", appName, "metrics.json"),
+			filepath.Join(baseDir, "out", appName, "gen_metrics.json"),
+			filepath.Join(baseDir, appName, "metrics.json"),
+			filepath.Join(baseDir, appName, "gen_metrics.json"),
 		}
 
-		var bm BuildMetrics
-		if err := json.Unmarshal(data, &bm); err == nil {
-			metrics[appName] = bm
+		for _, metricsPath := range possiblePaths {
+			data, err := os.ReadFile(metricsPath)
+			if err != nil {
+				continue
+			}
+
+			var bm BuildMetrics
+			if err := json.Unmarshal(data, &bm); err == nil {
+				metrics[appName] = bm
+				break
+			}
 		}
 	}
 
