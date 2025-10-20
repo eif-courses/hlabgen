@@ -39,7 +39,7 @@ func main() {
 		log.Fatal("❌ No experiment results found")
 	}
 
-	// Load build metrics
+	// Load build metrics (kept for backward compatibility, but we now use result.Coverage)
 	buildMetrics := loadBuildMetrics(*baseDir)
 
 	// Generate reports based on mode
@@ -145,6 +145,7 @@ func generateComparativeReport(results []report.ExperimentResult, buildMetrics m
 	}
 	fmt.Printf("✅ Comparative report: %s\n", outputPath)
 }
+
 func generateStatisticsReport(results []report.ExperimentResult, buildMetrics map[string]BuildMetrics, outputDir string) {
 	outputPath := filepath.Join(outputDir, "statistics.md")
 
@@ -158,10 +159,8 @@ func generateStatisticsReport(results []report.ExperimentResult, buildMetrics ma
 		durations = append(durations, r.DurationSeconds)
 		repairs = append(repairs, float64(r.RepairAttempts))
 		ruleFixes = append(ruleFixes, float64(r.RuleFixes))
-
-		if bm, ok := buildMetrics[r.AppName]; ok {
-			coverages = append(coverages, bm.CoveragePct)
-		}
+		// ✅ FIX: Use r.Coverage directly instead of buildMetrics lookup
+		coverages = append(coverages, r.Coverage)
 	}
 
 	var sb strings.Builder
@@ -307,9 +306,10 @@ func generateLaTeXReport(results []report.ExperimentResult, buildMetrics map[str
 	})
 
 	for _, r := range results {
+		// ✅ FIX: Use r.Coverage directly
 		coverage := "N/A"
-		if bm, ok := buildMetrics[r.AppName]; ok {
-			coverage = fmt.Sprintf("%.1f\\%%", bm.CoveragePct)
+		if r.Coverage > 0 {
+			coverage = fmt.Sprintf("%.1f\\%%", r.Coverage)
 		}
 
 		sb.WriteString(fmt.Sprintf("%s & %s & %d & %s & %.2f & %s \\\\\n",
@@ -328,12 +328,11 @@ func generateLaTeXReport(results []report.ExperimentResult, buildMetrics map[str
 
 	// Statistics summary table
 	durations := make([]float64, 0, len(results))
-	coverages := make([]float64, 0)
+	coverages := make([]float64, 0, len(results))
 	for _, r := range results {
 		durations = append(durations, r.DurationSeconds)
-		if bm, ok := buildMetrics[r.AppName]; ok {
-			coverages = append(coverages, bm.CoveragePct)
-		}
+		// ✅ FIX: Use r.Coverage directly
+		coverages = append(coverages, r.Coverage)
 	}
 
 	sb.WriteString("% Summary Statistics Table\n")
@@ -478,7 +477,7 @@ func avgCoverageFromResults(results []report.ExperimentResult, buildMetrics map[
 	sum := 0.0
 	count := 0
 	for _, r := range results {
-		// Use Coverage field directly from ExperimentResult
+		// ✅ FIX: Use Coverage field directly from ExperimentResult
 		if r.Coverage > 0 {
 			sum += r.Coverage
 			count++
