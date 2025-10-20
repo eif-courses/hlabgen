@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -40,19 +41,8 @@ func LoadMetricsFromJSON(path string) (ExperimentResult, error) {
 		mode = readModeFromExperimentInfo(filepath.Dir(path), app)
 	}
 
-	// ✅ FIX: Extract duration with better nanosecond handling
-	duration := getFloat(m, "duration_sec")
-	if duration == 0 {
-		// Try uppercase variants
-		if d := getFloat(m, "Duration"); d > 0 {
-			// Only convert from nanoseconds if value is very large (> 1e6 means likely nanoseconds)
-			if d > 1e6 {
-				duration = d / 1e9
-			} else {
-				duration = d
-			}
-		}
-	}
+	// ✅ FIX: Extract duration with intelligent unit detection
+	duration := parseAndConvertDuration(m)
 
 	repairs := int(getFloat(m, "repair_attempts"))
 	if repairs == 0 {
@@ -94,6 +84,87 @@ func LoadMetricsFromJSON(path string) (ExperimentResult, error) {
 		RuleFixes:       fixes,
 		Coverage:        coverage,
 	}, nil
+}
+
+// ✅ NEW: Smart duration parsing that handles multiple formats
+func parseAndConvertDuration(m map[string]interface{}) float64 {
+	// Try lowercase first
+	if d := getFloat(m, "duration_sec"); d > 0 {
+		return d
+	}
+
+	// Try Duration field (uppercase)
+	if d := getFloat(m, "Duration"); d > 0 {
+		// Smart detection: if value is tiny (< 0.001), it's likely microseconds or nanoseconds
+		// If value is between 50-200k, it's likely microseconds (typical rule generation: 50-200 microseconds)
+		// If value is > 1e6, it's likely nanoseconds
+		if d < 1 {
+			// Already in seconds
+			return d
+		} else if d >= 50 && d <= 200000 {
+			// Likely microseconds: convert to seconds
+			return d / 1e6
+		} else if d > 1e6 {
+			// Likely nanoseconds: convert to seconds
+			return d / 1e9
+		} else {
+			// Default: assume seconds
+			return d
+		}
+	}
+
+	// Try reading as string and parsing (handles "1m38.96s" format)
+	if durStr := getString(m, "duration"); durStr != "" {
+		if parsed, err := parseDurationString(durStr); err == nil {
+			return parsed
+		}
+	}
+
+	return 0
+}
+
+// ✅ NEW: Parse duration strings like "1m38.96s", "71.505µs", etc.
+func parseDurationString(s string) (float64, error) {
+	s = strings.TrimSpace(s)
+
+	// Handle microseconds (µs)
+	if strings.Contains(s, "µs") {
+		numStr := strings.TrimSuffix(s, "µs")
+		if f, err := strconv.ParseFloat(strings.TrimSpace(numStr), 64); err == nil {
+			return f / 1e6, nil // Convert µs to seconds
+		}
+	}
+
+	// Handle nanoseconds (ns)
+	if strings.Contains(s, "ns") {
+		numStr := strings.TrimSuffix(s, "ns")
+		if f, err := strconv.ParseFloat(strings.TrimSpace(numStr), 64); err == nil {
+			return f / 1e9, nil // Convert ns to seconds
+		}
+	}
+
+	// Handle milliseconds (ms)
+	if strings.Contains(s, "ms") {
+		numStr := strings.TrimSuffix(s, "ms")
+		if f, err := strconv.ParseFloat(strings.TrimSpace(numStr), 64); err == nil {
+			return f / 1e3, nil // Convert ms to seconds
+		}
+	}
+
+	// Handle seconds (s)
+	if strings.Contains(s, "s") {
+		numStr := strings.TrimSuffix(s, "s")
+		if f, err := strconv.ParseFloat(strings.TrimSpace(numStr), 64); err == nil {
+			return f, nil
+		}
+	}
+
+	// Try as plain number (assume seconds)
+	if f, err := strconv.ParseFloat(s, 64); err == nil {
+		return f, nil
+	}
+
+	return 0, fmt.Errorf("cannot parse duration: %s", s)
 }
 
 // readCoverage extracts coverage percentage from various possible locations

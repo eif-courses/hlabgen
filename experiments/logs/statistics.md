@@ -2,11 +2,11 @@
 
 ## Generation Duration Statistics
 
-- **Mean**: 41596.59 seconds
-- **Std Dev**: 58700.76 seconds
-- **Min**: 85.62 seconds
-- **Max**: 124612.00 seconds
-- **95% CI**: [-24829.57, 108022.75] seconds
+- **Mean**: 57.35 seconds
+- **Std Dev**: 40.58 seconds
+- **Min**: 0.07 seconds
+- **Max**: 89.05 seconds
+- **95% CI**: [11.43, 103.26] seconds
 
 ## Code Coverage Statistics
 
@@ -36,7 +36,7 @@
 
 | Metric Pair | Correlation (r) | Interpretation |
 |-------------|-----------------|----------------|
-| Duration vs Coverage | 1.000 | strong positive |
+| Duration vs Coverage | -0.998 | strong negative |
 | Repairs vs Coverage | 0.000 | weak positive |
 | Rule Fixes vs Coverage | -1.000 | strong negative |
 
