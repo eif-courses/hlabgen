@@ -18,7 +18,7 @@ type ExperimentResult struct {
 	ErrorMessage    string  `json:"error_message"`
 	DurationSeconds float64 `json:"duration_seconds"`
 	RuleFixes       int     `json:"rule_fixes"`
-	Coverage        float64 `json:"coverage"` // ADD THIS
+	Coverage        float64 `json:"coverage"`
 }
 
 // LoadMetricsFromJSON loads a single experiment's metrics JSON.
@@ -34,16 +34,34 @@ func LoadMetricsFromJSON(path string) (ExperimentResult, error) {
 	}
 
 	app := filepath.Base(filepath.Dir(path))
-	mode := readModeFromExperimentInfo(filepath.Dir(path), app)
+
+	// ✅ FIX 4: Read mode directly from JSON first (priority)
+	mode := ""
+	if modeVal, ok := m["mode"].(string); ok {
+		mode = modeVal
+	}
+
+	// Fallback to reading from experiment_info.txt if not in JSON
+	if mode == "" {
+		mode = readModeFromExperimentInfo(filepath.Dir(path), app)
+	}
 
 	// Extract values from gen_metrics
 	duration := 0.0
 	if d, ok := m["Duration"].(float64); ok {
 		duration = d / 1e9 // Convert nanoseconds to seconds
 	}
+	// Also try duration_sec field (lowercase, in seconds already)
+	if d, ok := m["duration_sec"].(float64); ok {
+		duration = d
+	}
 
 	repairs := 0
 	if r, ok := m["RepairAttempts"].(float64); ok {
+		repairs = int(r)
+	}
+	// Also try lowercase variant
+	if r, ok := m["repair_attempts"].(float64); ok {
 		repairs = int(r)
 	}
 
@@ -51,9 +69,17 @@ func LoadMetricsFromJSON(path string) (ExperimentResult, error) {
 	if f, ok := m["RuleFixes"].(float64); ok {
 		fixes = int(f)
 	}
+	// Also try lowercase variant
+	if f, ok := m["rule_fixes"].(float64); ok {
+		fixes = int(f)
+	}
 
 	primarySuccess := false
 	if p, ok := m["PrimarySuccess"].(bool); ok {
+		primarySuccess = p
+	}
+	// Also try lowercase variant
+	if p, ok := m["primary_success"].(bool); ok {
 		primarySuccess = p
 	}
 
@@ -61,9 +87,17 @@ func LoadMetricsFromJSON(path string) (ExperimentResult, error) {
 	if f, ok := m["FinalSuccess"].(bool); ok {
 		finalSuccess = f
 	}
+	// Also try lowercase variant
+	if f, ok := m["final_success"].(bool); ok {
+		finalSuccess = f
+	}
 
 	errorMsg := ""
 	if e, ok := m["ErrorMessage"].(string); ok {
+		errorMsg = e
+	}
+	// Also try lowercase variant
+	if e, ok := m["error_message"].(string); ok {
 		errorMsg = e
 	}
 
@@ -89,7 +123,7 @@ func LoadMetricsFromJSON(path string) (ExperimentResult, error) {
 		ErrorMessage:    errorMsg,
 		DurationSeconds: duration,
 		RuleFixes:       fixes,
-		Coverage:        coverage, // ADD THIS FIELD
+		Coverage:        coverage,
 	}, nil
 }
 

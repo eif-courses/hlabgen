@@ -25,7 +25,8 @@ type GenerationMetrics struct {
 	RepairAttempts int
 	FinalSuccess   bool
 	ErrorMessage   string
-	RuleFixes      int // NEW: counts fixes applied in WriteMany
+	RuleFixes      int
+	Mode           string // ADD THIS LINE
 }
 
 // Generate creates Go code scaffolds using ML and repairs malformed output automatically.
@@ -278,6 +279,7 @@ func saveMetrics(appName string, m GenerationMetrics, path string) {
 	}
 	data := map[string]any{
 		"app_name":        appName,
+		"mode":            m.Mode, // ADD THIS LINE
 		"start_time":      m.StartTime.Format(time.RFC3339),
 		"end_time":        m.EndTime.Format(time.RFC3339),
 		"duration_sec":    m.Duration.Seconds(),

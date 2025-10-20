@@ -58,6 +58,9 @@ func main() {
 	if *mode == "ml" || *mode == "hybrid" {
 		log.Println("🧠 Starting ML-based code generation...")
 
+		// ✅ FIX 3: Set mode before generation
+		genMetrics.Mode = *mode
+
 		// --- first try ---
 		genFiles, metrics, err := mlinternal.Generate(mlinternal.Schema{
 			AppName:    schema.AppName,
@@ -70,11 +73,15 @@ func main() {
 		})
 
 		genMetrics = metrics
+		genMetrics.Mode = *mode // ✅ Ensure mode is preserved after ML call
 		files = convertGenFiles(genFiles)
 
 		if err != nil {
 			log.Printf("⚠️  ML generation failed once: %v", err)
 			log.Println("🔁 Retrying with relaxed mode...")
+
+			// ✅ FIX 3: Set mode before relaxed generation
+			genMetrics.Mode = *mode
 
 			genFiles, metrics, err = mlinternal.GenerateRelaxed(mlinternal.Schema{
 				AppName:    schema.AppName,
@@ -87,6 +94,7 @@ func main() {
 			})
 
 			genMetrics = metrics
+			genMetrics.Mode = *mode // ✅ Ensure mode is preserved after relaxed call
 			files = convertGenFiles(genFiles)
 		}
 
@@ -170,6 +178,7 @@ func main() {
 		log.Println("⚙️  Starting rules-based code generation...")
 
 		genMetrics.StartTime = time.Now()
+		genMetrics.Mode = *mode // ✅ FIX 3: Set mode for rules
 
 		// Generate files for each entity
 		for _, entity := range schema.Entities {
