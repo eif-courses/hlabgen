@@ -37,8 +37,14 @@ func LoadMetricsFromJSON(path string) (ExperimentResult, error) {
 
 	// ✅ FIX 4: Read mode directly from JSON first (priority)
 	mode := ""
-	if modeVal, ok := m["mode"].(string); ok {
+	if modeVal, ok := m["Mode"].(string); ok {
 		mode = modeVal
+	}
+	// Also try lowercase variant
+	if mode == "" {
+		if modeVal, ok := m["mode"].(string); ok {
+			mode = modeVal
+		}
 	}
 
 	// Fallback to reading from experiment_info.txt if not in JSON
@@ -101,10 +107,19 @@ func LoadMetricsFromJSON(path string) (ExperimentResult, error) {
 		errorMsg = e
 	}
 
-	// Try to load metrics file for coverage
+	// ✅ FIX: Try to load metrics file for coverage with wildcard pattern
 	appDir := filepath.Dir(path)
 	coverage := 0.0
-	metricsPath := filepath.Join(appDir, "metrics.json")
+
+	// Find any metrics_*.json file with timestamp
+	var metricsPath string
+	metricsFiles, _ := filepath.Glob(filepath.Join(appDir, "metrics_*.json"))
+	if len(metricsFiles) > 0 {
+		metricsPath = metricsFiles[0]
+	} else {
+		metricsPath = filepath.Join(appDir, "metrics.json") // Fallback
+	}
+
 	if data, err := os.ReadFile(metricsPath); err == nil {
 		var metrics map[string]interface{}
 		if err := json.Unmarshal(data, &metrics); err == nil {
