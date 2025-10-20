@@ -442,11 +442,21 @@ func avgDuration(results []report.ExperimentResult) float64 {
 		return 0
 	}
 	sum := 0.0
+	count := 0
 	for _, r := range results {
-		sum += r.DurationSeconds
+		// ✅ Only count non-zero durations in average
+		if r.DurationSeconds > 0 {
+			sum += r.DurationSeconds
+			count++
+		}
 	}
-	return sum / float64(len(results))
+	if count == 0 {
+		return 0
+	}
+	return sum / float64(count)
 }
+
+// Add this function if missing, or update existing:
 
 func avgRepairs(results []report.ExperimentResult) float64 {
 	if len(results) == 0 {

@@ -27,21 +27,57 @@ func AggregateToCSV(baseDir, outputPath string) error {
 		}
 		appDir := filepath.Join(baseDir, e.Name())
 
-		// --- Load metrics.json ---
+		// --- Load metrics.json (build/test metrics) ---
 		var res Result
 		if data, err := os.ReadFile(filepath.Join(appDir, "metrics.json")); err == nil {
 			_ = json.Unmarshal(data, &res)
 		}
 
+		// ✅ FIX: Load gen_metrics_*.json for ML-specific data (duration, repairs)
+		var mlDuration string = ""
+		var repairAttempts string = ""
+
+		genFiles, _ := filepath.Glob(filepath.Join(appDir, "gen_metrics_*.json"))
+		if len(genFiles) > 0 {
+			// Use the latest gen_metrics file
+			latestGenFile := genFiles[len(genFiles)-1]
+			if data, err := os.ReadFile(latestGenFile); err == nil {
+				var genMetrics map[string]interface{}
+				if json.Unmarshal(data, &genMetrics) == nil {
+					// Extract duration - might be in nanoseconds or seconds
+					if d, ok := genMetrics["Duration"].(float64); ok && d > 0 {
+						// If Duration > 1e9, it's probably in nanoseconds
+						if d > 1e9 {
+							mlDuration = fmt.Sprintf("%.2f", d/1e9)
+						} else {
+							mlDuration = fmt.Sprintf("%.2f", d)
+						}
+					}
+					// Extract repair attempts
+					if r, ok := genMetrics["RepairAttempts"].(float64); ok {
+						repairAttempts = fmt.Sprintf("%.0f", r)
+					}
+				}
+			}
+		}
+
 		// --- Load experiment_info.txt (metadata) ---
 		meta := parseMeta(filepath.Join(appDir, "experiment_info.txt"))
+
+		// ✅ FIX: Override with actual ML metrics from gen_metrics JSON if available
+		if mlDuration != "" {
+			meta["MLDuration"] = mlDuration
+		}
+		if repairAttempts != "" {
+			meta["RepairAttempts"] = repairAttempts
+		}
 
 		// --- Add timestamp in case missing ---
 		if meta["Timestamp"] == "" {
 			meta["Timestamp"] = time.Now().Format(time.RFC3339)
 		}
 
-		// --- Build row ---
+		// --- Build row with all metrics populated ---
 		row := []string{
 			e.Name(),
 			meta["Mode"],
@@ -51,8 +87,8 @@ func AggregateToCSV(baseDir, outputPath string) error {
 			fmt.Sprintf("%v", res.TestsPass),
 			fmt.Sprintf("%.2f", res.CoveragePct),
 			fmt.Sprintf("%d", res.LintWarnings),
-			meta["MLDuration"],
-			meta["RepairAttempts"],
+			meta["MLDuration"],     // ✅ NOW POPULATED from gen_metrics
+			meta["RepairAttempts"], // ✅ NOW POPULATED from gen_metrics
 		}
 		newRows = append(newRows, row)
 	}
@@ -107,7 +143,7 @@ func AggregateToCSV(baseDir, outputPath string) error {
 	return nil
 }
 
-// parseMeta reads key:value pairs from experiment_info.txt.
+// parseMeta reads key:value pairs from experiment_info.txt
 func parseMeta(path string) map[string]string {
 	result := map[string]string{
 		"Mode":           "",

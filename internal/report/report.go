@@ -21,7 +21,8 @@ type ExperimentResult struct {
 	Coverage        float64 `json:"coverage"`
 }
 
-// LoadMetricsFromJSON loads a single experiment's metrics JSON.
+// Around line 27-60, UPDATE the LoadMetricsFromJSON function:
+
 func LoadMetricsFromJSON(path string) (ExperimentResult, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -35,27 +36,51 @@ func LoadMetricsFromJSON(path string) (ExperimentResult, error) {
 
 	app := filepath.Base(filepath.Dir(path))
 
-	// --- Extract lowercase JSON fields (most consistent)
+	// --- Extract fields from JSON ---
 	mode := getString(m, "mode")
 	if mode == "" {
 		mode = readModeFromExperimentInfo(filepath.Dir(path), app)
 	}
 
+	// ✅ FIX: Extract duration correctly from nanoseconds
 	duration := getFloat(m, "duration_sec")
 	if duration == 0 {
-		// fallback for nanoseconds field
-		if d := getFloat(m, "duration"); d > 0 {
-			duration = d / 1e9
+		if d := getFloat(m, "Duration"); d > 0 {
+			// If Duration is in nanoseconds, convert to seconds
+			if d > 1e9 { // Likely nanoseconds
+				duration = d / 1e9
+			} else {
+				duration = d
+			}
 		}
 	}
 
 	repairs := int(getFloat(m, "repair_attempts"))
-	fixes := int(getFloat(m, "rule_fixes"))
-	primarySuccess := getBool(m, "primary_success")
-	finalSuccess := getBool(m, "final_success")
-	errorMsg := getString(m, "error_message")
+	if repairs == 0 {
+		repairs = int(getFloat(m, "RepairAttempts"))
+	}
 
-	// --- Try to read coverage from metrics_final.json or metrics_*.json
+	fixes := int(getFloat(m, "rule_fixes"))
+	if fixes == 0 {
+		fixes = int(getFloat(m, "RuleFixes"))
+	}
+
+	primarySuccess := getBool(m, "primary_success")
+	if !primarySuccess {
+		primarySuccess = getBool(m, "PrimarySuccess")
+	}
+
+	finalSuccess := getBool(m, "final_success")
+	if !finalSuccess {
+		finalSuccess = getBool(m, "FinalSuccess")
+	}
+
+	errorMsg := getString(m, "error_message")
+	if errorMsg == "" {
+		errorMsg = getString(m, "ErrorMessage")
+	}
+
+	// ✅ FIX: Read coverage from directory
 	appDir := filepath.Dir(path)
 	coverage := readCoverage(appDir)
 
@@ -72,10 +97,35 @@ func LoadMetricsFromJSON(path string) (ExperimentResult, error) {
 	}, nil
 }
 
-// readCoverage looks for merged metrics or other JSON files for coverage.
+// OLD readCoverage function (lines ~80-110) - DELETE and REPLACE with:
+
+// readCoverage extracts coverage percentage from gen_metrics JSON or coverage.json
 func readCoverage(appDir string) float64 {
-	// Prefer merged file
-	if data, err := os.ReadFile(filepath.Join(appDir, "metrics_final.json")); err == nil {
+	// Try gen_metrics_*.json first (has coverage saved during validation)
+	files, _ := filepath.Glob(filepath.Join(appDir, "gen_metrics_*.json"))
+	for _, f := range files {
+		if data, err := os.ReadFile(f); err == nil {
+			var m map[string]interface{}
+			if json.Unmarshal(data, &m) == nil {
+				// Try all possible coverage field names
+				if cov, ok := m["CoveragePct"].(float64); ok && cov > 0 {
+					return cov
+				}
+				if cov, ok := m["coverage_pct"].(float64); ok && cov > 0 {
+					return cov
+				}
+				if cov, ok := m["Coverage"].(float64); ok && cov > 0 {
+					return cov
+				}
+				if cov, ok := m["coverage"].(float64); ok && cov > 0 {
+					return cov
+				}
+			}
+		}
+	}
+
+	// Fallback: Try coverage.json in the app directory
+	if data, err := os.ReadFile(filepath.Join(appDir, "coverage.json")); err == nil {
 		var m map[string]interface{}
 		if json.Unmarshal(data, &m) == nil {
 			if cov, ok := m["CoveragePct"].(float64); ok {
@@ -87,18 +137,17 @@ func readCoverage(appDir string) float64 {
 		}
 	}
 
-	// Then try metrics_*.json
-	files, _ := filepath.Glob(filepath.Join(appDir, "metrics_*.json"))
-	if len(files) > 0 {
-		if data, err := os.ReadFile(files[0]); err == nil {
-			var m map[string]interface{}
-			if json.Unmarshal(data, &m) == nil {
-				if cov, ok := m["coverage_pct"].(float64); ok {
-					return cov
-				}
+	// Last resort: Check parent directory for coverage.json
+	parentDir := filepath.Dir(appDir)
+	if data, err := os.ReadFile(filepath.Join(parentDir, "coverage.json")); err == nil {
+		var m map[string]interface{}
+		if json.Unmarshal(data, &m) == nil {
+			if total, ok := m["total_coverage"].(float64); ok && total > 0 {
+				return total
 			}
 		}
 	}
+
 	return 0
 }
 
