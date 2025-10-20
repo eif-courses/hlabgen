@@ -21,8 +21,6 @@ type ExperimentResult struct {
 	Coverage        float64 `json:"coverage"`
 }
 
-// Around line 27-60, UPDATE the LoadMetricsFromJSON function:
-
 func LoadMetricsFromJSON(path string) (ExperimentResult, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -36,18 +34,19 @@ func LoadMetricsFromJSON(path string) (ExperimentResult, error) {
 
 	app := filepath.Base(filepath.Dir(path))
 
-	// --- Extract fields from JSON ---
+	// --- Extract mode ---
 	mode := getString(m, "mode")
 	if mode == "" {
 		mode = readModeFromExperimentInfo(filepath.Dir(path), app)
 	}
 
-	// ✅ FIX: Extract duration correctly from nanoseconds
+	// ✅ FIX: Extract duration with better nanosecond handling
 	duration := getFloat(m, "duration_sec")
 	if duration == 0 {
+		// Try uppercase variants
 		if d := getFloat(m, "Duration"); d > 0 {
-			// If Duration is in nanoseconds, convert to seconds
-			if d > 1e9 { // Likely nanoseconds
+			// Only convert from nanoseconds if value is very large (> 1e6 means likely nanoseconds)
+			if d > 1e6 {
 				duration = d / 1e9
 			} else {
 				duration = d
@@ -80,7 +79,7 @@ func LoadMetricsFromJSON(path string) (ExperimentResult, error) {
 		errorMsg = getString(m, "ErrorMessage")
 	}
 
-	// ✅ FIX: Read coverage from directory
+	// --- Read coverage ---
 	appDir := filepath.Dir(path)
 	coverage := readCoverage(appDir)
 
