@@ -288,6 +288,8 @@ func main() {
 	fmt.Printf("  • Rule Fixes   = %d\n", genMetrics.RuleFixes)
 	fmt.Printf("  • Mode: %s\n", *mode)
 
+	genMetrics.Mode = *mode // Ensure mode is set before saving metrics
+
 	// --- 6) Save metrics ---
 	_ = metrics.SaveResult(*out, m)
 	_ = metrics.SaveMLMetrics(*out, genMetrics)
