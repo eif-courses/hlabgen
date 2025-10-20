@@ -1,0 +1,4 @@
+AppName,Mode,BuildSuccess,TestsPass,CoveragePct,MLDurationSec,RepairAttempts
+LibraryAPI_rules,,true,true,48.1,0.00,0
+LibraryAPI_ml,,true,true,46.8,0.00,0
+LibraryAPI_hybrid,,true,true,46.8,0.00,0

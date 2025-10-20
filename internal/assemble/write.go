@@ -390,14 +390,14 @@ func WriteMany(base string, files []File, metrics *ml.GenerationMetrics) error {
 			}
 		}
 
-		// ✅ Remove unnecessary mux imports in handlers ONLY if mux is not used
-		if strings.Contains(filename, "handlers/") && strings.Contains(content, `"github.com/gorilla/mux"`) {
-			// Only remove if mux.Vars is NOT used
-			if !strings.Contains(content, "mux.Vars") {
-				content = strings.ReplaceAll(content, "\t\"github.com/gorilla/mux\"\n", "")
-				metrics.RuleFixes++
-			}
-		}
+		// DISABLED: 		// ✅ Remove unnecessary mux imports in handlers ONLY if mux is not used
+		// DISABLED: 		if strings.Contains(filename, "handlers/") && strings.Contains(content, `"github.com/gorilla/mux"`) {
+		// DISABLED: 			// Only remove if mux.Vars is NOT used
+		// DISABLED: 			if !strings.Contains(content, "mux.Vars") {
+		// DISABLED: 				content = strings.ReplaceAll(content, "\t\"github.com/gorilla/mux\"\n", "")
+		// DISABLED: 				metrics.RuleFixes++
+		// DISABLED: 			}
+		//}
 
 		// ✅ Auto-fix placeholder import paths like "yourapp/", "your_project/", etc.
 		if moduleName != "" {

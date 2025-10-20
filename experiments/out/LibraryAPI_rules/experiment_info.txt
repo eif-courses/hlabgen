@@ -1,0 +1,10 @@
+App: LibraryAPI
+Mode: rules
+Timestamp: 2025-10-20T22:14:01+03:00
+OpenAI Model: gpt-4o-mini
+BuildSuccess: true
+TestsPass: true
+Coverage: 48.1%
+Duration: 71.768µs
+RepairAttempts: 0
+RuleFixes: 11

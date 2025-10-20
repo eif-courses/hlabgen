@@ -20,7 +20,22 @@ func Run(projectPath string) (metrics.Result, error) {
 	m := metrics.Result{}
 
 	// --- go fmt (non-fatal)
-	_ = exec.Command("go", "fmt", "./...").Run()
+	fmtCmd := exec.Command("go", "fmt", "./...")
+	fmtCmd.Dir = projectPath
+	_ = fmtCmd.Run()
+
+	// --- Auto-fix missing imports (gorilla/mux)
+	fixMuxImport(projectPath)
+	cmd := exec.Command("go", "get", "github.com/gorilla/mux@latest")
+	cmd.Dir = projectPath
+	_ = cmd.Run()
+
+	// Tidy up Go module dependencies
+	tidy := exec.Command("go", "mod", "tidy")
+	tidy.Dir = projectPath
+	_ = tidy.Run()
+
+	fmt.Println("🔧 Verified mux dependency and tidied module")
 
 	// --- go build
 	build := exec.Command("go", "build", "./...")
@@ -67,9 +82,11 @@ func Run(projectPath string) (metrics.Result, error) {
 			output := out.String()
 			combinedOut.WriteString(fmt.Sprintf("\n--- %s ---\n%s", dir, output))
 
-			if strings.Contains(output, "PASS") {
+			// Improved test result detection
+			if strings.Contains(output, "--- PASS:") && !strings.Contains(output, "--- FAIL:") {
 				passed = true
 			}
+
 			if cov := parseCoverage(output); cov > 0 {
 				coverValues = append(coverValues, cov)
 				perPkg[filepath.Base(dir)] = cov
@@ -109,6 +126,26 @@ func Run(projectPath string) (metrics.Result, error) {
 
 	fmt.Printf("✅ Validation completed in %.2fs\n", m.GenTimeSec)
 	m.Timestamp = time.Now().Format(time.RFC3339)
+
+	// --- Merge validation + generation metrics into one file
+	genFile := filepath.Join(projectPath, "gen_metrics.json")
+	if data, err := os.ReadFile(genFile); err == nil {
+		var g map[string]interface{}
+		if err := json.Unmarshal(data, &g); err == nil {
+			g["BuildSuccess"] = m.BuildSuccess
+			g["TestsPass"] = m.TestsPass
+			g["CoveragePct"] = m.CoveragePct
+			g["LintWarnings"] = m.LintWarnings
+			g["VetWarnings"] = m.VetWarnings
+			g["CyclomaticAvg"] = m.CyclomaticAvg
+			g["ValidationTimeSec"] = m.GenTimeSec
+			merged, _ := json.MarshalIndent(g, "", "  ")
+			finalPath := filepath.Join(projectPath, "metrics_final.json")
+			_ = os.WriteFile(finalPath, merged, 0o644)
+			fmt.Printf("📁 Merged metrics → %s\n", finalPath)
+		}
+	}
+
 	return m, nil
 }
 
@@ -121,6 +158,7 @@ func appendCoverageCSV(projectPath string, m metrics.Result) error {
 
 	// Try reading gen_metrics.json if available
 	type genMetrics struct {
+		Mode           string  `json:"mode"`
 		Duration       float64 `json:"duration_sec"`
 		RepairAttempts int     `json:"repair_attempts"`
 	}
@@ -140,14 +178,15 @@ func appendCoverageCSV(projectPath string, m metrics.Result) error {
 	defer f.Close()
 
 	if isNew {
-		header := "AppName,BuildSuccess,TestsPass,CoveragePct,MLDurationSec,RepairAttempts\n"
+		header := "AppName,Mode,BuildSuccess,TestsPass,CoveragePct,MLDurationSec,RepairAttempts\n"
 		if _, err := f.WriteString(header); err != nil {
 			return err
 		}
 	}
 
-	row := fmt.Sprintf("%s,%v,%v,%.1f,%.2f,%d\n",
+	row := fmt.Sprintf("%s,%s,%v,%v,%.1f,%.2f,%d\n",
 		appName,
+		g.Mode,
 		m.BuildSuccess,
 		m.TestsPass,
 		m.CoveragePct,
@@ -167,6 +206,11 @@ func findTestDirs(root string) []string {
 		if err != nil {
 			return nil
 		}
+
+		if strings.Contains(path, "/vendor/") || strings.Contains(path, "/.git/") {
+			return filepath.SkipDir
+		}
+
 		if !info.IsDir() && strings.HasSuffix(info.Name(), "_test.go") {
 			dir := filepath.Dir(path)
 			if !contains(testDirs, dir) {
@@ -237,4 +281,43 @@ func avgCyclo(out string) float64 {
 		return 0
 	}
 	return sum / n
+}
+
+// fixMuxImport scans Go files under internal/handlers and injects
+// the "github.com/gorilla/mux" import if mux.* is used but not imported.
+func fixMuxImport(projectPath string) {
+	filepath.Walk(projectPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return nil
+		}
+		if !strings.HasSuffix(path, ".go") || !strings.Contains(path, "internal/handlers/") {
+			return nil
+		}
+
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return nil
+		}
+		content := string(data)
+
+		// Only fix if mux is used but not imported
+		if strings.Contains(content, "mux.") && !strings.Contains(content, `"github.com/gorilla/mux"`) {
+			lines := strings.Split(content, "\n")
+			newLines := make([]string, 0, len(lines))
+			inserted := false
+			for _, line := range lines {
+				newLines = append(newLines, line)
+				if strings.HasPrefix(strings.TrimSpace(line), "import (") && !inserted {
+					newLines = append(newLines, `    "github.com/gorilla/mux"`)
+					inserted = true
+				}
+			}
+			if inserted {
+				newContent := strings.Join(newLines, "\n")
+				_ = os.WriteFile(path, []byte(newContent), 0o644)
+				fmt.Printf("🔧 Injected mux import → %s\n", path)
+			}
+		}
+		return nil
+	})
 }

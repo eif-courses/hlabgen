@@ -35,99 +35,29 @@ func LoadMetricsFromJSON(path string) (ExperimentResult, error) {
 
 	app := filepath.Base(filepath.Dir(path))
 
-	// ✅ FIX 4: Read mode directly from JSON first (priority)
-	mode := ""
-	if modeVal, ok := m["Mode"].(string); ok {
-		mode = modeVal
-	}
-	// Also try lowercase variant
-	if mode == "" {
-		if modeVal, ok := m["mode"].(string); ok {
-			mode = modeVal
-		}
-	}
-
-	// Fallback to reading from experiment_info.txt if not in JSON
+	// --- Extract lowercase JSON fields (most consistent)
+	mode := getString(m, "mode")
 	if mode == "" {
 		mode = readModeFromExperimentInfo(filepath.Dir(path), app)
 	}
 
-	// Extract values from gen_metrics
-	duration := 0.0
-	if d, ok := m["Duration"].(float64); ok {
-		duration = d / 1e9 // Convert nanoseconds to seconds
-	}
-	// Also try duration_sec field (lowercase, in seconds already)
-	if d, ok := m["duration_sec"].(float64); ok {
-		duration = d
-	}
-
-	repairs := 0
-	if r, ok := m["RepairAttempts"].(float64); ok {
-		repairs = int(r)
-	}
-	// Also try lowercase variant
-	if r, ok := m["repair_attempts"].(float64); ok {
-		repairs = int(r)
-	}
-
-	fixes := 0
-	if f, ok := m["RuleFixes"].(float64); ok {
-		fixes = int(f)
-	}
-	// Also try lowercase variant
-	if f, ok := m["rule_fixes"].(float64); ok {
-		fixes = int(f)
-	}
-
-	primarySuccess := false
-	if p, ok := m["PrimarySuccess"].(bool); ok {
-		primarySuccess = p
-	}
-	// Also try lowercase variant
-	if p, ok := m["primary_success"].(bool); ok {
-		primarySuccess = p
-	}
-
-	finalSuccess := false
-	if f, ok := m["FinalSuccess"].(bool); ok {
-		finalSuccess = f
-	}
-	// Also try lowercase variant
-	if f, ok := m["final_success"].(bool); ok {
-		finalSuccess = f
-	}
-
-	errorMsg := ""
-	if e, ok := m["ErrorMessage"].(string); ok {
-		errorMsg = e
-	}
-	// Also try lowercase variant
-	if e, ok := m["error_message"].(string); ok {
-		errorMsg = e
-	}
-
-	// ✅ FIX: Try to load metrics file for coverage with wildcard pattern
-	appDir := filepath.Dir(path)
-	coverage := 0.0
-
-	// Find any metrics_*.json file with timestamp
-	var metricsPath string
-	metricsFiles, _ := filepath.Glob(filepath.Join(appDir, "metrics_*.json"))
-	if len(metricsFiles) > 0 {
-		metricsPath = metricsFiles[0]
-	} else {
-		metricsPath = filepath.Join(appDir, "metrics.json") // Fallback
-	}
-
-	if data, err := os.ReadFile(metricsPath); err == nil {
-		var metrics map[string]interface{}
-		if err := json.Unmarshal(data, &metrics); err == nil {
-			if cov, ok := metrics["coverage_pct"].(float64); ok {
-				coverage = cov
-			}
+	duration := getFloat(m, "duration_sec")
+	if duration == 0 {
+		// fallback for nanoseconds field
+		if d := getFloat(m, "duration"); d > 0 {
+			duration = d / 1e9
 		}
 	}
+
+	repairs := int(getFloat(m, "repair_attempts"))
+	fixes := int(getFloat(m, "rule_fixes"))
+	primarySuccess := getBool(m, "primary_success")
+	finalSuccess := getBool(m, "final_success")
+	errorMsg := getString(m, "error_message")
+
+	// --- Try to read coverage from metrics_final.json or metrics_*.json
+	appDir := filepath.Dir(path)
+	coverage := readCoverage(appDir)
 
 	return ExperimentResult{
 		AppName:         app,
@@ -142,8 +72,62 @@ func LoadMetricsFromJSON(path string) (ExperimentResult, error) {
 	}, nil
 }
 
+// readCoverage looks for merged metrics or other JSON files for coverage.
+func readCoverage(appDir string) float64 {
+	// Prefer merged file
+	if data, err := os.ReadFile(filepath.Join(appDir, "metrics_final.json")); err == nil {
+		var m map[string]interface{}
+		if json.Unmarshal(data, &m) == nil {
+			if cov, ok := m["CoveragePct"].(float64); ok {
+				return cov
+			}
+			if cov, ok := m["coverage_pct"].(float64); ok {
+				return cov
+			}
+		}
+	}
+
+	// Then try metrics_*.json
+	files, _ := filepath.Glob(filepath.Join(appDir, "metrics_*.json"))
+	if len(files) > 0 {
+		if data, err := os.ReadFile(files[0]); err == nil {
+			var m map[string]interface{}
+			if json.Unmarshal(data, &m) == nil {
+				if cov, ok := m["coverage_pct"].(float64); ok {
+					return cov
+				}
+			}
+		}
+	}
+	return 0
+}
+
+// --- Small JSON helper getters
+
+func getString(m map[string]interface{}, key string) string {
+	if v, ok := m[key].(string); ok {
+		return v
+	}
+	return ""
+}
+
+func getFloat(m map[string]interface{}, key string) float64 {
+	if v, ok := m[key].(float64); ok {
+		return v
+	}
+	return 0
+}
+
+func getBool(m map[string]interface{}, key string) bool {
+	if v, ok := m[key].(bool); ok {
+		return v
+	}
+	return false
+}
+
 var csvModeCache map[string]string
 
+// readModeFromExperimentInfo extracts mode (rules/ml/hybrid) from text or summary.
 func readModeFromExperimentInfo(metricsDir string, appName string) string {
 	possiblePaths := []string{
 		filepath.Join(metricsDir, "experiment_info.txt"),
@@ -197,14 +181,13 @@ func loadSummaryCSVCache() map[string]string {
 	defer file.Close()
 
 	reader := csv.NewReader(file)
-	reader.Read() // Skip header
+	_, _ = reader.Read() // Skip header
 
 	for {
 		record, err := reader.Read()
 		if err != nil {
 			break
 		}
-
 		if len(record) >= 2 {
 			appName := strings.TrimSpace(record[0])
 			mode := strings.TrimSpace(record[1])
@@ -217,10 +200,15 @@ func loadSummaryCSVCache() map[string]string {
 	return cache
 }
 
+// CollectAllExperiments gathers all experiment results under experiments/out/.
 func CollectAllExperiments(baseDir string) ([]ExperimentResult, error) {
 	var results []ExperimentResult
 
 	outDir := filepath.Join(baseDir, "out")
+	if _, err := os.Stat(outDir); os.IsNotExist(err) {
+		return nil, fmt.Errorf("output directory not found: %s", outDir)
+	}
+
 	entries, err := os.ReadDir(outDir)
 	if err != nil {
 		return nil, err
@@ -256,17 +244,20 @@ func CollectAllExperiments(baseDir string) ([]ExperimentResult, error) {
 	return results, nil
 }
 
+// GenerateMarkdownReport writes Markdown table + saves error logs.
 func GenerateMarkdownReport(results []ExperimentResult, output string) error {
 	header := `# Experimental Evaluation Results
 
-| App | Mode | Primary Success | Repair Attempts | Rule Fixes | Final Success | Duration (s) | Error |
-|-----|------|----------------|----------------|-------------|----------------|---------------|-------|
+| App | Mode | Primary Success | Repair Attempts | Rule Fixes | Final Success | Duration (s) | Coverage (%) | Error |
+|-----|------|----------------|----------------|-------------|----------------|---------------|--------------|-------|
 `
 
 	var rows []string
+	os.MkdirAll("experiments/logs/errors", 0o755)
+
 	for _, r := range results {
 		rows = append(rows, fmt.Sprintf(
-			"| %s | %s | %v | %d | %d | %v | %.2f | %s |",
+			"| %s | %s | %v | %d | %d | %v | %.2f | %.1f | %s |",
 			r.AppName,
 			r.Mode,
 			r.PrimarySuccess,
@@ -274,8 +265,15 @@ func GenerateMarkdownReport(results []ExperimentResult, output string) error {
 			r.RuleFixes,
 			r.FinalSuccess,
 			r.DurationSeconds,
+			r.Coverage,
 			shorten(r.ErrorMessage, 50),
 		))
+
+		// Save full error log for reproducibility
+		if r.ErrorMessage != "" {
+			errPath := filepath.Join("experiments/logs/errors", fmt.Sprintf("%s_%s.txt", r.AppName, r.Mode))
+			_ = os.WriteFile(errPath, []byte(r.ErrorMessage), 0o644)
+		}
 	}
 
 	content := header + strings.Join(rows, "\n") + "\n"
