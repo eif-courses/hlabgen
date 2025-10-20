@@ -97,53 +97,67 @@ func LoadMetricsFromJSON(path string) (ExperimentResult, error) {
 	}, nil
 }
 
-// OLD readCoverage function (lines ~80-110) - DELETE and REPLACE with:
-
-// readCoverage extracts coverage percentage from gen_metrics JSON or coverage.json
+// readCoverage extracts coverage percentage from various possible locations
 func readCoverage(appDir string) float64 {
-	// Try gen_metrics_*.json first (has coverage saved during validation)
-	files, _ := filepath.Glob(filepath.Join(appDir, "gen_metrics_*.json"))
-	for _, f := range files {
+	// 1️⃣ First: Try metrics_final.json (merged file with build metrics)
+	if data, err := os.ReadFile(filepath.Join(appDir, "metrics_final.json")); err == nil {
+		var m map[string]interface{}
+		if json.Unmarshal(data, &m) == nil {
+			if cov, ok := m["CoveragePct"].(float64); ok && cov > 0 {
+				return cov
+			}
+			if cov, ok := m["coverage_pct"].(float64); ok && cov > 0 {
+				return cov
+			}
+		}
+	}
+
+	// 2️⃣ Second: Try gen_metrics_*.json files
+	genFiles, _ := filepath.Glob(filepath.Join(appDir, "gen_metrics_*.json"))
+	for _, f := range genFiles {
 		if data, err := os.ReadFile(f); err == nil {
 			var m map[string]interface{}
 			if json.Unmarshal(data, &m) == nil {
-				// Try all possible coverage field names
 				if cov, ok := m["CoveragePct"].(float64); ok && cov > 0 {
 					return cov
 				}
 				if cov, ok := m["coverage_pct"].(float64); ok && cov > 0 {
 					return cov
 				}
-				if cov, ok := m["Coverage"].(float64); ok && cov > 0 {
-					return cov
-				}
-				if cov, ok := m["coverage"].(float64); ok && cov > 0 {
-					return cov
-				}
 			}
 		}
 	}
 
-	// Fallback: Try coverage.json in the app directory
+	// 3️⃣ Third: Try coverage.json (per-package coverage map)
 	if data, err := os.ReadFile(filepath.Join(appDir, "coverage.json")); err == nil {
-		var m map[string]interface{}
-		if json.Unmarshal(data, &m) == nil {
-			if cov, ok := m["CoveragePct"].(float64); ok {
-				return cov
-			}
-			if cov, ok := m["coverage_pct"].(float64); ok {
-				return cov
+		var perPkg map[string]float64
+		if json.Unmarshal(data, &perPkg) == nil {
+			// Calculate average of all packages
+			if len(perPkg) > 0 {
+				var total float64
+				for _, cov := range perPkg {
+					total += cov
+				}
+				avg := total / float64(len(perPkg))
+				if avg > 0 {
+					return avg
+				}
 			}
 		}
 	}
 
-	// Last resort: Check parent directory for coverage.json
-	parentDir := filepath.Dir(appDir)
-	if data, err := os.ReadFile(filepath.Join(parentDir, "coverage.json")); err == nil {
-		var m map[string]interface{}
-		if json.Unmarshal(data, &m) == nil {
-			if total, ok := m["total_coverage"].(float64); ok && total > 0 {
-				return total
+	// 4️⃣ Fourth: Try metrics_*.json files
+	files, _ := filepath.Glob(filepath.Join(appDir, "metrics_*.json"))
+	for _, f := range files {
+		if data, err := os.ReadFile(f); err == nil {
+			var m map[string]interface{}
+			if json.Unmarshal(data, &m) == nil {
+				if cov, ok := m["CoveragePct"].(float64); ok && cov > 0 {
+					return cov
+				}
+				if cov, ok := m["coverage_pct"].(float64); ok && cov > 0 {
+					return cov
+				}
 			}
 		}
 	}

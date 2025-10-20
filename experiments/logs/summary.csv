@@ -1,7 +1,7 @@
 AppName,Mode,Timestamp,Model,BuildSuccess,TestsPass,CoveragePct,LintWarnings,MLDuration,RepairAttempts
-LibraryAPI_rules,rules,2025-10-20T22:14:01+03:00,gpt-4o-mini,false,false,0.00,0,,0
-LibraryAPI_ml,ml,2025-10-20T22:15:39+03:00,gpt-4o-mini,false,false,0.00,0,,0
-LibraryAPI_rules,rules,2025-10-20T22:14:01+03:00,gpt-4o-mini,false,false,0.00,0,,0
-LibraryAPI_hybrid,hybrid,2025-10-20T22:17:15+03:00,gpt-4o-mini,false,false,0.00,0,,0
-LibraryAPI_ml,ml,2025-10-20T22:15:39+03:00,gpt-4o-mini,false,false,0.00,0,,0
-LibraryAPI_rules,rules,2025-10-20T22:14:01+03:00,gpt-4o-mini,false,false,0.00,0,,0
+LibraryAPI_rules,rules,2025-10-20T23:04:49+03:00,gpt-4o-mini,false,false,0.00,0,48750.00,0
+LibraryAPI_ml,ml,2025-10-20T23:06:28+03:00,gpt-4o-mini,false,false,0.00,0,97.72,0
+LibraryAPI_rules,rules,2025-10-20T23:04:49+03:00,gpt-4o-mini,false,false,0.00,0,48750.00,0
+LibraryAPI_hybrid,hybrid,2025-10-20T23:07:51+03:00,gpt-4o-mini,false,false,0.00,0,81.63,0
+LibraryAPI_ml,ml,2025-10-20T23:06:28+03:00,gpt-4o-mini,false,false,0.00,0,97.72,0
+LibraryAPI_rules,rules,2025-10-20T23:04:49+03:00,gpt-4o-mini,false,false,0.00,0,48750.00,0

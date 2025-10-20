@@ -1,12 +1,12 @@
 {
   "app_name": "LibraryAPI",
-  "duration_sec": 94.801968338,
-  "end_time": "2025-10-20T22:17:14+03:00",
+  "duration_sec": 81.626638916,
+  "end_time": "2025-10-20T23:07:49+03:00",
   "error_message": "",
   "final_success": true,
   "mode": "",
   "primary_success": true,
   "repair_attempts": 0,
   "rule_fixes": 0,
-  "start_time": "2025-10-20T22:15:39+03:00"
+  "start_time": "2025-10-20T23:06:28+03:00"
 }
