@@ -1,0 +1,10 @@
+{
+  "StartTime": "2025-10-20T03:53:38.475491088+03:00",
+  "EndTime": "2025-10-20T03:53:38.475628395+03:00",
+  "Duration": 137307,
+  "PrimarySuccess": true,
+  "RepairAttempts": 1,
+  "FinalSuccess": true,
+  "ErrorMessage": "failed to parse repaired output: json parse error: invalid character 'e' after object key:value pair",
+  "RuleFixes": 11
+}

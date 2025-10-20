@@ -1,0 +1,11 @@
+{
+  "app_name": "FinanceAPI",
+  "duration_sec": 56.731637086,
+  "end_time": "2025-10-20T01:11:42+03:00",
+  "error_message": "",
+  "final_success": true,
+  "primary_success": false,
+  "repair_attempts": 1,
+  "rule_fixes": 0,
+  "start_time": "2025-10-20T01:10:45+03:00"
+}

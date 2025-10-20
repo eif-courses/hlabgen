@@ -1,0 +1,146 @@
+
+🚀 Starting generation for app: NewsAPI (mode=hybrid)
+✅ Rule-based scaffold created
+2025/10/20 05:01:13 🧠 Starting ML-based code generation...
+🌍 Using custom endpoint: https://api.openai.com/v1
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 37.404024337s (model: gpt-4o-mini, attempt: 1)
+✅ Parsed 12 files
+
+📊 Generation Summary:
+  • Duration: 37.404808893s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+✅ NewsAPI generation completed successfully
+🧾 Saved ML metrics → experiments/NewsAPI/gen_metrics.json
+📝 Processing: internal/models/article.go
+✅ Written: experiments/out/NewsAPI/internal/models/article.go
+📝 Processing: internal/models/category.go
+✅ Written: experiments/out/NewsAPI/internal/models/category.go
+📝 Processing: internal/models/author.go
+✅ Written: experiments/out/NewsAPI/internal/models/author.go
+📝 Processing: internal/handlers/article.go
+🔧 Fixed handler signature for CreateArticle
+🔧 Fixed handler signature for GetArticles
+🔧 Fixed handler signature for GetArticle
+🔧 Fixed handler signature for UpdateArticle
+🔧 Fixed handler signature for DeleteArticle
+✅ Written: experiments/out/NewsAPI/internal/handlers/article.go
+📝 Processing: internal/handlers/category.go
+🔧 Fixed handler signature for CreateCategory
+🔧 Fixed handler signature for GetCategories
+🔧 Fixed handler signature for GetCategory
+🔧 Fixed handler signature for UpdateCategory
+🔧 Fixed handler signature for DeleteCategory
+✅ Written: experiments/out/NewsAPI/internal/handlers/category.go
+📝 Processing: internal/handlers/author.go
+🔧 Fixed handler signature for CreateAuthor
+🔧 Fixed handler signature for GetAuthors
+🔧 Fixed handler signature for GetAuthor
+🔧 Fixed handler signature for UpdateAuthor
+🔧 Fixed handler signature for DeleteAuthor
+✅ Written: experiments/out/NewsAPI/internal/handlers/author.go
+📝 Processing: internal/handlers/article_test.go
+🔧 Fixed test signature for TestCreateArticle
+🔧 Fixed test signature for TestGetArticles
+✅ Auto-fixed test signatures in internal/handlers/article_test.go
+✅ Written: experiments/out/NewsAPI/internal/handlers/article_test.go
+📝 Processing: internal/handlers/category_test.go
+🔧 Fixed test signature for TestCreateCategory
+🔧 Fixed test signature for TestGetCategories
+✅ Auto-fixed test signatures in internal/handlers/category_test.go
+✅ Written: experiments/out/NewsAPI/internal/handlers/category_test.go
+📝 Processing: internal/handlers/author_test.go
+🔧 Fixed test signature for TestCreateAuthor
+🔧 Fixed test signature for TestGetAuthors
+✅ Auto-fixed test signatures in internal/handlers/author_test.go
+✅ Written: experiments/out/NewsAPI/internal/handlers/author_test.go
+📝 Processing: internal/routes/routes.go
+🔧 Fixed Register function parameter
+✅ Written: experiments/out/NewsAPI/internal/routes/routes.go
+📝 Processing: cmd/main.go
+✅ Written: experiments/out/NewsAPI/cmd/main.go
+📝 Processing: tasks.md
+⚠️  Syntax validation failed for tasks.md: temp.go:1:1: illegal character U+0023 '#'
+🔧 Attempting additional fixes...
+❌ Could not auto-fix syntax errors in tasks.md
+✅ Written: experiments/out/NewsAPI/tasks.md
+
+🔧 Total rule-based fixes applied: 25
+
+🔧 Running auto-fix on generated files...
+
+🔧 Auto-fixing all files in: experiments/out/NewsAPI
+
+📝 Fixing test function signatures...
+  ✅ Fixed test signatures in article_test.go
+  ✅ Fixed test signatures in author_test.go
+  ✅ Fixed test signatures in category_test.go
+
+📝 Fixing handler function signatures...
+
+📝 Fixing routes Register function...
+
+📝 Fixing missing commas in struct literals...
+
+📝 Ensuring test file imports...
+
+✅ Applied 3 fixes total!
+✅ Auto-fix completed successfully
+
+🔍 Validating Go syntax...
+✅ All generated files have valid Go syntax
+2025/10/20 05:01:50 ✅ Generated 3 test file(s)
+
+🔧 Fixing import paths...
+2025/10/20 05:01:50 🔧 Detected module name: NewsAPI — fixing imports...
+2025/10/20 05:01:50 ✅ No import fixes needed
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+
+🔍 Final syntax validation after fixes...
+✅ All syntax errors resolved
+✅ ML generation completed (37.40s)
+📁 Saved per-package coverage → experiments/out/NewsAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/NewsAPI/internal/handlers ---
+=== RUN   TestCreateArticle
+--- PASS: TestCreateArticle (0.00s)
+=== RUN   TestGetArticles
+--- PASS: TestGetArticles (0.00s)
+=== RUN   TestCreateAuthor
+--- PASS: TestCreateAuthor (0.00s)
+=== RUN   TestGetAuthors
+--- PASS: TestGetAuthors (0.00s)
+=== RUN   TestCreateCategory
+--- PASS: TestCreateCategory (0.00s)
+=== RUN   TestGetCategories
+--- PASS: TestGetCategories (0.00s)
+PASS
+coverage: 53.3% of statements
+ok  	NewsAPI/internal/handlers	0.004s
+
+------------------------
+✅ Validation completed in 1.05s
+
+📊 Summary for NewsAPI:
+  • BuildSuccess = true
+  • LintWarnings = 3
+  • TestsPass    = true
+  • Coverage     = 53.3%
+  • Generation Duration = 37.404808893s
+  • Repair Attempts = 0
+  • Rule Fixes   = 25
+  • Mode: hybrid
+🧾 Appended 30 experiments into experiments/logs/summary.csv
+
+🧾 Generating Markdown summary from JSON metrics...
+📊 Markdown results saved → experiments/logs/results.md
+✅ Summary successfully written to experiments/logs/results.md
+
+✅ Experiment complete..

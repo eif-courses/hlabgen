@@ -1,0 +1,23 @@
+{
+  "timestamp": "2025-10-20T01:07:00+03:00",
+  "build": {
+    "build_success": true,
+    "vet_warnings": 0,
+    "lint_warnings": 0,
+    "tests_pass": true,
+    "coverage_pct": 72.2,
+    "cyclomatic_avg": 3.0625,
+    "gen_time_sec": 0.776605841,
+    "timestamp": "2025-10-20T01:07:00+03:00"
+  },
+  "generation": {
+    "StartTime": "2025-10-20T01:06:59.957066638+03:00",
+    "EndTime": "2025-10-20T01:06:59.957225927+03:00",
+    "Duration": 159292,
+    "PrimarySuccess": true,
+    "RepairAttempts": 1,
+    "FinalSuccess": true,
+    "ErrorMessage": "failed to parse repaired output: json parse error: invalid character 'e' after object key:value pair",
+    "RuleFixes": 11
+  }
+}

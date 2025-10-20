@@ -1,0 +1,11 @@
+{
+  "app_name": "TravelAPI",
+  "duration_sec": 61.585369884,
+  "end_time": "2025-10-20T04:04:50+03:00",
+  "error_message": "failed to parse repaired output: json parse error: invalid character 'e' after object key:value pair",
+  "final_success": false,
+  "primary_success": false,
+  "repair_attempts": 1,
+  "rule_fixes": 0,
+  "start_time": "2025-10-20T04:03:49+03:00"
+}

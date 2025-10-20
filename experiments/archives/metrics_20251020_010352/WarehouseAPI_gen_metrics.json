@@ -1,0 +1,11 @@
+{
+  "app_name": "WarehouseAPI",
+  "duration_sec": 69.772730822,
+  "end_time": "2025-10-20T01:03:51+03:00",
+  "error_message": "failed to parse repaired output: json parse error: invalid character 'e' after object key:value pair",
+  "final_success": false,
+  "primary_success": false,
+  "repair_attempts": 1,
+  "rule_fixes": 0,
+  "start_time": "2025-10-20T01:02:42+03:00"
+}

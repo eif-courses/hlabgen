@@ -1,0 +1,212 @@
+
+🚀 Starting generation for app: AuctionAPI (mode=hybrid)
+✅ Rule-based scaffold created
+2025/10/20 04:46:02 🧠 Starting ML-based code generation...
+🌍 Using custom endpoint: https://api.openai.com/v1
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 34.095922271s (model: gpt-4o-mini, attempt: 1)
+❌ JSON error: invalid character 'e' after object key:value pair
+⚠️ Primary parse failed, retrying with JSON repair prompt...
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 44.82352813s (model: gpt-4o-mini, attempt: 1)
+🔁 Repair call took 44.8235933s
+❌ JSON error: invalid character 'e' after object key:value pair
+--- CLEANED JSON ---
+[
+  {
+    "filename": "internal/models/auction.go",
+    "code": "package models\n\ntype Auction struct {\n\tID          int     `json:\"id\"`\n\tTitle       string  `json:\"title\"`\n\tDescription string  `json:\"description\"`\n\tUserID      int     `json:\"user_id\"`\n\tStartPrice  float64 `json:\"start_price\"`\n\tEndTime     string  `json:\"end_time\"`\n}"
+  },
+  {
+    "filename": "internal/models/bid.go",
+    "code": "package models\n\ntype Bid struct {\n\tID        int     `json:\"id\"`\n\tAuctionID int     `json:\"auction_id\"`\n\tUserID    int     `json:\"user_id\"`\n\tAmount    float64 `json:\"amount\"`\n}"
+  },
+  {
+    "filename": "internal/models/user.go",
+    "code": "package models\n\ntype User struct {\n\tID       int    `json:\"id\"`\n\tUsername string `json:\"username\"`\n\tEmail    string `json:\"email\"`\n\tPassword string `json:\"password\"`\n}"
+  },
+  {
+    "filename": "internal/handlers/auction.go",
+    "code": "package handlers\n\nimport (\n\t"encoding/json\"\n\t"net/http\"\n\t\"AuctionAPI/internal/models\"\n)\n\nvar auctions []models.Auction\n\nfunc CreateAuction(w http.ResponseWriter, r *http.Request) {\n\tvar auction models.Auction\n\tif r.Body == nil {\n\t\thttp.Error(w, \"missing body\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif err := json.NewDecoder(r.Body).Decode(&auction); err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}\n\tauctions = append(auctions, auction)\n\tw.WriteHeader(http.StatusCreated)\n\tjson.NewEncoder(w).Encode(auction)\n}\n\nfunc GetAuctions(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(auctions)\n}\n\nfunc GetAuction(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for getting a single auction\n\tw.WriteHeader(http.StatusOK)\n}\n\nfunc UpdateAuction(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for updating an auction\n\tw.WriteHeader(http.StatusOK)\n}\n\nfunc DeleteAuction(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for deleting an auction\n\tw.WriteHeader(http.StatusNoContent)\n}"
+  },
+  {
+    "filename": "internal/handlers/bid.go",
+    "code": "package handlers\n\nimport (\n\t"encoding/json\"\n\t"net/http\"\n\t\"AuctionAPI/internal/models\"\n)\n\nvar bids []models.Bid\n\nfunc CreateBid(w http.ResponseWriter, r *http.Request) {\n\tvar bid models.Bid\n\tif r.Body == nil {\n\t\thttp.Error(w, \"missing body\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif err := json.NewDecoder(r.Body).Decode(&bid); err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}\n\tbids = append(bids, bid)\n\tw.WriteHeader(http.StatusCreated)\n\tjson.NewEncoder(w).Encode(bid)\n}\n\nfunc GetBids(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(bids)\n}\n\nfunc GetBid(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for getting a single bid\n\tw.WriteHeader(http.StatusOK)\n}\n\nfunc UpdateBid(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for updating a bid\n\tw.WriteHeader(http.StatusOK)\n}\n\nfunc DeleteBid(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for deleting a bid\n\tw.WriteHeader(http.StatusNoContent)\n}"
+  },
+  {
+    "filename": "internal/handlers/user.go",
+    "code": "package handlers\n\nimport (\n\t"encoding/json\"\n\t"net/http\"\n\t\"AuctionAPI/internal/models\"\n)\n\nvar users []models.User\n\nfunc CreateUser(w http.ResponseWriter, r *http.Request) {\n\tvar user models.User\n\tif r.Body == nil {\n\t\thttp.Error(w, \"missing body\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif err := json.NewDecoder(r.Body).Decode(&user); err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}\n\tusers = append(users, user)\n\tw.WriteHeader(http.StatusCreated)\n\tjson.NewEncoder(w).Encode(user)\n}\n\nfunc GetUsers(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(users)\n}\n\nfunc GetUser(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for getting a single user\n\tw.WriteHeader(http.StatusOK)\n}\n\nfunc UpdateUser(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for updating a user\n\tw.WriteHeader(http.StatusOK)\n}\n\nfunc DeleteUser(w http.ResponseWriter, r *http.Request) {\n\t// Implementation for deleting a user\n\tw.WriteHeader(http.StatusNoContent)\n}"
+  },
+  {
+    "filename": "internal/handlers/auction_test.go",
+    "code": "package handlers_test\n\nimport (\n\t"bytes\"\n\t"encoding/json\"\n\t"net/http\"\n\t"net/http/httptest\"\n\t"testing\"\n\t\"AuctionAPI/internal/handlers\"\n\t\"AuctionAPI/internal/models\"\n)\n\nfunc TestCreateAuction(t *testing.T) {\n\tauction := models.Auction{\n\t\tTitle:       \"Test Auction\",\n\t\tDescription: \"Test Description\",\n\t\tUserID:      1,\n\t\tStartPrice:  100.0,\n\t\tEndTime:     \"2023-12-31T23:59:59Z\",\n\t}\n\tbody, _ := json.Marshal(auction)\n\treq := httptest.NewRequest(\"POST\", \"/auctions\", bytes.NewBuffer(body))\n\tw := httptest.NewRecorder()\n\thandlers.CreateAuction(w, req)\n\tif w.Code != http.StatusCreated {\n\t\tt.Errorf(\"Expected 201, got %d\", w.Code)\n\t}\n}\n\nfunc TestGetAuctions(t *testing.T) {\n\treq := httptest.NewRequest(\"GET\", \"/auctions\", nil)\n\tw := httptest.NewRecorder()\n\thandlers.GetAuctions(w, req)\n\tif w.Code != http.StatusOK {\n\t\tt.Errorf(\"Expected 200, got %d\", w.Code)\n\t}\n}"
+  },
+  {
+    "filename": "internal/handlers/bid_test.go",
+    "code": "package handlers_test\n\nimport (\n\t"bytes\"\n\t"encoding/json\"\n\t"net/http\"\n\t"net/http/httptest\"\n\t"testing\"\n\t\"AuctionAPI/internal/handlers\"\n\t\"AuctionAPI/internal/models\"\n)\n\nfunc TestCreateBid(t *testing.T) {\n\tbid := models.Bid{\n\t\tAuctionID: 1,\n\t\tUserID:    1,\n\t\tAmount:    150.0,\n\t}\n\tbody, _ := json.Marshal(bid)\n\treq := httptest.NewRequest(\"POST\", \"/bids\", bytes.NewBuffer(body))\n\tw := httptest.NewRecorder()\n\thandlers.CreateBid(w, req)\n\tif w.Code != http.StatusCreated {\n\t\tt.Errorf(\"Expected 201, got %d\", w.Code)\n\t}\n}\n\nfunc TestGetBids(t *testing.T) {\n\treq := httptest.NewRequest(\"GET\", \"/bids\", nil)\n\tw := httptest.NewRecorder()\n\thandlers.GetBids(w, req)\n\tif w.Code != http.StatusOK {\n\t\tt.Errorf(\"Expected 200, got %d\", w.Code)\n\t}\n}"
+  },
+  {
+    "filename": "internal/handlers/user_test.go",
+    "code": "package handlers_test\n\nimport (\n\t"bytes\"\n\t"encoding/json\"\n\t"net/http\"\n\t"net/http/httptest\"\n\t"testing\"\n\t\"AuctionAPI/internal/handlers\"\n\t\"AuctionAPI/internal/models\"\n)\n\nfunc TestCreateUser(t *testing.T) {\n\tuser := models.User{\n\t\tUsername: \"testuser\",\n\t\tEmail:    \"test@example.com\",\n\t\tPassword: \"password\",\n\t}\n\tbody, _ := json.Marshal(user)\n\treq := httptest.NewRequest(\"POST\", \"/users\", bytes.NewBuffer(body))\n\tw := httptest.NewRecorder()\n\thandlers.CreateUser(w, req)\n\tif w.Code != http.StatusCreated {\n\t\tt.Errorf(\"Expected 201, got %d\", w.Code)\n\t}\n}\n\nfunc TestGetUsers(t *testing.T) {\n\treq := httptest.NewRequest(\"GET\", \"/users\", nil)\n\tw := httptest.NewRecorder()\n\thandlers.GetUsers(w, req)\n\tif w.Code != http.StatusOK {\n\t\tt.Errorf(\"Expected 200, got %d\", w.Code)\n\t}\n}"
+  },
+  {
+    "filename": "internal/routes/routes.go",
+    "code": "package routes\n\nimport (\n\t\"github.com/gorilla/mux\"\n\t\"AuctionAPI/internal/handlers\"\n)\n\nfunc Register(r *mux.Router) {\n\t// Auction routes\n\tr.HandleFunc(\"/auctions\", handlers.CreateAuction).Methods(\"POST\")\n\tr.HandleFunc(\"/auctions\", handlers.GetAuctions).Methods(\"GET\")\n\tr.HandleFunc(\"/auctions/{id}\", handlers.GetAuction).Methods(\"GET\")\n\tr.HandleFunc(\"/auctions/{id}\", handlers.UpdateAuction).Methods(\"PUT\")\n\tr.HandleFunc(\"/auctions/{id}\", handlers.DeleteAuction).Methods(\"DELETE\")\n\t// Bid routes\n\tr.HandleFunc(\"/bids\", handlers.CreateBid).Methods(\"POST\")\n\tr.HandleFunc(\"/bids\", handlers.GetBids).Methods(\"GET\")\n\tr.HandleFunc(\"/bids/{id}\", handlers.GetBid).Methods(\"GET\")\n\tr.HandleFunc(\"/bids/{id}\", handlers.UpdateBid).Methods(\"PUT\")\n\tr.HandleFunc(\"/bids/{id}\", handlers.DeleteBid).Methods(\"DELETE\")\n\t// User routes\n\tr.HandleFunc(\"/users\", handlers.CreateUser).Methods(\"POST\")\n\tr.HandleFunc(\"/users\", handlers.GetUsers).Methods(\"GET\")\n\tr.HandleFunc(\"/users/{id}\", handlers.GetUser).Methods(\"GET\")\n\tr.HandleFunc(\"/users/{id}\", handlers.UpdateUser).Methods(\"PUT\")\n\tr.HandleFunc(\"/users/{id}\", handlers.DeleteUser).Methods(\"DELETE\")\n}"
+  },
+  {
+    "filename": "cmd/main.go",
+    "code": "package main\n\nimport (\n\t\"log\"\n\t\"net/http\"\n\t\"github.com/gorilla/mux\"\n\t\"AuctionAPI/internal/routes\"\n)\n\nfunc main() {\n\tr := mux.NewRouter()\n\troutes.Register(r)\n\tlog.Println(\"Server listening on :8080\")\n\tlog.Fatal(http.ListenAndServe(\":8080\", r))\n}"
+  },
+  {
+    "filename": "tasks.md",
+    "code": "# Lab Tasks\n\n1. Implement the GetAuction handler to return a single auction by ID\n2. Add validation for required fields in CreateAuction handler\n3. Write additional test cases for UpdateAuction and DeleteAuction handlers\n4. Implement error handling for auction not found scenarios\n5. Add pagination support for the GetAuctions endpoint\n6. Implement similar tasks for Bid and User entities"
+  }
+]
+--- END ---
+🧾 Saved ML metrics → experiments/AuctionAPI/gen_metrics.json
+2025/10/20 04:47:21 ⚠️  ML generation failed once: failed to parse repaired output: json parse error: invalid character 'e' after object key:value pair
+2025/10/20 04:47:21 🔁 Retrying with relaxed mode...
+2025/10/20 04:47:21 🪄 Using relaxed ML generation mode (cleaning JSON output)...
+🌍 Using custom endpoint: https://api.openai.com/v1
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 32.856294016s (model: gpt-4o-mini, attempt: 1)
+✅ Parsed 12 files
+
+📊 Generation Summary:
+  • Duration: 32.856714792s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+✅ AuctionAPI generation completed successfully
+🧾 Saved ML metrics → experiments/AuctionAPI/gen_metrics.json
+2025/10/20 04:47:54 ✅ Normal ML generation succeeded — no relaxed mode needed.
+📝 Processing: internal/models/auction.go
+✅ Written: experiments/out/AuctionAPI/internal/models/auction.go
+📝 Processing: internal/models/bid.go
+✅ Written: experiments/out/AuctionAPI/internal/models/bid.go
+📝 Processing: internal/models/user.go
+✅ Written: experiments/out/AuctionAPI/internal/models/user.go
+📝 Processing: internal/handlers/auction.go
+🔧 Fixed handler signature for CreateAuction
+🔧 Fixed handler signature for GetAuctions
+🔧 Fixed handler signature for GetAuction
+🔧 Fixed handler signature for UpdateAuction
+🔧 Fixed handler signature for DeleteAuction
+✅ Written: experiments/out/AuctionAPI/internal/handlers/auction.go
+📝 Processing: internal/handlers/bid.go
+🔧 Fixed handler signature for CreateBid
+🔧 Fixed handler signature for GetBids
+🔧 Fixed handler signature for GetBid
+🔧 Fixed handler signature for UpdateBid
+🔧 Fixed handler signature for DeleteBid
+✅ Written: experiments/out/AuctionAPI/internal/handlers/bid.go
+📝 Processing: internal/handlers/user.go
+🔧 Fixed handler signature for CreateUser
+🔧 Fixed handler signature for GetUsers
+🔧 Fixed handler signature for GetUser
+🔧 Fixed handler signature for UpdateUser
+🔧 Fixed handler signature for DeleteUser
+✅ Written: experiments/out/AuctionAPI/internal/handlers/user.go
+📝 Processing: internal/handlers/auction_test.go
+🔧 Fixed test signature for TestCreateAuction
+🔧 Fixed test signature for TestGetAuctions
+✅ Auto-fixed test signatures in internal/handlers/auction_test.go
+✅ Written: experiments/out/AuctionAPI/internal/handlers/auction_test.go
+📝 Processing: internal/handlers/bid_test.go
+🔧 Fixed test signature for TestCreateBid
+🔧 Fixed test signature for TestGetBids
+✅ Auto-fixed test signatures in internal/handlers/bid_test.go
+✅ Written: experiments/out/AuctionAPI/internal/handlers/bid_test.go
+📝 Processing: internal/handlers/user_test.go
+🔧 Fixed test signature for TestCreateUser
+🔧 Fixed test signature for TestGetUsers
+✅ Auto-fixed test signatures in internal/handlers/user_test.go
+✅ Written: experiments/out/AuctionAPI/internal/handlers/user_test.go
+📝 Processing: internal/routes/routes.go
+🔧 Fixed Register function parameter
+✅ Written: experiments/out/AuctionAPI/internal/routes/routes.go
+📝 Processing: cmd/main.go
+✅ Written: experiments/out/AuctionAPI/cmd/main.go
+📝 Processing: tasks.md
+⚠️  Syntax validation failed for tasks.md: temp.go:1:1: illegal character U+0023 '#'
+🔧 Attempting additional fixes...
+❌ Could not auto-fix syntax errors in tasks.md
+✅ Written: experiments/out/AuctionAPI/tasks.md
+
+🔧 Total rule-based fixes applied: 25
+
+🔧 Running auto-fix on generated files...
+
+🔧 Auto-fixing all files in: experiments/out/AuctionAPI
+
+📝 Fixing test function signatures...
+  ✅ Fixed test signatures in auction_test.go
+  ✅ Fixed test signatures in bid_test.go
+  ✅ Fixed test signatures in user_test.go
+
+📝 Fixing handler function signatures...
+
+📝 Fixing routes Register function...
+
+📝 Fixing missing commas in struct literals...
+
+📝 Ensuring test file imports...
+
+✅ Applied 3 fixes total!
+✅ Auto-fix completed successfully
+
+🔍 Validating Go syntax...
+✅ All generated files have valid Go syntax
+2025/10/20 04:47:54 ✅ Generated 3 test file(s)
+
+🔧 Fixing import paths...
+2025/10/20 04:47:54 🔧 Detected module name: AuctionAPI — fixing imports...
+2025/10/20 04:47:54 ✅ No import fixes needed
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+
+🔍 Final syntax validation after fixes...
+✅ All syntax errors resolved
+✅ ML generation completed (32.86s)
+📁 Saved per-package coverage → experiments/out/AuctionAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/AuctionAPI/internal/handlers ---
+=== RUN   TestCreateAuction
+--- PASS: TestCreateAuction (0.00s)
+=== RUN   TestGetAuctions
+--- PASS: TestGetAuctions (0.00s)
+=== RUN   TestCreateBid
+--- PASS: TestCreateBid (0.00s)
+=== RUN   TestGetBids
+--- PASS: TestGetBids (0.00s)
+=== RUN   TestCreateUser
+--- PASS: TestCreateUser (0.00s)
+=== RUN   TestGetUsers
+--- PASS: TestGetUsers (0.00s)
+PASS
+coverage: 53.3% of statements
+ok  	AuctionAPI/internal/handlers	0.003s
+
+------------------------
+✅ Validation completed in 1.14s
+
+📊 Summary for AuctionAPI:
+  • BuildSuccess = true
+  • LintWarnings = 3
+  • TestsPass    = true
+  • Coverage     = 53.3%
+  • Generation Duration = 32.856714792s
+  • Repair Attempts = 0
+  • Rule Fixes   = 25
+  • Mode: hybrid
+🧾 Appended 30 experiments into experiments/logs/summary.csv
+
+🧾 Generating Markdown summary from JSON metrics...
+📊 Markdown results saved → experiments/logs/results.md
+✅ Summary successfully written to experiments/logs/results.md
+
+✅ Experiment complete..

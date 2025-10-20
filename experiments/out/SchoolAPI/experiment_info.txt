@@ -1,0 +1,10 @@
+App: SchoolAPI
+Mode: hybrid
+Timestamp: 2025-10-20T05:07:11+03:00
+OpenAI Model: gpt-4o-mini
+BuildSuccess: true
+TestsPass: true
+Coverage: 53.3%
+Duration: 32.386998555s
+RepairAttempts: 0
+RuleFixes: 25
