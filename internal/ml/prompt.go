@@ -21,7 +21,7 @@ func BuildPrompt(s Schema) string {
 	b, _ := json.Marshal(s)
 
 	// Build prompt with proper argument count
-	promptText := `You are a Go code generator. Generate ONLY valid, compilable Go code for a REST API.
+	promptText := `You are a Go code generator. Generate ONLY valid, compilable Go code for a REST API with COMPLETE, PRODUCTION-READY implementations.
 
 Project Requirements: %s
 
@@ -162,7 +162,7 @@ Project Requirements: %s
    }
 
 6️⃣ IMPORT REQUIREMENTS:
-   • Handlers: "encoding/json", "net/http"
+   • Handlers: "encoding/json", "net/http", "strconv"
    • Tests: "bytes", "encoding/json", "net/http", "net/http/httptest", "testing"
    • Routes: "github.com/gorilla/mux"
    • DO NOT import "github.com/gorilla/mux" in handlers
@@ -184,8 +184,43 @@ Project Requirements: %s
    • cmd/main.go
    • tasks.md
 
+9️⃣ COMPLETE IMPLEMENTATIONS REQUIRED:
+   ⚠️  DO NOT generate placeholder comments or empty functions!
+   ⚠️  ALL CRUD operations must be FULLY IMPLEMENTED!
+   
+   YOU MUST IMPLEMENT:
+   • Create: Add item to in-memory slice, return 201 Created
+   • GetAll: Return entire collection, 200 OK
+   • GetByID: Extract ID from URL, search slice, return item or 404
+   • Update: Extract ID, find item, update fields, return 200 OK
+   • Delete: Extract ID, remove from slice, return 204 No Content
+   
+   ❌ WRONG (placeholder):
+   func GetBook(w http.ResponseWriter, r *http.Request) {
+       // Implementation for getting a single book
+       w.WriteHeader(http.StatusOK)
+   }
+   
+   ✅ CORRECT (complete):
+   func GetBook(w http.ResponseWriter, r *http.Request) {
+       vars := mux.Vars(r)
+       id, err := strconv.Atoi(vars["id"])
+       if err != nil {
+           http.Error(w, "Invalid ID", http.StatusBadRequest)
+           return
+       }
+       for _, book := range books {
+           if book.ID == id {
+               w.Header().Set("Content-Type", "application/json")
+               json.NewEncoder(w).Encode(book)
+               return
+           }
+       }
+       http.Error(w, "Book not found", http.StatusNotFound)
+   }
+
 ═══════════════════════════════════════════════════════════════
-📋 COMPLETE FILE EXAMPLES
+📋 COMPLETE FILE EXAMPLES (FULL IMPLEMENTATIONS)
 ═══════════════════════════════════════════════════════════════
 
 EXAMPLE: internal/models/book.go
@@ -199,17 +234,20 @@ type Book struct {
 	ISBN   string ` + "`json:\"isbn\"`" + `
 }
 
-EXAMPLE: internal/handlers/book.go
+EXAMPLE: internal/handlers/book.go (COMPLETE IMPLEMENTATION)
 ───────────────────────────────────
 package handlers
 
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
+	"github.com/gorilla/mux"
 	"%s/internal/models"
 )
 
 var books []models.Book
+var nextBookID = 1
 
 func CreateBook(w http.ResponseWriter, r *http.Request) {
 	var book models.Book
@@ -221,8 +259,11 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	book.ID = nextBookID
+	nextBookID++
 	books = append(books, book)
 	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(book)
 }
 
@@ -232,21 +273,68 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetBook(w http.ResponseWriter, r *http.Request) {
-	// Implementation for getting a single book
-	w.WriteHeader(http.StatusOK)
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+	for _, book := range books {
+		if book.ID == id {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(book)
+			return
+		}
+	}
+	http.Error(w, "Book not found", http.StatusNotFound)
 }
 
 func UpdateBook(w http.ResponseWriter, r *http.Request) {
-	// Implementation for updating a book
-	w.WriteHeader(http.StatusOK)
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+	var updatedBook models.Book
+	if r.Body == nil {
+		http.Error(w, "missing body", http.StatusBadRequest)
+		return
+	}
+	if err := json.NewDecoder(r.Body).Decode(&updatedBook); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	for i, book := range books {
+		if book.ID == id {
+			updatedBook.ID = id
+			books[i] = updatedBook
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(updatedBook)
+			return
+		}
+	}
+	http.Error(w, "Book not found", http.StatusNotFound)
 }
 
 func DeleteBook(w http.ResponseWriter, r *http.Request) {
-	// Implementation for deleting a book
-	w.WriteHeader(http.StatusNoContent)
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+	for i, book := range books {
+		if book.ID == id {
+			books = append(books[:i], books[i+1:]...)
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+	}
+	http.Error(w, "Book not found", http.StatusNotFound)
 }
 
-EXAMPLE: internal/handlers/book_test.go
+EXAMPLE: internal/handlers/book_test.go (COMPREHENSIVE TESTS)
 ───────────────────────────────────
 package handlers_test
 
@@ -256,6 +344,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"github.com/gorilla/mux"
 	"%s/internal/handlers"
 	"%s/internal/models"
 )
@@ -282,6 +371,43 @@ func TestGetBooks(t *testing.T) {
 	handlers.GetBooks(w, req)
 	if w.Code != http.StatusOK {
 		t.Errorf("Expected 200, got %%d", w.Code)
+	}
+}
+
+func TestGetBook(t *testing.T) {
+	req := httptest.NewRequest("GET", "/books/1", nil)
+	req = mux.SetURLVars(req, map[string]string{"id": "1"})
+	w := httptest.NewRecorder()
+	handlers.GetBook(w, req)
+	if w.Code != http.StatusOK && w.Code != http.StatusNotFound {
+		t.Errorf("Expected 200 or 404, got %%d", w.Code)
+	}
+}
+
+func TestUpdateBook(t *testing.T) {
+	book := models.Book{
+		Title:  "Updated Book",
+		Author: "Updated Author",
+		ISBN:   "0987654321",
+	}
+	body, _ := json.Marshal(book)
+	req := httptest.NewRequest("PUT", "/books/1", bytes.NewBuffer(body))
+	req = mux.SetURLVars(req, map[string]string{"id": "1"})
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	handlers.UpdateBook(w, req)
+	if w.Code != http.StatusOK && w.Code != http.StatusNotFound {
+		t.Errorf("Expected 200 or 404, got %%d", w.Code)
+	}
+}
+
+func TestDeleteBook(t *testing.T) {
+	req := httptest.NewRequest("DELETE", "/books/1", nil)
+	req = mux.SetURLVars(req, map[string]string{"id": "1"})
+	w := httptest.NewRecorder()
+	handlers.DeleteBook(w, req)
+	if w.Code != http.StatusNoContent && w.Code != http.StatusNotFound {
+		t.Errorf("Expected 204 or 404, got %%d", w.Code)
 	}
 }
 
@@ -323,13 +449,22 @@ func main() {
 
 EXAMPLE: tasks.md
 ───────────────────────────────────
-# Lab Tasks
+# Lab Tasks - Advanced Features
 
-1. Implement the GetBook handler to return a single book by ID
-2. Add validation for required fields in CreateBook handler
-3. Write additional test cases for UpdateBook and DeleteBook handlers
-4. Implement error handling for book not found scenarios
-5. Add pagination support for the GetBooks endpoint
+## Completed Implementation
+✅ All CRUD operations are fully implemented
+✅ Complete test suite for all handlers
+✅ Proper error handling and status codes
+
+## Optional Enhancements (Student Tasks)
+1. Add database persistence using SQLite or PostgreSQL
+2. Implement authentication and authorization middleware
+3. Add request validation using a validation library
+4. Implement pagination for GetBooks endpoint
+5. Add filtering and sorting capabilities
+6. Create OpenAPI/Swagger documentation
+7. Implement rate limiting middleware
+8. Add logging middleware for all requests
 
 ═══════════════════════════════════════════════════════════════
 🎯 OUTPUT FORMAT REQUIREMENTS
@@ -362,6 +497,9 @@ The response must START with [ and END with ]
 ═══════════════════════════════════════════════════════════════
 
 Before generating output, verify:
+☐ ALL handlers have COMPLETE implementations (no placeholders!)
+☐ ALL CRUD operations are FULLY functional (Create, GetAll, GetByID, Update, Delete)
+☐ ALL test functions test the complete functionality
 ☐ All handlers have (w http.ResponseWriter, r *http.Request)
 ☐ Register function has (r *mux.Router) parameter
 ☐ All test functions have (t *testing.T) parameter
@@ -370,10 +508,11 @@ Before generating output, verify:
 ☐ Test package is "handlers_test" not "handlers"
 ☐ No gin imports or gin.Context usage
 ☐ Output is pure JSON array starting with [
-☐ Generated at least one test file for each handler file
+☐ Generated complete test files with ALL 5 test functions per entity
 ☐ All handlers check r.Body == nil before decoding
+☐ GetByID, Update, Delete handlers extract and validate ID from URL
 
-Generate the complete REST API code now. Return ONLY the JSON array.`
+Generate the complete REST API code now with FULL IMPLEMENTATIONS. Return ONLY the JSON array.`
 
 	// Apply the format with correct number of arguments
 	formattedPrompt := fmt.Sprintf(promptText,
@@ -387,7 +526,7 @@ Generate the complete REST API code now. Return ONLY the JSON array.`
 		s.AppName, // %s - routes Register import handlers
 		s.AppName, // %s - test import handlers
 		s.AppName, // %s - test import models
-		s.AppName, // %s - handlers book example
+		s.AppName, // %s - handlers book example (complete)
 		s.AppName, // %s - test book example (handlers import)
 		s.AppName, // %s - test book example (models import)
 		s.AppName, // %s - routes example
