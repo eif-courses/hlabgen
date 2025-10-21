@@ -11,10 +11,10 @@ import (
 )
 
 // AggregateToCSV scans all experiment result folders under baseDir
-// and appends reproducibility results to a single summary CSV.
-// If the file already exists, new results are appended instead of overwriting.
+// and REPLACES the summary CSV with current results (no duplicates).
 func AggregateToCSV(baseDir, outputPath string) error {
-	var newRows [][]string
+	// ✅ FIX 1: Collect results in memory first (prevents duplicates)
+	resultMap := make(map[string][]string) // key: appName, value: row data
 
 	entries, err := os.ReadDir(baseDir)
 	if err != nil {
@@ -26,6 +26,7 @@ func AggregateToCSV(baseDir, outputPath string) error {
 			continue
 		}
 		appDir := filepath.Join(baseDir, e.Name())
+		appName := e.Name()
 
 		// --- Load metrics.json (build/test metrics) ---
 		var res Result
@@ -33,28 +34,25 @@ func AggregateToCSV(baseDir, outputPath string) error {
 			_ = json.Unmarshal(data, &res)
 		}
 
-		// ✅ FIX: Load gen_metrics_*.json for ML-specific data (duration, repairs)
-		var mlDuration string = ""
-		var repairAttempts string = ""
+		// ✅ FIX 2: Load gen_metrics_*.json with CORRECT duration parsing
+		var mlDuration string = "0.00"
+		var repairAttempts string = "0"
 
 		genFiles, _ := filepath.Glob(filepath.Join(appDir, "gen_metrics_*.json"))
 		if len(genFiles) > 0 {
-			// Use the latest gen_metrics file
 			latestGenFile := genFiles[len(genFiles)-1]
 			if data, err := os.ReadFile(latestGenFile); err == nil {
 				var genMetrics map[string]interface{}
 				if json.Unmarshal(data, &genMetrics) == nil {
-					// Extract duration - might be in nanoseconds or seconds
-					if d, ok := genMetrics["Duration"].(float64); ok && d > 0 {
-						// If Duration > 1e9, it's probably in nanoseconds
-						if d > 1e9 {
-							mlDuration = fmt.Sprintf("%.2f", d/1e9)
-						} else {
-							mlDuration = fmt.Sprintf("%.2f", d)
-						}
+					// ✅ Extract duration with smart unit detection
+					if d := parseMLDuration(genMetrics); d > 0 {
+						mlDuration = fmt.Sprintf("%.2f", d)
 					}
+
 					// Extract repair attempts
-					if r, ok := genMetrics["RepairAttempts"].(float64); ok {
+					if r, ok := genMetrics["repair_attempts"].(float64); ok {
+						repairAttempts = fmt.Sprintf("%.0f", r)
+					} else if r, ok := genMetrics["RepairAttempts"].(float64); ok {
 						repairAttempts = fmt.Sprintf("%.0f", r)
 					}
 				}
@@ -64,22 +62,22 @@ func AggregateToCSV(baseDir, outputPath string) error {
 		// --- Load experiment_info.txt (metadata) ---
 		meta := parseMeta(filepath.Join(appDir, "experiment_info.txt"))
 
-		// ✅ FIX: Override with actual ML metrics from gen_metrics JSON if available
-		if mlDuration != "" {
+		// Override with actual ML metrics
+		if mlDuration != "0.00" {
 			meta["MLDuration"] = mlDuration
 		}
-		if repairAttempts != "" {
+		if repairAttempts != "0" {
 			meta["RepairAttempts"] = repairAttempts
 		}
 
-		// --- Add timestamp in case missing ---
+		// Add timestamp if missing
 		if meta["Timestamp"] == "" {
 			meta["Timestamp"] = time.Now().Format(time.RFC3339)
 		}
 
-		// --- Build row with all metrics populated ---
+		// Build row
 		row := []string{
-			e.Name(),
+			appName,
 			meta["Mode"],
 			meta["Timestamp"],
 			meta["Model"],
@@ -87,60 +85,83 @@ func AggregateToCSV(baseDir, outputPath string) error {
 			fmt.Sprintf("%v", res.TestsPass),
 			fmt.Sprintf("%.2f", res.CoveragePct),
 			fmt.Sprintf("%d", res.LintWarnings),
-			meta["MLDuration"],     // ✅ NOW POPULATED from gen_metrics
-			meta["RepairAttempts"], // ✅ NOW POPULATED from gen_metrics
+			meta["MLDuration"],
+			meta["RepairAttempts"],
 		}
-		newRows = append(newRows, row)
+
+		// ✅ Store in map (overwrites duplicates automatically)
+		resultMap[appName] = row
 	}
 
-	// --- Ensure output dir exists ---
+	// ✅ FIX 3: Write FRESH file (no appending - prevents duplicates)
 	if err := os.MkdirAll(filepath.Dir(outputPath), 0o755); err != nil {
 		return fmt.Errorf("failed to create output dir: %w", err)
 	}
 
-	// --- Detect if CSV exists (append or create) ---
-	fileExists := false
-	if _, err := os.Stat(outputPath); err == nil {
-		fileExists = true
-	}
-
-	f, err := os.OpenFile(outputPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+	f, err := os.Create(outputPath) // ← Use Create instead of OpenFile
 	if err != nil {
-		return fmt.Errorf("failed to open CSV: %w", err)
+		return fmt.Errorf("failed to create CSV: %w", err)
 	}
 	defer f.Close()
 
 	writer := csv.NewWriter(f)
 	defer writer.Flush()
 
-	// --- Write header only once ---
-	if !fileExists {
-		header := []string{
-			"AppName",
-			"Mode",
-			"Timestamp",
-			"Model",
-			"BuildSuccess",
-			"TestsPass",
-			"CoveragePct",
-			"LintWarnings",
-			"MLDuration",
-			"RepairAttempts",
-		}
-		if err := writer.Write(header); err != nil {
-			return err
-		}
+	// Write header
+	header := []string{
+		"AppName",
+		"Mode",
+		"Timestamp",
+		"Model",
+		"BuildSuccess",
+		"TestsPass",
+		"CoveragePct",
+		"LintWarnings",
+		"MLDuration",
+		"RepairAttempts",
+	}
+	if err := writer.Write(header); err != nil {
+		return err
 	}
 
-	// --- Write new rows ---
-	for _, row := range newRows {
+	// Write rows (deduplicated)
+	for _, row := range resultMap {
 		if err := writer.Write(row); err != nil {
 			return err
 		}
 	}
 
-	fmt.Printf("🧾 Appended %d experiments into %s\n", len(newRows), outputPath)
+	fmt.Printf("🧾 Wrote %d unique experiments to %s\n", len(resultMap), outputPath)
 	return nil
+}
+
+// ✅ NEW: Smart ML duration parser (handles nanoseconds, microseconds, seconds)
+func parseMLDuration(m map[string]interface{}) float64 {
+	// Try duration_sec first
+	if d, ok := m["duration_sec"].(float64); ok && d > 0 {
+		return d
+	}
+
+	// Try Duration field (could be in different units)
+	if d, ok := m["Duration"].(float64); ok && d > 0 {
+		// Smart detection based on realistic ranges:
+		// - 0.001 to 1000 → already seconds
+		// - 10 to 10,000,000 → microseconds (10µs to 10s)
+		// - > 10,000,000 → nanoseconds
+
+		if d < 10 {
+			// Already in seconds or very small
+			return d
+		} else if d >= 10 && d <= 10000000 {
+			// Microseconds range (10µs to 10 seconds)
+			return d / 1e6
+		} else {
+			// Nanoseconds (> 10 seconds in ns)
+			return d / 1e9
+		}
+	}
+
+	return 0
 }
 
 // parseMeta reads key:value pairs from experiment_info.txt
@@ -149,8 +170,8 @@ func parseMeta(path string) map[string]string {
 		"Mode":           "",
 		"Timestamp":      "",
 		"Model":          "",
-		"MLDuration":     "",
-		"RepairAttempts": "",
+		"MLDuration":     "0.00",
+		"RepairAttempts": "0",
 	}
 
 	data, err := os.ReadFile(path)
@@ -170,10 +191,6 @@ func parseMeta(path string) map[string]string {
 				result["Timestamp"] = val
 			case "OpenAI Model":
 				result["Model"] = val
-			case "MLDuration":
-				result["MLDuration"] = val
-			case "RepairAttempts":
-				result["RepairAttempts"] = val
 			}
 		}
 	}

@@ -300,7 +300,7 @@ func main() {
 	meta := fmt.Sprintf(
 		"App: %s\nMode: %s\nTimestamp: %s\nOpenAI Model: %s\nBuildSuccess: %v\nTestsPass: %v\nCoverage: %.1f%%\nDuration: %v\nRepairAttempts: %d\nRuleFixes: %d\n",
 		schema.AppName,
-		*mode,
+		*mode, // ✅ Make sure this is passed correctly
 		time.Now().Format(time.RFC3339),
 		getModelName(),
 		m.BuildSuccess,
