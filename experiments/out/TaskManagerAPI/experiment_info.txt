@@ -1,0 +1,10 @@
+App: TaskManagerAPI
+Mode: hybrid
+Timestamp: 2025-10-21T22:12:49+03:00
+OpenAI Model: gpt-4o-mini
+BuildSuccess: true
+TestsPass: true
+Coverage: 70.2%
+Duration: 1m45.679896336s
+RepairAttempts: 0
+RuleFixes: 26

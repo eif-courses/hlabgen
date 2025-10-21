@@ -1,0 +1,171 @@
+
+🚀 Starting generation for app: StudentAPI (mode=hybrid)
+2025/10/21 22:08:07 🔀 Starting HYBRID generation (rules + ML + validation)...
+2025/10/21 22:08:07 📐 Step 1/3: Creating rule-based scaffold...
+✅ Rule-based scaffold created (structure only)
+2025/10/21 22:08:07 🧠 Step 2/3: Using ML to enhance scaffold logic...
+🌍 Using custom endpoint: https://api.openai.com/v1
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 2m7.549554394s (model: gpt-4o-mini, attempt: 1)
+✅ Parsed 12 files
+
+📊 Generation Summary:
+  • Duration: 2m7.550597885s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+✅ StudentAPI generation completed successfully
+🧾 Saved ML metrics → experiments/StudentAPI/gen_metrics.json
+2025/10/21 22:10:14 🔧 Step 3/3: Applying rule-based validation & fixes...
+📝 Processing: internal/models/student.go
+✅ Written: experiments/out/StudentAPI/internal/models/student.go
+📝 Processing: internal/models/course.go
+✅ Written: experiments/out/StudentAPI/internal/models/course.go
+📝 Processing: internal/models/grade.go
+✅ Written: experiments/out/StudentAPI/internal/models/grade.go
+📝 Processing: internal/handlers/student.go
+🔧 Fixed handler signature for CreateStudent
+🔧 Fixed handler signature for GetStudents
+🔧 Fixed handler signature for GetStudent
+🔧 Fixed handler signature for UpdateStudent
+🔧 Fixed handler signature for DeleteStudent
+✅ Written: experiments/out/StudentAPI/internal/handlers/student.go
+📝 Processing: internal/handlers/course.go
+🔧 Fixed handler signature for CreateCourse
+🔧 Fixed handler signature for GetCourses
+🔧 Fixed handler signature for GetCourse
+🔧 Fixed handler signature for UpdateCourse
+🔧 Fixed handler signature for DeleteCourse
+✅ Written: experiments/out/StudentAPI/internal/handlers/course.go
+📝 Processing: internal/handlers/grade.go
+🔧 Fixed handler signature for CreateGrade
+🔧 Fixed handler signature for GetGrades
+🔧 Fixed handler signature for GetGrade
+🔧 Fixed handler signature for UpdateGrade
+🔧 Fixed handler signature for DeleteGrade
+✅ Written: experiments/out/StudentAPI/internal/handlers/grade.go
+📝 Processing: internal/handlers/student_test.go
+🔧 Fixed test signature for TestCreateStudent
+🔧 Fixed test signature for TestGetStudents
+🔧 Fixed test signature for TestGetStudent
+🔧 Fixed test signature for TestUpdateStudent
+🔧 Fixed test signature for TestDeleteStudent
+✅ Auto-fixed test signatures in internal/handlers/student_test.go
+✅ Written: experiments/out/StudentAPI/internal/handlers/student_test.go
+📝 Processing: internal/handlers/course_test.go
+🔧 Fixed test signature for TestCreateCourse
+🔧 Fixed test signature for TestGetCourses
+🔧 Fixed test signature for TestGetCourse
+🔧 Fixed test signature for TestUpdateCourse
+🔧 Fixed test signature for TestDeleteCourse
+✅ Auto-fixed test signatures in internal/handlers/course_test.go
+✅ Written: experiments/out/StudentAPI/internal/handlers/course_test.go
+📝 Processing: internal/handlers/grade_test.go
+🔧 Fixed test signature for TestCreateGrade
+🔧 Fixed test signature for TestGetGrades
+🔧 Fixed test signature for TestGetGrade
+🔧 Fixed test signature for TestUpdateGrade
+🔧 Fixed test signature for TestDeleteGrade
+✅ Auto-fixed test signatures in internal/handlers/grade_test.go
+✅ Written: experiments/out/StudentAPI/internal/handlers/grade_test.go
+📝 Processing: internal/routes/routes.go
+🔧 Fixed Register function parameter
+✅ Written: experiments/out/StudentAPI/internal/routes/routes.go
+📝 Processing: cmd/main.go
+✅ Written: experiments/out/StudentAPI/cmd/main.go
+📝 Processing: tasks.md
+⚠️  Syntax validation failed for tasks.md: temp.go:1:1: illegal character U+0023 '#'
+🔧 Attempting additional fixes...
+❌ Could not auto-fix syntax errors in tasks.md
+✅ Written: experiments/out/StudentAPI/tasks.md
+
+🔧 Total rule-based fixes applied: 25
+🔧 Running rule-based auto-fix on ML-generated files...
+
+🔧 Auto-fixing all files in: experiments/out/StudentAPI
+
+📝 Fixing test function signatures...
+  ✅ Fixed test signatures in course_test.go
+  ✅ Fixed test signatures in grade_test.go
+  ✅ Fixed test signatures in student_test.go
+
+📝 Fixing handler function signatures...
+
+📝 Fixing routes Register function...
+
+📝 Fixing missing commas in struct literals...
+
+📝 Ensuring test file imports...
+
+✅ Applied 3 fixes total!
+✅ Rule-based fixes applied successfully
+🔍 Validating Go syntax...
+✅ All generated files have valid Go syntax
+2025/10/21 22:10:14 🔧 Detected module name: StudentAPI — fixing imports...
+2025/10/21 22:10:14 ✅ No import fixes needed
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+✅ Hybrid generation completed (127.59s) - rules + ML synergy applied
+🔧 Injected mux import → experiments/out/StudentAPI/internal/handlers/course.go
+🔧 Injected mux import → experiments/out/StudentAPI/internal/handlers/grade.go
+🔧 Injected mux import → experiments/out/StudentAPI/internal/handlers/student.go
+🔧 Verified mux dependency and tidied module
+📁 Saved per-package coverage → experiments/out/StudentAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/StudentAPI/internal/handlers ---
+=== RUN   TestCreateCourse
+--- PASS: TestCreateCourse (0.00s)
+=== RUN   TestGetCourses
+--- PASS: TestGetCourses (0.00s)
+=== RUN   TestGetCourse
+--- PASS: TestGetCourse (0.00s)
+=== RUN   TestUpdateCourse
+--- PASS: TestUpdateCourse (0.00s)
+=== RUN   TestDeleteCourse
+--- PASS: TestDeleteCourse (0.00s)
+=== RUN   TestCreateGrade
+--- PASS: TestCreateGrade (0.00s)
+=== RUN   TestGetGrades
+--- PASS: TestGetGrades (0.00s)
+=== RUN   TestGetGrade
+--- PASS: TestGetGrade (0.00s)
+=== RUN   TestUpdateGrade
+--- PASS: TestUpdateGrade (0.00s)
+=== RUN   TestDeleteGrade
+--- PASS: TestDeleteGrade (0.00s)
+=== RUN   TestCreateStudent
+--- PASS: TestCreateStudent (0.00s)
+=== RUN   TestGetStudents
+--- PASS: TestGetStudents (0.00s)
+=== RUN   TestGetStudent
+--- PASS: TestGetStudent (0.00s)
+=== RUN   TestUpdateStudent
+--- PASS: TestUpdateStudent (0.00s)
+=== RUN   TestDeleteStudent
+--- PASS: TestDeleteStudent (0.00s)
+PASS
+coverage: 70.2% of statements
+ok  	StudentAPI/internal/handlers	0.002s
+
+------------------------
+✅ Validation completed in 1.46s
+
+📊 Summary for StudentAPI (mode: hybrid):
+  • BuildSuccess = true
+  • LintWarnings = 3
+  • TestsPass    = true
+  • Coverage     = 70.2%
+  • Generation Duration = 2m7.58912885s
+  • Repair Attempts = 0
+  • Rule Fixes   = 26
+🧾 Wrote 30 unique experiments to experiments/logs/summary.csv
+
+🧾 Generating Markdown summary from JSON metrics...
+📊 Markdown results saved → experiments/logs/results.md
+✅ Summary successfully written to experiments/logs/results.md
+
+✅ Experiment complete..

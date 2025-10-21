@@ -178,6 +178,9 @@ func generateMLOnly(schema input.Schema, outDir string) mlinternal.GenerationMet
 		log.Fatalf("❌ Failed to write ML files: %v", err)
 	}
 
+	// ✅ FIX: Fix parseID type mismatches (even in ML-only mode)
+	fixParseIDTypeMismatch(outDir)
+
 	fmt.Println("🔍 Validating Go syntax (ML-only)...")
 	syntaxErrors := validateGoSyntax(outDir)
 	if len(syntaxErrors) > 0 {
@@ -279,6 +282,9 @@ func generateHybrid(schema input.Schema, outDir string) mlinternal.GenerationMet
 		fmt.Println("✅ Rule-based fixes applied successfully")
 		genMetrics.RuleFixes++
 	}
+
+	// ✅ FIX: Fix parseID type mismatches
+	fixParseIDTypeMismatch(outDir)
 
 	// Validate syntax
 	fmt.Println("🔍 Validating Go syntax...")
@@ -403,6 +409,56 @@ func convertGenFiles(in []mlinternal.GenFile) []assemble.File {
 		out[i] = assemble.File{Filename: f.Filename, Content: f.Code}
 	}
 	return out
+}
+
+// fixParseIDTypeMismatch removes broken parseID calls that have type mismatches
+// Issue: ML generates strconv.Atoi(vars["id"]) which returns int,
+// then tries to call parseID(id) where parseID expects string
+func fixParseIDTypeMismatch(projectDir string) {
+	fmt.Println("🔧 Fixing parseID type mismatches...")
+
+	fixCount := 0
+	filepath.WalkDir(projectDir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() || !strings.HasSuffix(path, ".go") {
+			return nil
+		}
+
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return nil
+		}
+
+		original := string(content)
+		fixed := original
+
+		// Remove parseID calls - id is already an int from strconv.Atoi
+		fixed = strings.ReplaceAll(fixed, "parseID(id)", "id")
+
+		// Remove the parseID function definition
+		parseIDFunc := `
+
+func parseID(s string) int {
+	id, _ := strconv.Atoi(s)
+	return id
+}`
+		fixed = strings.ReplaceAll(fixed, parseIDFunc, "")
+
+		// Also handle variants with different whitespace
+		fixed = strings.ReplaceAll(fixed, "func parseID(s string) int { id, _ := strconv.Atoi(s); return id }", "")
+
+		if fixed != original {
+			os.WriteFile(path, []byte(fixed), 0o644)
+			fixCount++
+			relPath, _ := filepath.Rel(projectDir, path)
+			fmt.Printf("  ✅ Fixed parseID in %s\n", filepath.Base(relPath))
+		}
+
+		return nil
+	})
+
+	if fixCount > 0 {
+		fmt.Printf("✅ Fixed parseID mismatches in %d file(s)\n", fixCount)
+	}
 }
 
 // tidyDependencies runs go mod tidy

@@ -1,0 +1,174 @@
+
+🚀 Starting generation for app: CarRentalAPI (mode=hybrid)
+2025/10/21 21:19:38 🔀 Starting HYBRID generation (rules + ML + validation)...
+2025/10/21 21:19:38 📐 Step 1/3: Creating rule-based scaffold...
+✅ Rule-based scaffold created (structure only)
+2025/10/21 21:19:38 🧠 Step 2/3: Using ML to enhance scaffold logic...
+🌍 Using custom endpoint: https://api.openai.com/v1
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 2m7.208574521s (model: gpt-4o-mini, attempt: 1)
+✅ Parsed 12 files
+
+📊 Generation Summary:
+  • Duration: 2m7.209170733s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+✅ CarRentalAPI generation completed successfully
+🧾 Saved ML metrics → experiments/CarRentalAPI/gen_metrics.json
+2025/10/21 21:21:45 🔧 Step 3/3: Applying rule-based validation & fixes...
+📝 Processing: internal/models/car.go
+✅ Written: experiments/out/CarRentalAPI/internal/models/car.go
+📝 Processing: internal/models/customer.go
+✅ Written: experiments/out/CarRentalAPI/internal/models/customer.go
+📝 Processing: internal/models/rental.go
+✅ Written: experiments/out/CarRentalAPI/internal/models/rental.go
+📝 Processing: internal/handlers/car.go
+🔧 Fixed handler signature for CreateCar
+🔧 Fixed handler signature for GetCars
+🔧 Fixed handler signature for GetCar
+🔧 Fixed handler signature for UpdateCar
+🔧 Fixed handler signature for DeleteCar
+✅ Written: experiments/out/CarRentalAPI/internal/handlers/car.go
+📝 Processing: internal/handlers/customer.go
+🔧 Fixed handler signature for CreateCustomer
+🔧 Fixed handler signature for GetCustomers
+🔧 Fixed handler signature for GetCustomer
+🔧 Fixed handler signature for UpdateCustomer
+🔧 Fixed handler signature for DeleteCustomer
+✅ Written: experiments/out/CarRentalAPI/internal/handlers/customer.go
+📝 Processing: internal/handlers/rental.go
+🔧 Fixed handler signature for CreateRental
+🔧 Fixed handler signature for GetRentals
+🔧 Fixed handler signature for GetRental
+🔧 Fixed handler signature for UpdateRental
+🔧 Fixed handler signature for DeleteRental
+✅ Written: experiments/out/CarRentalAPI/internal/handlers/rental.go
+📝 Processing: internal/handlers/car_test.go
+🔧 Fixed test signature for TestCreateCar
+🔧 Fixed test signature for TestGetCars
+🔧 Fixed test signature for TestGetCar
+🔧 Fixed test signature for TestUpdateCar
+🔧 Fixed test signature for TestDeleteCar
+✅ Auto-fixed test signatures in internal/handlers/car_test.go
+✅ Written: experiments/out/CarRentalAPI/internal/handlers/car_test.go
+📝 Processing: internal/handlers/customer_test.go
+🔧 Fixed test signature for TestCreateCustomer
+🔧 Fixed test signature for TestGetCustomers
+🔧 Fixed test signature for TestGetCustomer
+🔧 Fixed test signature for TestUpdateCustomer
+🔧 Fixed test signature for TestDeleteCustomer
+✅ Auto-fixed test signatures in internal/handlers/customer_test.go
+✅ Written: experiments/out/CarRentalAPI/internal/handlers/customer_test.go
+📝 Processing: internal/handlers/rental_test.go
+🔧 Fixed test signature for TestCreateRental
+🔧 Fixed test signature for TestGetRentals
+🔧 Fixed test signature for TestGetRental
+🔧 Fixed test signature for TestUpdateRental
+🔧 Fixed test signature for TestDeleteRental
+✅ Auto-fixed test signatures in internal/handlers/rental_test.go
+✅ Written: experiments/out/CarRentalAPI/internal/handlers/rental_test.go
+📝 Processing: internal/routes/routes.go
+🔧 Fixed Register function parameter
+✅ Written: experiments/out/CarRentalAPI/internal/routes/routes.go
+📝 Processing: cmd/main.go
+✅ Written: experiments/out/CarRentalAPI/cmd/main.go
+📝 Processing: tasks.md
+⚠️  Syntax validation failed for tasks.md: temp.go:1:1: illegal character U+0023 '#'
+🔧 Attempting additional fixes...
+❌ Could not auto-fix syntax errors in tasks.md
+✅ Written: experiments/out/CarRentalAPI/tasks.md
+
+🔧 Total rule-based fixes applied: 25
+🔧 Running rule-based auto-fix on ML-generated files...
+
+🔧 Auto-fixing all files in: experiments/out/CarRentalAPI
+
+📝 Fixing test function signatures...
+  ✅ Fixed test signatures in car_test.go
+  ✅ Fixed test signatures in customer_test.go
+  ✅ Fixed test signatures in rental_test.go
+
+📝 Fixing handler function signatures...
+
+📝 Fixing routes Register function...
+
+📝 Fixing missing commas in struct literals...
+
+📝 Ensuring test file imports...
+
+✅ Applied 3 fixes total!
+✅ Rule-based fixes applied successfully
+🔍 Validating Go syntax...
+✅ All generated files have valid Go syntax
+2025/10/21 21:21:45 🔧 Detected module name: CarRentalAPI — fixing imports...
+2025/10/21 21:21:45 ✅ No import fixes needed
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+✅ Hybrid generation completed (127.25s) - rules + ML synergy applied
+🔧 Injected mux import → experiments/out/CarRentalAPI/internal/handlers/car.go
+🔧 Injected mux import → experiments/out/CarRentalAPI/internal/handlers/car_test.go
+🔧 Injected mux import → experiments/out/CarRentalAPI/internal/handlers/customer.go
+🔧 Injected mux import → experiments/out/CarRentalAPI/internal/handlers/customer_test.go
+🔧 Injected mux import → experiments/out/CarRentalAPI/internal/handlers/rental.go
+🔧 Injected mux import → experiments/out/CarRentalAPI/internal/handlers/rental_test.go
+🔧 Verified mux dependency and tidied module
+📁 Saved per-package coverage → experiments/out/CarRentalAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/CarRentalAPI/internal/handlers ---
+=== RUN   TestCreateCar
+--- PASS: TestCreateCar (0.00s)
+=== RUN   TestGetCars
+--- PASS: TestGetCars (0.00s)
+=== RUN   TestGetCar
+--- PASS: TestGetCar (0.00s)
+=== RUN   TestUpdateCar
+--- PASS: TestUpdateCar (0.00s)
+=== RUN   TestDeleteCar
+--- PASS: TestDeleteCar (0.00s)
+=== RUN   TestCreateCustomer
+--- PASS: TestCreateCustomer (0.00s)
+=== RUN   TestGetCustomers
+--- PASS: TestGetCustomers (0.00s)
+=== RUN   TestGetCustomer
+--- PASS: TestGetCustomer (0.00s)
+=== RUN   TestUpdateCustomer
+--- PASS: TestUpdateCustomer (0.00s)
+=== RUN   TestDeleteCustomer
+--- PASS: TestDeleteCustomer (0.00s)
+=== RUN   TestCreateRental
+--- PASS: TestCreateRental (0.00s)
+=== RUN   TestGetRentals
+--- PASS: TestGetRentals (0.00s)
+=== RUN   TestGetRental
+--- PASS: TestGetRental (0.00s)
+=== RUN   TestUpdateRental
+--- PASS: TestUpdateRental (0.00s)
+=== RUN   TestDeleteRental
+--- PASS: TestDeleteRental (0.00s)
+PASS
+coverage: 70.2% of statements
+ok  	CarRentalAPI/internal/handlers	0.002s
+
+------------------------
+✅ Validation completed in 1.35s
+
+📊 Summary for CarRentalAPI (mode: hybrid):
+  • BuildSuccess = true
+  • LintWarnings = 3
+  • TestsPass    = true
+  • Coverage     = 70.2%
+  • Generation Duration = 2m7.245448988s
+  • Repair Attempts = 0
+  • Rule Fixes   = 26
+🧾 Wrote 30 unique experiments to experiments/logs/summary.csv
+
+🧾 Generating Markdown summary from JSON metrics...
+📊 Markdown results saved → experiments/logs/results.md
+✅ Summary successfully written to experiments/logs/results.md
+
+✅ Experiment complete..

@@ -1,0 +1,10 @@
+App: TicketingAPI
+Mode: hybrid
+Timestamp: 2025-10-21T22:15:31+03:00
+OpenAI Model: gpt-4o-mini
+BuildSuccess: true
+TestsPass: true
+Coverage: 70.2%
+Duration: 2m41.35090216s
+RepairAttempts: 0
+RuleFixes: 33

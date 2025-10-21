@@ -1,0 +1,158 @@
+
+🚀 Starting generation for app: CourseAPI (mode=hybrid)
+2025/10/21 21:23:29 🔀 Starting HYBRID generation (rules + ML + validation)...
+2025/10/21 21:23:29 📐 Step 1/3: Creating rule-based scaffold...
+✅ Rule-based scaffold created (structure only)
+2025/10/21 21:23:29 🧠 Step 2/3: Using ML to enhance scaffold logic...
+🌍 Using custom endpoint: https://api.openai.com/v1
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 1m57.223908085s (model: gpt-4o-mini, attempt: 1)
+✅ Parsed 12 files
+
+📊 Generation Summary:
+  • Duration: 1m57.224524234s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+✅ CourseAPI generation completed successfully
+🧾 Saved ML metrics → experiments/CourseAPI/gen_metrics.json
+🧩 Merged duplicate struct: Lesson
+🧩 Merged duplicate struct: Enrollment
+2025/10/21 21:25:26 🔧 Step 3/3: Applying rule-based validation & fixes...
+📝 Processing: internal/models/course.go
+✅ Written: experiments/out/CourseAPI/internal/models/course.go
+📝 Processing: internal/handlers/course.go
+🔧 Fixed handler signature for CreateCourse
+🔧 Fixed handler signature for GetCourses
+🔧 Fixed handler signature for GetCourse
+🔧 Fixed handler signature for UpdateCourse
+🔧 Fixed handler signature for DeleteCourse
+✅ Written: experiments/out/CourseAPI/internal/handlers/course.go
+📝 Processing: internal/handlers/course_test.go
+🔧 Fixed test signature for TestCreateCourse
+🔧 Fixed test signature for TestGetCourses
+🔧 Fixed test signature for TestGetCourse
+🔧 Fixed test signature for TestUpdateCourse
+🔧 Fixed test signature for TestDeleteCourse
+✅ Auto-fixed test signatures in internal/handlers/course_test.go
+✅ Written: experiments/out/CourseAPI/internal/handlers/course_test.go
+📝 Processing: internal/models/lesson.go
+✅ Written: experiments/out/CourseAPI/internal/models/lesson.go
+📝 Processing: internal/handlers/lesson.go
+🔧 Fixed handler signature for CreateLesson
+🔧 Fixed handler signature for GetLessons
+🔧 Fixed handler signature for GetLesson
+🔧 Fixed handler signature for UpdateLesson
+🔧 Fixed handler signature for DeleteLesson
+✅ Written: experiments/out/CourseAPI/internal/handlers/lesson.go
+📝 Processing: internal/handlers/lesson_test.go
+🔧 Fixed test signature for TestCreateLesson
+🔧 Fixed test signature for TestGetLessons
+🔧 Fixed test signature for TestGetLesson
+🔧 Fixed test signature for TestUpdateLesson
+🔧 Fixed test signature for TestDeleteLesson
+✅ Auto-fixed test signatures in internal/handlers/lesson_test.go
+✅ Written: experiments/out/CourseAPI/internal/handlers/lesson_test.go
+📝 Processing: internal/models/enrollment.go
+✅ Written: experiments/out/CourseAPI/internal/models/enrollment.go
+📝 Processing: internal/handlers/enrollment.go
+🔧 Fixed handler signature for CreateEnrollment
+🔧 Fixed handler signature for GetEnrollments
+🔧 Fixed handler signature for GetEnrollment
+🔧 Fixed handler signature for UpdateEnrollment
+🔧 Fixed handler signature for DeleteEnrollment
+✅ Written: experiments/out/CourseAPI/internal/handlers/enrollment.go
+📝 Processing: internal/handlers/enrollment_test.go
+🔧 Fixed test signature for TestCreateEnrollment
+🔧 Fixed test signature for TestGetEnrollments
+🔧 Fixed test signature for TestGetEnrollment
+🔧 Fixed test signature for TestUpdateEnrollment
+🔧 Fixed test signature for TestDeleteEnrollment
+✅ Auto-fixed test signatures in internal/handlers/enrollment_test.go
+✅ Written: experiments/out/CourseAPI/internal/handlers/enrollment_test.go
+📝 Processing: internal/routes/routes.go
+🔧 Fixed Register function parameter
+✅ Written: experiments/out/CourseAPI/internal/routes/routes.go
+📝 Processing: cmd/main.go
+✅ Written: experiments/out/CourseAPI/cmd/main.go
+📝 Processing: tasks.md
+⚠️  Syntax validation failed for tasks.md: temp.go:1:1: illegal character U+0023 '#'
+🔧 Attempting additional fixes...
+❌ Could not auto-fix syntax errors in tasks.md
+✅ Written: experiments/out/CourseAPI/tasks.md
+
+🔧 Total rule-based fixes applied: 25
+🔧 Running rule-based auto-fix on ML-generated files...
+
+🔧 Auto-fixing all files in: experiments/out/CourseAPI
+
+📝 Fixing test function signatures...
+  ✅ Fixed test signatures in course_test.go
+  ✅ Fixed test signatures in enrollment_test.go
+  ✅ Fixed test signatures in lesson_test.go
+
+📝 Fixing handler function signatures...
+
+📝 Fixing routes Register function...
+
+📝 Fixing missing commas in struct literals...
+
+📝 Ensuring test file imports...
+
+✅ Applied 3 fixes total!
+✅ Rule-based fixes applied successfully
+🔍 Validating Go syntax...
+✅ All generated files have valid Go syntax
+2025/10/21 21:25:26 🔧 Detected module name: CourseAPI — fixing imports...
+2025/10/21 21:25:26 ✅ No import fixes needed
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+✅ Hybrid generation completed (117.26s) - rules + ML synergy applied
+🔧 Injected mux import → experiments/out/CourseAPI/internal/handlers/course.go
+🔧 Injected mux import → experiments/out/CourseAPI/internal/handlers/enrollment.go
+🔧 Injected mux import → experiments/out/CourseAPI/internal/handlers/lesson.go
+🔧 Verified mux dependency and tidied module
+📁 Saved per-package coverage → experiments/out/CourseAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/CourseAPI/internal/handlers ---
+# CourseAPI/internal/models
+../models/enrollment.go:3:6: Enrollment redeclared in this block
+	../models/course.go:15:6: other declaration of Enrollment
+../models/enrollment.go:7:2: ID redeclared
+	../models/enrollment.go:4:2: other declaration of ID
+../models/enrollment.go:8:2: CourseID redeclared
+	../models/enrollment.go:5:2: other declaration of CourseID
+../models/enrollment.go:9:2: UserID redeclared
+	../models/enrollment.go:6:2: other declaration of UserID
+../models/lesson.go:3:6: Lesson redeclared in this block
+	../models/course.go:9:6: other declaration of Lesson
+../models/course.go:19:2: ID redeclared
+	../models/course.go:16:2: other declaration of ID
+../models/course.go:20:2: CourseID redeclared
+	../models/course.go:17:2: other declaration of CourseID
+../models/course.go:21:2: UserID redeclared
+	../models/course.go:18:2: other declaration of UserID
+FAIL	CourseAPI/internal/handlers [build failed]
+
+------------------------
+✅ Validation completed in 0.86s
+
+📊 Summary for CourseAPI (mode: hybrid):
+  • BuildSuccess = false
+  • LintWarnings = 51
+  • TestsPass    = false
+  • Coverage     = 0.0%
+  • Generation Duration = 1m57.262952575s
+  • Repair Attempts = 0
+  • Rule Fixes   = 26
+🧾 Wrote 30 unique experiments to experiments/logs/summary.csv
+
+🧾 Generating Markdown summary from JSON metrics...
+📊 Markdown results saved → experiments/logs/results.md
+✅ Summary successfully written to experiments/logs/results.md
+
+✅ Experiment complete..

@@ -1,0 +1,10 @@
+App: MovieAPI
+Mode: hybrid
+Timestamp: 2025-10-21T21:44:18+03:00
+OpenAI Model: gpt-4o-mini
+BuildSuccess: true
+TestsPass: true
+Coverage: 70.2%
+Duration: 41.249899542s
+RepairAttempts: 0
+RuleFixes: 12

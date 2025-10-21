@@ -1,0 +1,162 @@
+
+🚀 Starting generation for app: EcommerceAPI (mode=hybrid)
+2025/10/21 21:25:27 🔀 Starting HYBRID generation (rules + ML + validation)...
+2025/10/21 21:25:27 📐 Step 1/3: Creating rule-based scaffold...
+✅ Rule-based scaffold created (structure only)
+2025/10/21 21:25:27 🧠 Step 2/3: Using ML to enhance scaffold logic...
+🌍 Using custom endpoint: https://api.openai.com/v1
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 2m25.508953636s (model: gpt-4o-mini, attempt: 1)
+✅ Parsed 15 files
+
+📊 Generation Summary:
+  • Duration: 2m25.509685574s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+✅ EcommerceAPI generation completed successfully
+🧾 Saved ML metrics → experiments/EcommerceAPI/gen_metrics.json
+2025/10/21 21:27:52 🔧 Step 3/3: Applying rule-based validation & fixes...
+📝 Processing: internal/models/product.go
+✅ Written: experiments/out/EcommerceAPI/internal/models/product.go
+📝 Processing: internal/models/user.go
+✅ Written: experiments/out/EcommerceAPI/internal/models/user.go
+📝 Processing: internal/models/cart.go
+✅ Written: experiments/out/EcommerceAPI/internal/models/cart.go
+📝 Processing: internal/models/order.go
+✅ Written: experiments/out/EcommerceAPI/internal/models/order.go
+📝 Processing: internal/handlers/product.go
+🔧 Fixed handler signature for CreateProduct
+🔧 Fixed handler signature for GetProducts
+🔧 Fixed handler signature for GetProduct
+🔧 Fixed handler signature for UpdateProduct
+🔧 Fixed handler signature for DeleteProduct
+✅ Written: experiments/out/EcommerceAPI/internal/handlers/product.go
+📝 Processing: internal/handlers/user.go
+🔧 Fixed handler signature for CreateUser
+🔧 Fixed handler signature for GetUsers
+🔧 Fixed handler signature for GetUser
+🔧 Fixed handler signature for UpdateUser
+🔧 Fixed handler signature for DeleteUser
+✅ Written: experiments/out/EcommerceAPI/internal/handlers/user.go
+📝 Processing: internal/handlers/cart.go
+🔧 Fixed handler signature for CreateCart
+🔧 Fixed handler signature for GetCarts
+🔧 Fixed handler signature for GetCart
+🔧 Fixed handler signature for UpdateCart
+🔧 Fixed handler signature for DeleteCart
+✅ Written: experiments/out/EcommerceAPI/internal/handlers/cart.go
+📝 Processing: internal/handlers/order.go
+🔧 Fixed handler signature for CreateOrder
+🔧 Fixed handler signature for GetOrders
+🔧 Fixed handler signature for GetOrder
+🔧 Fixed handler signature for UpdateOrder
+🔧 Fixed handler signature for DeleteOrder
+✅ Written: experiments/out/EcommerceAPI/internal/handlers/order.go
+📝 Processing: internal/handlers/product_test.go
+🔧 Fixed test signature for TestCreateProduct
+🔧 Fixed test signature for TestGetProducts
+🔧 Fixed test signature for TestGetProduct
+🔧 Fixed test signature for TestUpdateProduct
+🔧 Fixed test signature for TestDeleteProduct
+✅ Auto-fixed test signatures in internal/handlers/product_test.go
+✅ Written: experiments/out/EcommerceAPI/internal/handlers/product_test.go
+📝 Processing: internal/handlers/user_test.go
+🔧 Fixed test signature for TestCreateUser
+🔧 Fixed test signature for TestGetUsers
+🔧 Fixed test signature for TestGetUser
+🔧 Fixed test signature for TestUpdateUser
+🔧 Fixed test signature for TestDeleteUser
+✅ Auto-fixed test signatures in internal/handlers/user_test.go
+✅ Written: experiments/out/EcommerceAPI/internal/handlers/user_test.go
+📝 Processing: internal/handlers/cart_test.go
+🔧 Fixed test signature for TestCreateCart
+🔧 Fixed test signature for TestGetCarts
+🔧 Fixed test signature for TestGetCart
+🔧 Fixed test signature for TestUpdateCart
+🔧 Fixed test signature for TestDeleteCart
+✅ Auto-fixed test signatures in internal/handlers/cart_test.go
+✅ Written: experiments/out/EcommerceAPI/internal/handlers/cart_test.go
+📝 Processing: internal/handlers/order_test.go
+🔧 Fixed test signature for TestCreateOrder
+🔧 Fixed test signature for TestGetOrders
+🔧 Fixed test signature for TestGetOrder
+🔧 Fixed test signature for TestUpdateOrder
+🔧 Fixed test signature for TestDeleteOrder
+✅ Auto-fixed test signatures in internal/handlers/order_test.go
+✅ Written: experiments/out/EcommerceAPI/internal/handlers/order_test.go
+📝 Processing: internal/routes/routes.go
+🔧 Fixed Register function parameter
+✅ Written: experiments/out/EcommerceAPI/internal/routes/routes.go
+📝 Processing: cmd/main.go
+✅ Written: experiments/out/EcommerceAPI/cmd/main.go
+📝 Processing: tasks.md
+⚠️  Syntax validation failed for tasks.md: temp.go:1:1: illegal character U+0023 '#'
+🔧 Attempting additional fixes...
+❌ Could not auto-fix syntax errors in tasks.md
+✅ Written: experiments/out/EcommerceAPI/tasks.md
+
+🔧 Total rule-based fixes applied: 32
+🔧 Running rule-based auto-fix on ML-generated files...
+
+🔧 Auto-fixing all files in: experiments/out/EcommerceAPI
+
+📝 Fixing test function signatures...
+  ✅ Fixed test signatures in cart_test.go
+  ✅ Fixed test signatures in order_test.go
+  ✅ Fixed test signatures in product_test.go
+  ✅ Fixed test signatures in user_test.go
+
+📝 Fixing handler function signatures...
+
+📝 Fixing routes Register function...
+
+📝 Fixing missing commas in struct literals...
+
+📝 Ensuring test file imports...
+
+✅ Applied 4 fixes total!
+✅ Rule-based fixes applied successfully
+🔍 Validating Go syntax...
+✅ All generated files have valid Go syntax
+2025/10/21 21:27:52 🔧 Detected module name: EcommerceAPI — fixing imports...
+2025/10/21 21:27:52 ✅ No import fixes needed
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+✅ Hybrid generation completed (145.54s) - rules + ML synergy applied
+🔧 Injected mux import → experiments/out/EcommerceAPI/internal/handlers/cart.go
+🔧 Injected mux import → experiments/out/EcommerceAPI/internal/handlers/order.go
+🔧 Injected mux import → experiments/out/EcommerceAPI/internal/handlers/product.go
+🔧 Injected mux import → experiments/out/EcommerceAPI/internal/handlers/user.go
+🔧 Verified mux dependency and tidied module
+📁 Saved per-package coverage → experiments/out/EcommerceAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/EcommerceAPI/internal/handlers ---
+# EcommerceAPI/internal/handlers [EcommerceAPI/internal/handlers.test]
+./user.go:44:25: cannot use id (variable of type int) as string value in argument to parseID
+./user.go:70:25: cannot use id (variable of type int) as string value in argument to parseID
+./user.go:89:25: cannot use id (variable of type int) as string value in argument to parseID
+FAIL	EcommerceAPI/internal/handlers [build failed]
+
+------------------------
+✅ Validation completed in 0.95s
+
+📊 Summary for EcommerceAPI (mode: hybrid):
+  • BuildSuccess = false
+  • LintWarnings = 12
+  • TestsPass    = false
+  • Coverage     = 0.0%
+  • Generation Duration = 2m25.537788945s
+  • Repair Attempts = 0
+  • Rule Fixes   = 33
+🧾 Wrote 30 unique experiments to experiments/logs/summary.csv
+
+🧾 Generating Markdown summary from JSON metrics...
+📊 Markdown results saved → experiments/logs/results.md
+✅ Summary successfully written to experiments/logs/results.md
+
+✅ Experiment complete..

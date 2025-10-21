@@ -1,0 +1,10 @@
+App: FitnessAPI
+Mode: hybrid
+Timestamp: 2025-10-21T21:32:12+03:00
+OpenAI Model: gpt-4o-mini
+BuildSuccess: false
+TestsPass: false
+Coverage: 0.0%
+Duration: 2m11.369780912s
+RepairAttempts: 0
+RuleFixes: 33

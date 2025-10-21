@@ -1,0 +1,11 @@
+{
+  "StartTime": "2025-10-21T22:03:53.992200936+03:00",
+  "EndTime": "2025-10-21T22:06:53.993187066+03:00",
+  "Duration": 180000986126,
+  "PrimarySuccess": false,
+  "RepairAttempts": 0,
+  "FinalSuccess": false,
+  "ErrorMessage": "Post \"https://api.openai.com/v1/chat/completions\": context deadline exceeded",
+  "RuleFixes": 0,
+  "Mode": "hybrid"
+}

@@ -1,0 +1,10 @@
+App: VotingAPI
+Mode: hybrid
+Timestamp: 2025-10-21T22:19:35+03:00
+OpenAI Model: gpt-4o-mini
+BuildSuccess: true
+TestsPass: true
+Coverage: 70.2%
+Duration: 2m23.711797242s
+RepairAttempts: 0
+RuleFixes: 26

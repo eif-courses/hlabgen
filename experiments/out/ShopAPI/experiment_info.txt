@@ -1,0 +1,10 @@
+App: ShopAPI
+Mode: hybrid
+Timestamp: 2025-10-21T22:06:55+03:00
+OpenAI Model: gpt-4o-mini
+BuildSuccess: true
+TestsPass: false
+Coverage: 0.0%
+Duration: 3m0.000986126s
+RepairAttempts: 0
+RuleFixes: 0

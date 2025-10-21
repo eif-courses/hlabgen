@@ -182,23 +182,33 @@ func SafeDecode(code string) string {
 	return fixed
 }
 
-// FixIDTypeMismatch ensures route path variables are converted to int when comparing with struct IDs.
+// FixIDTypeMismatch removes the broken parseID function since strconv.Atoi already converts to int
 func FixIDTypeMismatch(code string) string {
-	if strings.Contains(code, "vars := mux.Vars(r)") && strings.Contains(code, "user.ID == id") {
-		code = strings.ReplaceAll(code, "user.ID == id",
-			"user.ID == parseID(id)")
-		if !strings.Contains(code, "func parseID(") {
-			code += `
+	// The issue: ML generates code that does:
+	//   id, err := strconv.Atoi(vars["id"])  // id is now int
+	//   if item.ID == parseID(id)            // but parseID expects string!
+	//
+	// Solution: Remove all parseID() calls since id is already an int
+
+	// Remove calls to parseID since id is already an int from strconv.Atoi
+	code = strings.ReplaceAll(code, "parseID(id)", "id")
+
+	// Remove the entire parseID function definition if it exists
+	parseIDFunc := `
 
 func parseID(s string) int {
 	id, _ := strconv.Atoi(s)
 	return id
 }`
-		}
-		if !strings.Contains(code, `"strconv"`) {
-			code = strings.Replace(code, "import (", "import (\n\t\"strconv\"", 1)
-		}
-	}
+	code = strings.ReplaceAll(code, parseIDFunc, "")
+
+	// Also handle case where it might be on one line or with different whitespace
+	code = strings.ReplaceAll(code, "func parseID(s string) int { id, _ := strconv.Atoi(s); return id }", "")
+
+	// Remove any remaining parseID definitions (be thorough)
+	re := regexp.MustCompile(`\n\nfunc parseID\([^)]*\)[^{]*\{[^}]*\}`)
+	code = re.ReplaceAllString(code, "")
+
 	return code
 }
 
