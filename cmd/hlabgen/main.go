@@ -74,7 +74,7 @@ func main() {
 	fmt.Printf("  • Rule Fixes   = %d\n", genMetrics.RuleFixes)
 
 	// --- 5) Save metrics ---
-	genMetrics.Mode = *mode // ✅ Ensure mode is set
+	genMetrics.Mode = *mode // Ensure mode is set
 	_ = metrics.SaveResult(*out, buildMetrics)
 	_ = metrics.SaveMLMetrics(*out, genMetrics)
 	_ = metrics.SaveCombinedMetrics(*out, buildMetrics, genMetrics)
@@ -126,10 +126,7 @@ func generateMLOnly(schema input.Schema, outDir string) mlinternal.GenerationMet
 		Mode:      "ml",
 	}
 
-	// ✅ KEY DIFFERENCE: SKIP rules.Scaffold() entirely
 	// ML-only should generate everything from scratch
-
-	// --- First attempt ---
 	mlFiles, mlMetrics, err := mlinternal.Generate(mlinternal.Schema{
 		AppName:    schema.AppName,
 		Database:   schema.Database,
@@ -141,10 +138,10 @@ func generateMLOnly(schema input.Schema, outDir string) mlinternal.GenerationMet
 	})
 
 	genMetrics = mlMetrics
-	genMetrics.Mode = "ml" // ✅ Preserve mode
+	genMetrics.Mode = "ml"
 	files := convertGenFiles(mlFiles)
 
-	// --- Retry logic (ML-only still needs this for robustness) ---
+	// Retry logic
 	if err != nil {
 		log.Printf("⚠️  ML generation failed once: %v", err)
 		log.Println("🔁 Retrying with relaxed mode...")
@@ -161,7 +158,7 @@ func generateMLOnly(schema input.Schema, outDir string) mlinternal.GenerationMet
 		})
 
 		genMetrics = mlMetrics
-		genMetrics.Mode = "ml" // ✅ Preserve mode
+		genMetrics.Mode = "ml"
 		files = convertGenFiles(mlFiles)
 	}
 
@@ -173,12 +170,12 @@ func generateMLOnly(schema input.Schema, outDir string) mlinternal.GenerationMet
 		return genMetrics
 	}
 
-	// ✅ Write ML output WITHOUT rule-based fixes (pure ML output)
+	// Write ML output
 	if err := assemble.WriteMany(outDir, files, &genMetrics); err != nil {
 		log.Fatalf("❌ Failed to write ML files: %v", err)
 	}
 
-	// ✅ FIX: Fix parseID type mismatches (even in ML-only mode)
+	// Fix parseID type mismatches
 	fixParseIDTypeMismatch(outDir)
 
 	fmt.Println("🔍 Validating Go syntax (ML-only)...")
@@ -192,11 +189,16 @@ func generateMLOnly(schema input.Schema, outDir string) mlinternal.GenerationMet
 		fmt.Println("✅ All ML-generated files have valid Go syntax")
 	}
 
-	// Fix imports and tidy
+	// Ensure go.mod exists FIRST
+	ensureGoMod(outDir, schema.AppName)
+
+	// Then fix imports
 	fixImportsToModule(outDir)
+
 	tidyDependencies(outDir)
 
 	genMetrics.FinalSuccess = true
+
 	genMetrics.EndTime = time.Now()
 	genMetrics.Duration = genMetrics.EndTime.Sub(genMetrics.StartTime)
 
@@ -215,14 +217,14 @@ func generateHybrid(schema input.Schema, outDir string) mlinternal.GenerationMet
 		Mode:      "hybrid",
 	}
 
-	// --- Step 1: Create rule-based scaffold (structure & templates) ---
+	// Step 1: Create rule-based scaffold
 	log.Println("📐 Step 1/3: Creating rule-based scaffold...")
 	if _, err := rules.Scaffold(outDir, schema.AppName); err != nil {
 		log.Fatalf("❌ Scaffold failed: %v", err)
 	}
 	fmt.Println("✅ Rule-based scaffold created (structure only)")
 
-	// --- Step 2: Generate ML content to enhance scaffold ---
+	// Step 2: Generate ML content
 	log.Println("🧠 Step 2/3: Using ML to enhance scaffold logic...")
 	mlFiles, mlMetrics, err := mlinternal.Generate(mlinternal.Schema{
 		AppName:    schema.AppName,
@@ -235,7 +237,7 @@ func generateHybrid(schema input.Schema, outDir string) mlinternal.GenerationMet
 	})
 
 	genMetrics = mlMetrics
-	genMetrics.Mode = "hybrid" // ✅ Preserve hybrid mode
+	genMetrics.Mode = "hybrid"
 	files := convertGenFiles(mlFiles)
 
 	// Retry if needed
@@ -255,20 +257,20 @@ func generateHybrid(schema input.Schema, outDir string) mlinternal.GenerationMet
 		})
 
 		genMetrics = mlMetrics
-		genMetrics.Mode = "hybrid" // ✅ Preserve hybrid mode
+		genMetrics.Mode = "hybrid"
 		files = convertGenFiles(mlFiles)
 	}
 
 	if err != nil {
 		log.Printf("❌ ML generation failed, using rules-only fallback")
-		genMetrics.Mode = "hybrid" // Still mark as hybrid attempt
+		genMetrics.Mode = "hybrid"
 		genMetrics.FinalSuccess = false
 		genMetrics.EndTime = time.Now()
 		genMetrics.Duration = genMetrics.EndTime.Sub(genMetrics.StartTime)
 		return genMetrics
 	}
 
-	// --- Step 3: Apply rule-based validation & repair ---
+	// Step 3: Apply rule-based validation & repair
 	log.Println("🔧 Step 3/3: Applying rule-based validation & fixes...")
 	if err := assemble.WriteMany(outDir, files, &genMetrics); err != nil {
 		log.Fatalf("❌ Failed to write hybrid files: %v", err)
@@ -283,8 +285,11 @@ func generateHybrid(schema input.Schema, outDir string) mlinternal.GenerationMet
 		genMetrics.RuleFixes++
 	}
 
-	// ✅ FIX: Fix parseID type mismatches
+	// Fix parseID type mismatches
 	fixParseIDTypeMismatch(outDir)
+
+	// Ensure go.mod exists
+	//ensureGoMod(outDir, schema.AppName)
 
 	// Validate syntax
 	fmt.Println("🔍 Validating Go syntax...")
@@ -298,8 +303,12 @@ func generateHybrid(schema input.Schema, outDir string) mlinternal.GenerationMet
 		fmt.Println("✅ All generated files have valid Go syntax")
 	}
 
-	// Fix imports and tidy
+	// Ensure go.mod exists FIRST
+	ensureGoMod(outDir, schema.AppName)
+
+	// Then fix imports
 	fixImportsToModule(outDir)
+
 	tidyDependencies(outDir)
 
 	genMetrics.FinalSuccess = true
@@ -323,28 +332,25 @@ func generateRulesOnly(schema input.Schema, outDir string) mlinternal.Generation
 
 	var files []assemble.File
 
-	// Generate files for each entity (template-driven)
+	// Generate files for each entity
 	for _, entity := range schema.Entities {
-		// Model
 		files = append(files, assemble.File{
 			Filename: fmt.Sprintf("internal/models/%s.go", strings.ToLower(entity)),
 			Content:  rules.GenerateModel(entity),
 		})
 
-		// Handler
 		files = append(files, assemble.File{
 			Filename: fmt.Sprintf("internal/handlers/%s.go", strings.ToLower(entity)),
 			Content:  rules.GenerateHandler(entity, schema.AppName),
 		})
 
-		// Test
 		files = append(files, assemble.File{
 			Filename: fmt.Sprintf("internal/handlers/%s_test.go", strings.ToLower(entity)),
 			Content:  rules.GenerateTest(entity, schema.AppName),
 		})
 	}
 
-	// Routes (template-driven)
+	// Routes
 	files = append(files, assemble.File{
 		Filename: "internal/routes/routes.go",
 		Content:  rules.GenerateRoutes(schema.Entities, schema.AppName),
@@ -356,7 +362,7 @@ func generateRulesOnly(schema input.Schema, outDir string) mlinternal.Generation
 		Content:  rules.GenerateTasksMarkdown(schema.Entities),
 	})
 
-	// Write files directly (no ML, no fixes)
+	// Write files directly
 	for _, f := range files {
 		fullPath := filepath.Join(outDir, f.Filename)
 		if err := os.MkdirAll(filepath.Dir(fullPath), 0o755); err != nil {
@@ -382,11 +388,16 @@ func generateRulesOnly(schema input.Schema, outDir string) mlinternal.Generation
 		fmt.Println("✅ All rule-generated files have valid Go syntax")
 	}
 
-	// Fix imports and tidy
+	// Ensure go.mod exists FIRST
+	ensureGoMod(outDir, schema.AppName)
+
+	// Then fix imports
 	fixImportsToModule(outDir)
+
 	tidyDependencies(outDir)
 
 	genMetrics.PrimarySuccess = true
+
 	genMetrics.FinalSuccess = true
 	genMetrics.RuleFixes = len(files)
 	genMetrics.EndTime = time.Now()
@@ -402,7 +413,6 @@ func generateRulesOnly(schema input.Schema, outDir string) mlinternal.Generation
 // 🛠️  HELPER FUNCTIONS
 // ============================================================================
 
-// convertGenFiles converts []mlinternal.GenFile → []assemble.File
 func convertGenFiles(in []mlinternal.GenFile) []assemble.File {
 	out := make([]assemble.File, len(in))
 	for i, f := range in {
@@ -411,9 +421,29 @@ func convertGenFiles(in []mlinternal.GenFile) []assemble.File {
 	return out
 }
 
-// fixParseIDTypeMismatch removes broken parseID calls that have type mismatches
-// Issue: ML generates strconv.Atoi(vars["id"]) which returns int,
-// then tries to call parseID(id) where parseID expects string
+// ensureGoMod creates go.mod if it doesn't exist
+func ensureGoMod(projectDir string, appName string) {
+	goModPath := filepath.Join(projectDir, "go.mod")
+
+	if _, err := os.Stat(goModPath); err == nil {
+		return
+	}
+
+	// Use full path to avoid import confusion
+	goMod := []byte(fmt.Sprintf(`module github.com/eif-courses/hlabgen/experiments/out/%s
+
+go 1.25
+
+require github.com/gorilla/mux v1.8.1
+`, appName))
+
+	if err := os.WriteFile(goModPath, goMod, 0o644); err != nil {
+		log.Printf("⚠️  Failed to create go.mod: %v", err)
+		return
+	}
+	fmt.Println("📄 Created go.mod")
+}
+
 func fixParseIDTypeMismatch(projectDir string) {
 	fmt.Println("🔧 Fixing parseID type mismatches...")
 
@@ -431,10 +461,8 @@ func fixParseIDTypeMismatch(projectDir string) {
 		original := string(content)
 		fixed := original
 
-		// Remove parseID calls - id is already an int from strconv.Atoi
 		fixed = strings.ReplaceAll(fixed, "parseID(id)", "id")
 
-		// Remove the parseID function definition
 		parseIDFunc := `
 
 func parseID(s string) int {
@@ -442,8 +470,6 @@ func parseID(s string) int {
 	return id
 }`
 		fixed = strings.ReplaceAll(fixed, parseIDFunc, "")
-
-		// Also handle variants with different whitespace
 		fixed = strings.ReplaceAll(fixed, "func parseID(s string) int { id, _ := strconv.Atoi(s); return id }", "")
 
 		if fixed != original {
@@ -461,7 +487,6 @@ func parseID(s string) int {
 	}
 }
 
-// tidyDependencies runs go mod tidy
 func tidyDependencies(projectDir string) {
 	fmt.Println("🔧 Running go mod tidy...")
 	tidyCmd := exec.Command("go", "mod", "tidy")
@@ -475,7 +500,6 @@ func tidyDependencies(projectDir string) {
 	}
 }
 
-// fixImportsToModule detects module name and fixes imports automatically
 func fixImportsToModule(projectDir string) {
 	goMod := filepath.Join(projectDir, "go.mod")
 	f, err := os.Open(goMod)
@@ -485,7 +509,6 @@ func fixImportsToModule(projectDir string) {
 	}
 	defer f.Close()
 
-	// Detect module name
 	scanner := bufio.NewScanner(f)
 	moduleName := ""
 	for scanner.Scan() {
@@ -519,11 +542,20 @@ func fixImportsToModule(projectDir string) {
 		original := string(content)
 		newContent := original
 
-		// Fix all possible wrong import patterns
+		// Get app name from module (last part after /)
+		parts := strings.Split(moduleName, "/")
+		appName := parts[len(parts)-1]
+
+		// ✅ NEW: Fix bare app name imports
+		newContent = strings.ReplaceAll(newContent,
+			fmt.Sprintf(`"%s/internal/`, appName),
+			fmt.Sprintf(`"%s/internal/`, moduleName))
+
+		// Fix all other wrong import patterns
 		wrongPatterns := []string{
 			`"github.com/eif-courses/hlabgen/internal/`,
-			`"github.com/yourusername/` + moduleName + `/internal/`,
-			`"github.com/yourusername/` + moduleName + `/`,
+			`"github.com/yourusername/` + appName + `/internal/`,
+			`"github.com/yourusername/` + appName + `/`,
 			`"yourapp/`,
 			`"your_project/`,
 		}
@@ -537,7 +569,6 @@ func fixImportsToModule(projectDir string) {
 			}
 		}
 
-		// Write back if changed
 		if newContent != original {
 			err = os.WriteFile(path, []byte(newContent), 0o644)
 			if err == nil {
@@ -556,7 +587,6 @@ func fixImportsToModule(projectDir string) {
 	}
 }
 
-// getModelName returns the OpenAI model name from env or default
 func getModelName() string {
 	model := os.Getenv("OPENAI_MODEL")
 	if model == "" {
@@ -565,7 +595,6 @@ func getModelName() string {
 	return model
 }
 
-// validateGoSyntax validates Go syntax for all .go files
 func validateGoSyntax(projectPath string) []string {
 	var errors []string
 

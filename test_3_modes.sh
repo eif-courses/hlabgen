@@ -11,5 +11,5 @@ for mode in rules ml hybrid; do
     -out experiments/out/$APP_DIR
 done
 
-make reports-all
+make analyze-modes
 cat experiments/logs/comparative.md
