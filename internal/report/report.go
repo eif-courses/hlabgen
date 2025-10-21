@@ -20,6 +20,11 @@ type ExperimentResult struct {
 	DurationSeconds float64 `json:"duration_seconds"`
 	RuleFixes       int     `json:"rule_fixes"`
 	Coverage        float64 `json:"coverage"`
+	// ✅ ADD THESE:
+	LintWarnings int  `json:"lint_warnings"` // NEW
+	VetWarnings  int  `json:"vet_warnings"`  // NEW
+	BuildSuccess bool `json:"build_success"` // NEW
+	TestsPass    bool `json:"tests_pass"`    // NEW
 }
 
 func LoadMetricsFromJSON(path string) (ExperimentResult, error) {
@@ -34,9 +39,35 @@ func LoadMetricsFromJSON(path string) (ExperimentResult, error) {
 	}
 
 	app := filepath.Base(filepath.Dir(path))
-
-	// --- Extract mode ---
 	mode := getString(m, "mode")
+
+	// ✅ Extract lint/vet from build metrics
+	lintWarnings := 0
+	vetWarnings := 0
+	buildSuccess := false
+	testsPass := false
+
+	// Check if this is a combined metrics file with build data
+	if build, ok := m["build"].(map[string]interface{}); ok {
+		lintWarnings = int(getFloat(build, "lint_warnings"))
+		vetWarnings = int(getFloat(build, "vet_warnings"))
+		buildSuccess = getBool(build, "build_success")
+		testsPass = getBool(build, "tests_pass")
+	}
+
+	// Fallback to flat structure
+	if lintWarnings == 0 {
+		lintWarnings = int(getFloat(m, "lint_warnings"))
+	}
+	if vetWarnings == 0 {
+		vetWarnings = int(getFloat(m, "vet_warnings"))
+	}
+	if !buildSuccess {
+		buildSuccess = getBool(m, "build_success")
+	}
+	if !testsPass {
+		testsPass = getBool(m, "tests_pass")
+	}
 	if mode == "" {
 		mode = readModeFromExperimentInfo(filepath.Dir(path), app)
 	}
@@ -83,6 +114,10 @@ func LoadMetricsFromJSON(path string) (ExperimentResult, error) {
 		DurationSeconds: duration,
 		RuleFixes:       fixes,
 		Coverage:        coverage,
+		LintWarnings:    lintWarnings, // ✅ NEW
+		VetWarnings:     vetWarnings,  // ✅ NEW
+		BuildSuccess:    buildSuccess, // ✅ NEW
+		TestsPass:       testsPass,    // ✅ NEW
 	}, nil
 }
 

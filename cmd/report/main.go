@@ -66,10 +66,154 @@ func main() {
 
 func generateStandardReport(results []report.ExperimentResult, outputDir string) {
 	outputPath := filepath.Join(outputDir, "results.md")
-	if err := report.GenerateMarkdownReport(results, outputPath); err != nil {
-		log.Fatalf("❌ Standard report generation failed: %v", err)
+
+	// ✅ UPDATED TABLE WITH LINT/VET WARNINGS
+	header := `# Experimental Evaluation Results
+
+| App | Mode | Build | Tests | Coverage | Lint Warnings | Vet Warnings | Primary Success | Repairs | Fixes | Duration (s) |
+|-----|------|-------|-------|----------|---------------|--------------|-----------------|---------|-------|--------------|
+`
+
+	var rows []string
+	for _, r := range results {
+		rows = append(rows, fmt.Sprintf(
+			"| %s | %s | %v | %v | %.1f%% | %d | %d | %v | %d | %d | %.2f |",
+			r.AppName,
+			r.Mode,
+			r.BuildSuccess,
+			r.TestsPass,
+			r.Coverage,
+			r.LintWarnings, // ✅ NEW
+			r.VetWarnings,  // ✅ NEW
+			r.PrimarySuccess,
+			r.RepairAttempts,
+			r.RuleFixes,
+			r.DurationSeconds,
+		))
 	}
-	fmt.Printf("✅ Standard report: %s\n", outputPath)
+
+	// ✅ CALCULATE SUMMARY STATISTICS
+	content := header + strings.Join(rows, "\n") + "\n\n"
+
+	content += "## Summary Statistics\n\n"
+
+	// Count totals
+	totalLint := 0
+	totalVet := 0
+	totalBuildSuccess := 0
+	totalTestsPass := 0
+	for _, r := range results {
+		totalLint += r.LintWarnings
+		totalVet += r.VetWarnings
+		if r.BuildSuccess {
+			totalBuildSuccess++
+		}
+		if r.TestsPass {
+			totalTestsPass++
+		}
+	}
+
+	content += fmt.Sprintf("- **Total Experiments**: %d\n", len(results))
+	content += fmt.Sprintf("- **Build Success Rate**: %.1f%% (%d/%d)\n",
+		float64(totalBuildSuccess)/float64(len(results))*100, totalBuildSuccess, len(results))
+	content += fmt.Sprintf("- **Test Success Rate**: %.1f%% (%d/%d)\n",
+		float64(totalTestsPass)/float64(len(results))*100, totalTestsPass, len(results))
+	content += fmt.Sprintf("- **Average Coverage**: %.1f%%\n", avgCoverageFromResults(results, nil))
+	content += fmt.Sprintf("- **Total Lint Warnings**: %d (avg: %.1f per app)\n",
+		totalLint, float64(totalLint)/float64(len(results)))
+	content += fmt.Sprintf("- **Total Vet Warnings**: %d (avg: %.1f per app)\n",
+		totalVet, float64(totalVet)/float64(len(results)))
+	content += fmt.Sprintf("- **Average Generation Duration**: %.2fs\n", avgDuration(results))
+	content += fmt.Sprintf("- **Avg Repairs Needed**: %.1f per app\n", avgRepairs(results))
+
+	// ✅ CODE QUALITY SECTION
+	content += "\n## Code Quality Analysis\n\n"
+
+	// Count apps with warnings
+	appsWithLint := 0
+	appsWithVet := 0
+	maxLint := 0
+	maxVet := 0
+	var maxLintApp, maxVetApp string
+
+	for _, r := range results {
+		if r.LintWarnings > 0 {
+			appsWithLint++
+		}
+		if r.VetWarnings > 0 {
+			appsWithVet++
+		}
+		if r.LintWarnings > maxLint {
+			maxLint = r.LintWarnings
+			maxLintApp = r.AppName
+		}
+		if r.VetWarnings > maxVet {
+			maxVet = r.VetWarnings
+			maxVetApp = r.AppName
+		}
+	}
+
+	content += fmt.Sprintf("- **Apps with Lint Warnings**: %d/%d\n", appsWithLint, len(results))
+	content += fmt.Sprintf("- **Apps with Vet Warnings**: %d/%d\n", appsWithVet, len(results))
+	if maxLint > 0 {
+		content += fmt.Sprintf("- **Highest Lint Warnings**: %s (%d warnings)\n", maxLintApp, maxLint)
+	}
+	if maxVet > 0 {
+		content += fmt.Sprintf("- **Highest Vet Warnings**: %s (%d warnings)\n", maxVetApp, maxVet)
+	}
+
+	// ✅ MODE COMPARISON SECTION
+	content += "\n## Performance by Mode\n\n"
+
+	modeStats := make(map[string]struct {
+		count       int
+		builds      int
+		tests       int
+		avgCov      float64
+		avgLint     float64
+		avgVet      float64
+		avgDuration float64
+	})
+
+	for _, r := range results {
+		stats := modeStats[r.Mode]
+		stats.count++
+		if r.BuildSuccess {
+			stats.builds++
+		}
+		if r.TestsPass {
+			stats.tests++
+		}
+		stats.avgCov += r.Coverage
+		stats.avgLint += float64(r.LintWarnings)
+		stats.avgVet += float64(r.VetWarnings)
+		stats.avgDuration += r.DurationSeconds
+		modeStats[r.Mode] = stats
+	}
+
+	content += "| Mode | Apps | Build Success | Test Success | Avg Coverage | Avg Lint | Avg Vet | Avg Duration |\n"
+	content += "|------|------|---------------|--------------|--------------|----------|---------|---------------|\n"
+
+	for mode, stats := range modeStats {
+		if stats.count > 0 {
+			content += fmt.Sprintf("| %s | %d | %.1f%% | %.1f%% | %.1f%% | %.1f | %.1f | %.2fs |\n",
+				mode,
+				stats.count,
+				float64(stats.builds)/float64(stats.count)*100,
+				float64(stats.tests)/float64(stats.count)*100,
+				stats.avgCov/float64(stats.count),
+				stats.avgLint/float64(stats.count),
+				stats.avgVet/float64(stats.count),
+				stats.avgDuration/float64(stats.count),
+			)
+		}
+	}
+
+	os.MkdirAll(filepath.Dir(outputPath), 0o755)
+	if err := os.WriteFile(outputPath, []byte(content), 0o644); err != nil {
+		log.Fatalf("❌ Failed to write standard report: %v", err)
+	}
+	fmt.Printf("✅ Standard report with lint/vet warnings: %s\n", outputPath)
 }
 
 func generateComparativeReport(results []report.ExperimentResult, buildMetrics map[string]BuildMetrics, outputDir string) {
@@ -284,41 +428,38 @@ func generateFailuresReport(results []report.ExperimentResult, outputDir string)
 	fmt.Printf("✅ Failures report: %s\n", outputPath)
 }
 
+// ✅ ALSO UPDATE generateLaTeXReport FUNCTION:
+
 func generateLaTeXReport(results []report.ExperimentResult, buildMetrics map[string]BuildMetrics, outputDir string) {
 	outputPath := filepath.Join(outputDir, "tables.tex")
 
 	var sb strings.Builder
 
-	// Main results table
-	sb.WriteString("% Experimental Results Table\n")
+	// Main results table with lint/vet
+	sb.WriteString("% Experimental Results with Code Quality Metrics\n")
 	sb.WriteString("\\begin{table}[htbp]\n")
 	sb.WriteString("\\centering\n")
-	sb.WriteString("\\caption{Experimental Results Summary}\n")
-	sb.WriteString("\\label{tab:results}\n")
-	sb.WriteString("\\begin{tabular}{lccccc}\n")
+	sb.WriteString("\\caption{Experimental Results with Lint and Vet Warnings}\n")
+	sb.WriteString("\\label{tab:results-quality}\n")
+	sb.WriteString("\\begin{tabular}{lccccccc}\n")
 	sb.WriteString("\\toprule\n")
-	sb.WriteString("\\textbf{Application} & \\textbf{Success} & \\textbf{Repairs} & \\textbf{Coverage} & \\textbf{Duration} & \\textbf{Build} \\\\\n")
+	sb.WriteString("\\textbf{App} & \\textbf{Mode} & \\textbf{Build} & \\textbf{Tests} & \\textbf{Cov} & \\textbf{Lint} & \\textbf{Vet} & \\textbf{Dur} \\\\\n")
 	sb.WriteString("\\midrule\n")
 
-	// Sort by app name
 	sort.Slice(results, func(i, j int) bool {
 		return results[i].AppName < results[j].AppName
 	})
 
 	for _, r := range results {
-		// ✅ FIX: Use r.Coverage directly
-		coverage := "N/A"
-		if r.Coverage > 0 {
-			coverage = fmt.Sprintf("%.1f\\%%", r.Coverage)
-		}
-
-		sb.WriteString(fmt.Sprintf("%s & %s & %d & %s & %.2f & %s \\\\\n",
+		sb.WriteString(fmt.Sprintf("%s & %s & %s & %s & %.1f & %d & %d & %.1f \\\\\n",
 			escapeLaTeX(r.AppName),
-			boolToLaTeX(r.FinalSuccess),
-			r.RepairAttempts,
-			coverage,
+			r.Mode,
+			boolToLaTeX(r.BuildSuccess),
+			boolToLaTeX(r.TestsPass),
+			r.Coverage,
+			r.LintWarnings,
+			r.VetWarnings,
 			r.DurationSeconds,
-			boolToLaTeX(r.FinalSuccess && r.RepairAttempts == 0),
 		))
 	}
 
@@ -326,42 +467,39 @@ func generateLaTeXReport(results []report.ExperimentResult, buildMetrics map[str
 	sb.WriteString("\\end{tabular}\n")
 	sb.WriteString("\\end{table}\n\n")
 
-	// Statistics summary table
-	durations := make([]float64, 0, len(results))
-	coverages := make([]float64, 0, len(results))
-	for _, r := range results {
-		durations = append(durations, r.DurationSeconds)
-		// ✅ FIX: Use r.Coverage directly
-		coverages = append(coverages, r.Coverage)
-	}
-
-	sb.WriteString("% Summary Statistics Table\n")
+	// Summary statistics table
+	sb.WriteString("% Summary Statistics\n")
 	sb.WriteString("\\begin{table}[htbp]\n")
 	sb.WriteString("\\centering\n")
-	sb.WriteString("\\caption{Summary Statistics}\n")
-	sb.WriteString("\\label{tab:stats}\n")
+	sb.WriteString("\\caption{Code Quality Summary}\n")
+	sb.WriteString("\\label{tab:quality-summary}\n")
 	sb.WriteString("\\begin{tabular}{lcc}\n")
 	sb.WriteString("\\toprule\n")
-	sb.WriteString("\\textbf{Metric} & \\textbf{Mean} & \\textbf{Std Dev} \\\\\n")
+	sb.WriteString("\\textbf{Metric} & \\textbf{Total} & \\textbf{Average} \\\\\n")
 	sb.WriteString("\\midrule\n")
 
-	durationStats := calculateStats(durations)
-	coverageStats := calculateStats(coverages)
+	totalLint := 0
+	totalVet := 0
+	for _, r := range results {
+		totalLint += r.LintWarnings
+		totalVet += r.VetWarnings
+	}
 
-	sb.WriteString(fmt.Sprintf("Duration (s) & %.2f & %.2f \\\\\n", durationStats.Mean, durationStats.StdDev))
-	sb.WriteString(fmt.Sprintf("Coverage (\\%%) & %.1f & %.1f \\\\\n", coverageStats.Mean, coverageStats.StdDev))
-	sb.WriteString(fmt.Sprintf("Success Rate (\\%%) & %.1f & --- \\\\\n", successRate(results)*100))
+	sb.WriteString(fmt.Sprintf("Lint Warnings & %d & %.1f \\\\\n", totalLint, float64(totalLint)/float64(len(results))))
+	sb.WriteString(fmt.Sprintf("Vet Warnings & %d & %.1f \\\\\n", totalVet, float64(totalVet)/float64(len(results))))
+	sb.WriteString(fmt.Sprintf("Avg Coverage & -- & %.1f\\%% \\\\\n", avgCoverageFromResults(results, nil)))
+	sb.WriteString(fmt.Sprintf("Avg Duration & -- & %.2fs \\\\\n", avgDuration(results)))
 
 	sb.WriteString("\\bottomrule\n")
 	sb.WriteString("\\end{tabular}\n")
 	sb.WriteString("\\end{table}\n")
 
-	if err := os.WriteFile(outputPath, []byte(sb.String()), 0644); err != nil {
+	os.MkdirAll(filepath.Dir(outputPath), 0o755)
+	if err := os.WriteFile(outputPath, []byte(sb.String()), 0o644); err != nil {
 		log.Fatalf("❌ Failed to write LaTeX report: %v", err)
 	}
-	fmt.Printf("✅ LaTeX tables: %s\n", outputPath)
+	fmt.Printf("✅ LaTeX tables with lint/vet warnings: %s\n", outputPath)
 }
-
 func generateAllReports(results []report.ExperimentResult, buildMetrics map[string]BuildMetrics, outputDir string) {
 	fmt.Println("📊 Generating all report types...")
 	generateStandardReport(results, outputDir)

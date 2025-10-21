@@ -1,0 +1,31 @@
+% Experimental Results Table
+\begin{table}[htbp]
+\centering
+\caption{Experimental Results Summary}
+\label{tab:results}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Application} & \textbf{Success} & \textbf{Repairs} & \textbf{Coverage} & \textbf{Duration} & \textbf{Build} \\
+\midrule
+LibraryAPI\_hybrid & \checkmark & 0 & 70.2\% & 115.47 & \checkmark \\
+LibraryAPI\_ml & \checkmark & 0 & N/A & 108.69 & \checkmark \\
+LibraryAPI\_rules & \checkmark & 0 & 72.2\% & 0.02 & \checkmark \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% Summary Statistics Table
+\begin{table}[htbp]
+\centering
+\caption{Summary Statistics}
+\label{tab:stats}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Metric} & \textbf{Mean} & \textbf{Std Dev} \\
+\midrule
+Duration (s) & 74.72 & 52.90 \\
+Coverage (\%) & 47.5 & 33.6 \\
+Success Rate (\%) & 100.0 & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
