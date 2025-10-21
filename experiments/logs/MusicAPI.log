@@ -1,0 +1,180 @@
+
+🚀 Starting generation for app: MusicAPI (mode=hybrid)
+✅ Rule-based scaffold created
+2025/10/21 07:22:10 🧠 Starting ML-based code generation...
+🌍 Using custom endpoint: https://api.openai.com/v1
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 1m15.73822881s (model: gpt-4o-mini, attempt: 1)
+✅ Parsed 12 files
+
+📊 Generation Summary:
+  • Duration: 1m15.738898147s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+✅ MusicAPI generation completed successfully
+🧾 Saved ML metrics → experiments/MusicAPI/gen_metrics.json
+📝 Processing: internal/models/artist.go
+✅ Written: experiments/out/MusicAPI/internal/models/artist.go
+📝 Processing: internal/models/album.go
+✅ Written: experiments/out/MusicAPI/internal/models/album.go
+📝 Processing: internal/models/song.go
+✅ Written: experiments/out/MusicAPI/internal/models/song.go
+📝 Processing: internal/handlers/artist.go
+🔧 Fixed handler signature for CreateArtist
+🔧 Fixed handler signature for GetArtists
+🔧 Fixed handler signature for GetArtist
+🔧 Fixed handler signature for UpdateArtist
+🔧 Fixed handler signature for DeleteArtist
+✅ Written: experiments/out/MusicAPI/internal/handlers/artist.go
+📝 Processing: internal/handlers/artist_test.go
+🔧 Fixed test signature for TestCreateArtist
+🔧 Fixed test signature for TestGetArtists
+🔧 Fixed test signature for TestGetArtist
+🔧 Fixed test signature for TestUpdateArtist
+🔧 Fixed test signature for TestDeleteArtist
+✅ Auto-fixed test signatures in internal/handlers/artist_test.go
+✅ Written: experiments/out/MusicAPI/internal/handlers/artist_test.go
+📝 Processing: internal/handlers/album.go
+🔧 Fixed handler signature for CreateAlbum
+🔧 Fixed handler signature for GetAlbums
+🔧 Fixed handler signature for GetAlbum
+🔧 Fixed handler signature for UpdateAlbum
+🔧 Fixed handler signature for DeleteAlbum
+✅ Written: experiments/out/MusicAPI/internal/handlers/album.go
+📝 Processing: internal/handlers/album_test.go
+🔧 Fixed test signature for TestCreateAlbum
+🔧 Fixed test signature for TestGetAlbums
+🔧 Fixed test signature for TestGetAlbum
+🔧 Fixed test signature for TestUpdateAlbum
+🔧 Fixed test signature for TestDeleteAlbum
+✅ Auto-fixed test signatures in internal/handlers/album_test.go
+✅ Written: experiments/out/MusicAPI/internal/handlers/album_test.go
+📝 Processing: internal/handlers/song.go
+🔧 Fixed handler signature for CreateSong
+🔧 Fixed handler signature for GetSongs
+🔧 Fixed handler signature for GetSong
+🔧 Fixed handler signature for UpdateSong
+🔧 Fixed handler signature for DeleteSong
+✅ Written: experiments/out/MusicAPI/internal/handlers/song.go
+📝 Processing: internal/handlers/song_test.go
+🔧 Fixed test signature for TestCreateSong
+🔧 Fixed test signature for TestGetSongs
+🔧 Fixed test signature for TestGetSong
+🔧 Fixed test signature for TestUpdateSong
+🔧 Fixed test signature for TestDeleteSong
+✅ Auto-fixed test signatures in internal/handlers/song_test.go
+✅ Written: experiments/out/MusicAPI/internal/handlers/song_test.go
+📝 Processing: internal/routes/routes.go
+🔧 Fixed Register function parameter
+✅ Written: experiments/out/MusicAPI/internal/routes/routes.go
+📝 Processing: cmd/main.go
+✅ Written: experiments/out/MusicAPI/cmd/main.go
+📝 Processing: tasks.md
+⚠️  Syntax validation failed for tasks.md: temp.go:1:1: illegal character U+0023 '#'
+🔧 Attempting additional fixes...
+❌ Could not auto-fix syntax errors in tasks.md
+✅ Written: experiments/out/MusicAPI/tasks.md
+
+🔧 Total rule-based fixes applied: 25
+
+🔧 Running auto-fix on generated files...
+
+🔧 Auto-fixing all files in: experiments/out/MusicAPI
+
+📝 Fixing test function signatures...
+  ✅ Fixed test signatures in album_test.go
+  ✅ Fixed test signatures in artist_test.go
+  ✅ Fixed test signatures in song_test.go
+
+📝 Fixing handler function signatures...
+
+📝 Fixing routes Register function...
+
+📝 Fixing missing commas in struct literals...
+
+📝 Ensuring test file imports...
+
+✅ Applied 3 fixes total!
+✅ Auto-fix completed successfully
+
+🔍 Validating Go syntax...
+✅ All generated files have valid Go syntax
+2025/10/21 07:23:25 ✅ Generated 3 test file(s)
+
+🔧 Fixing import paths...
+2025/10/21 07:23:25 🔧 Detected module name: MusicAPI — fixing imports...
+2025/10/21 07:23:25 ✅ No import fixes needed
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+
+🔍 Final syntax validation after fixes...
+✅ All syntax errors resolved
+✅ ML generation completed (75.74s)
+🔧 Injected mux import → experiments/out/MusicAPI/internal/handlers/album.go
+🔧 Injected mux import → experiments/out/MusicAPI/internal/handlers/album_test.go
+🔧 Injected mux import → experiments/out/MusicAPI/internal/handlers/artist.go
+🔧 Injected mux import → experiments/out/MusicAPI/internal/handlers/artist_test.go
+🔧 Injected mux import → experiments/out/MusicAPI/internal/handlers/song.go
+🔧 Injected mux import → experiments/out/MusicAPI/internal/handlers/song_test.go
+🔧 Verified mux dependency and tidied module
+📁 Saved per-package coverage → experiments/out/MusicAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/MusicAPI/internal/handlers ---
+=== RUN   TestCreateAlbum
+--- PASS: TestCreateAlbum (0.00s)
+=== RUN   TestGetAlbums
+--- PASS: TestGetAlbums (0.00s)
+=== RUN   TestGetAlbum
+--- PASS: TestGetAlbum (0.00s)
+=== RUN   TestUpdateAlbum
+--- PASS: TestUpdateAlbum (0.00s)
+=== RUN   TestDeleteAlbum
+--- PASS: TestDeleteAlbum (0.00s)
+=== RUN   TestCreateArtist
+--- PASS: TestCreateArtist (0.00s)
+=== RUN   TestGetArtists
+--- PASS: TestGetArtists (0.00s)
+=== RUN   TestGetArtist
+--- PASS: TestGetArtist (0.00s)
+=== RUN   TestUpdateArtist
+--- PASS: TestUpdateArtist (0.00s)
+=== RUN   TestDeleteArtist
+--- PASS: TestDeleteArtist (0.00s)
+=== RUN   TestCreateSong
+--- PASS: TestCreateSong (0.00s)
+=== RUN   TestGetSongs
+--- PASS: TestGetSongs (0.00s)
+=== RUN   TestGetSong
+--- PASS: TestGetSong (0.00s)
+=== RUN   TestUpdateSong
+--- PASS: TestUpdateSong (0.00s)
+=== RUN   TestDeleteSong
+--- PASS: TestDeleteSong (0.00s)
+PASS
+coverage: 70.2% of statements
+ok  	MusicAPI/internal/handlers	0.005s
+
+------------------------
+✅ Validation completed in 1.27s
+
+📊 Summary for MusicAPI:
+  • BuildSuccess = true
+  • LintWarnings = 3
+  • TestsPass    = true
+  • Coverage     = 70.2%
+  • Generation Duration = 1m15.738898147s
+  • Repair Attempts = 0
+  • Rule Fixes   = 25
+  • Mode: hybrid
+🧾 Appended 30 experiments into experiments/logs/summary.csv
+
+🧾 Generating Markdown summary from JSON metrics...
+📊 Markdown results saved → experiments/logs/results.md
+✅ Summary successfully written to experiments/logs/results.md
+
+✅ Experiment complete..

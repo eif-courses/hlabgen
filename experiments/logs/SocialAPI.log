@@ -1,0 +1,157 @@
+
+🚀 Starting generation for app: SocialAPI (mode=hybrid)
+✅ Rule-based scaffold created
+2025/10/21 07:34:24 🧠 Starting ML-based code generation...
+🌍 Using custom endpoint: https://api.openai.com/v1
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 1m11.416803459s (model: gpt-4o-mini, attempt: 1)
+❌ JSON error: invalid character 'e' after object key:value pair
+⚠️ Primary parse failed, retrying with JSON repair prompt...
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 1m2.36270332s (model: gpt-4o-mini, attempt: 1)
+🔁 Repair call took 1m2.362749864s
+✅ Parsed 12 files
+
+📊 Generation Summary:
+  • Duration: 2m13.780422102s
+  • Primary Success: false
+  • Repair Attempts: 1
+  • Final Success: true
+  • Error: 
+✅ SocialAPI generation completed successfully
+🧾 Saved ML metrics → experiments/SocialAPI/gen_metrics.json
+📝 Processing: internal/models/user.go
+✅ Written: experiments/out/SocialAPI/internal/models/user.go
+📝 Processing: internal/models/post.go
+✅ Written: experiments/out/SocialAPI/internal/models/post.go
+📝 Processing: internal/models/comment.go
+✅ Written: experiments/out/SocialAPI/internal/models/comment.go
+📝 Processing: internal/handlers/user.go
+🔧 Fixed handler signature for CreateUser
+🔧 Fixed handler signature for GetUsers
+🔧 Fixed handler signature for GetUser
+🔧 Fixed handler signature for UpdateUser
+🔧 Fixed handler signature for DeleteUser
+✅ Written: experiments/out/SocialAPI/internal/handlers/user.go
+📝 Processing: internal/handlers/post.go
+🔧 Fixed handler signature for CreatePost
+🔧 Fixed handler signature for GetPosts
+🔧 Fixed handler signature for GetPost
+🔧 Fixed handler signature for UpdatePost
+🔧 Fixed handler signature for DeletePost
+✅ Written: experiments/out/SocialAPI/internal/handlers/post.go
+📝 Processing: internal/handlers/comment.go
+🔧 Fixed handler signature for CreateComment
+🔧 Fixed handler signature for GetComments
+🔧 Fixed handler signature for GetComment
+🔧 Fixed handler signature for UpdateComment
+🔧 Fixed handler signature for DeleteComment
+✅ Written: experiments/out/SocialAPI/internal/handlers/comment.go
+📝 Processing: internal/handlers/user_test.go
+🔧 Fixed test signature for TestCreateUser
+🔧 Fixed test signature for TestGetUsers
+🔧 Fixed test signature for TestGetUser
+🔧 Fixed test signature for TestUpdateUser
+🔧 Fixed test signature for TestDeleteUser
+✅ Auto-fixed test signatures in internal/handlers/user_test.go
+✅ Written: experiments/out/SocialAPI/internal/handlers/user_test.go
+📝 Processing: internal/handlers/post_test.go
+🔧 Fixed test signature for TestCreatePost
+🔧 Fixed test signature for TestGetPosts
+🔧 Fixed test signature for TestGetPost
+🔧 Fixed test signature for TestUpdatePost
+🔧 Fixed test signature for TestDeletePost
+✅ Auto-fixed test signatures in internal/handlers/post_test.go
+✅ Written: experiments/out/SocialAPI/internal/handlers/post_test.go
+📝 Processing: internal/handlers/comment_test.go
+🔧 Fixed test signature for TestCreateComment
+🔧 Fixed test signature for TestGetComments
+🔧 Fixed test signature for TestGetComment
+🔧 Fixed test signature for TestUpdateComment
+🔧 Fixed test signature for TestDeleteComment
+✅ Auto-fixed test signatures in internal/handlers/comment_test.go
+✅ Written: experiments/out/SocialAPI/internal/handlers/comment_test.go
+📝 Processing: internal/routes/routes.go
+🔧 Fixed Register function parameter
+✅ Written: experiments/out/SocialAPI/internal/routes/routes.go
+📝 Processing: cmd/main.go
+✅ Written: experiments/out/SocialAPI/cmd/main.go
+📝 Processing: tasks.md
+⚠️  Syntax validation failed for tasks.md: temp.go:1:1: illegal character U+0023 '#'
+🔧 Attempting additional fixes...
+❌ Could not auto-fix syntax errors in tasks.md
+✅ Written: experiments/out/SocialAPI/tasks.md
+
+🔧 Total rule-based fixes applied: 25
+
+🔧 Running auto-fix on generated files...
+
+🔧 Auto-fixing all files in: experiments/out/SocialAPI
+
+📝 Fixing test function signatures...
+  ✅ Fixed test signatures in comment_test.go
+  ✅ Fixed test signatures in post_test.go
+  ✅ Fixed test signatures in user_test.go
+
+📝 Fixing handler function signatures...
+
+📝 Fixing routes Register function...
+
+📝 Fixing missing commas in struct literals...
+
+📝 Ensuring test file imports...
+
+✅ Applied 3 fixes total!
+✅ Auto-fix completed successfully
+
+🔍 Validating Go syntax...
+✅ All generated files have valid Go syntax
+2025/10/21 07:36:38 ✅ Generated 3 test file(s)
+
+🔧 Fixing import paths...
+2025/10/21 07:36:38 🔧 Detected module name: SocialAPI — fixing imports...
+2025/10/21 07:36:38 ✅ No import fixes needed
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+
+🔍 Final syntax validation after fixes...
+✅ All syntax errors resolved
+✅ ML generation completed (133.78s)
+🔧 Injected mux import → experiments/out/SocialAPI/internal/handlers/comment.go
+🔧 Injected mux import → experiments/out/SocialAPI/internal/handlers/comment_test.go
+🔧 Injected mux import → experiments/out/SocialAPI/internal/handlers/post.go
+🔧 Injected mux import → experiments/out/SocialAPI/internal/handlers/post_test.go
+🔧 Injected mux import → experiments/out/SocialAPI/internal/handlers/user.go
+🔧 Injected mux import → experiments/out/SocialAPI/internal/handlers/user_test.go
+🔧 Verified mux dependency and tidied module
+📁 Saved per-package coverage → experiments/out/SocialAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/SocialAPI/internal/handlers ---
+# SocialAPI/internal/handlers [SocialAPI/internal/handlers.test]
+./user.go:44:25: cannot use id (variable of type int) as string value in argument to parseID
+./user.go:70:25: cannot use id (variable of type int) as string value in argument to parseID
+./user.go:89:25: cannot use id (variable of type int) as string value in argument to parseID
+FAIL	SocialAPI/internal/handlers [build failed]
+
+------------------------
+✅ Validation completed in 1.07s
+
+📊 Summary for SocialAPI:
+  • BuildSuccess = false
+  • LintWarnings = 12
+  • TestsPass    = false
+  • Coverage     = 0.0%
+  • Generation Duration = 2m13.780422102s
+  • Repair Attempts = 1
+  • Rule Fixes   = 25
+  • Mode: hybrid
+🧾 Appended 30 experiments into experiments/logs/summary.csv
+
+🧾 Generating Markdown summary from JSON metrics...
+📊 Markdown results saved → experiments/logs/results.md
+✅ Summary successfully written to experiments/logs/results.md
+
+✅ Experiment complete..

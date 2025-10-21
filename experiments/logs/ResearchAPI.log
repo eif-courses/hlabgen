@@ -1,0 +1,152 @@
+
+🚀 Starting generation for app: ResearchAPI (mode=hybrid)
+✅ Rule-based scaffold created
+2025/10/21 07:26:53 🧠 Starting ML-based code generation...
+🌍 Using custom endpoint: https://api.openai.com/v1
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 1m2.53294108s (model: gpt-4o-mini, attempt: 1)
+✅ Parsed 12 files
+
+📊 Generation Summary:
+  • Duration: 1m2.533949072s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+✅ ResearchAPI generation completed successfully
+🧾 Saved ML metrics → experiments/ResearchAPI/gen_metrics.json
+🧩 Merged duplicate struct: Author
+🧩 Merged duplicate struct: Review
+📝 Processing: internal/models/paper.go
+✅ Written: experiments/out/ResearchAPI/internal/models/paper.go
+📝 Processing: internal/handlers/paper.go
+🔧 Fixed handler signature for CreatePaper
+🔧 Fixed handler signature for GetPapers
+🔧 Fixed handler signature for GetPaper
+🔧 Fixed handler signature for UpdatePaper
+🔧 Fixed handler signature for DeletePaper
+✅ Written: experiments/out/ResearchAPI/internal/handlers/paper.go
+📝 Processing: internal/handlers/paper_test.go
+🔧 Fixed test signature for TestCreatePaper
+🔧 Fixed test signature for TestGetPapers
+🔧 Fixed test signature for TestGetPaper
+🔧 Fixed test signature for TestUpdatePaper
+🔧 Fixed test signature for TestDeletePaper
+✅ Auto-fixed test signatures in internal/handlers/paper_test.go
+✅ Written: experiments/out/ResearchAPI/internal/handlers/paper_test.go
+📝 Processing: internal/models/author.go
+✅ Written: experiments/out/ResearchAPI/internal/models/author.go
+📝 Processing: internal/handlers/author.go
+🔧 Fixed handler signature for CreateAuthor
+🔧 Fixed handler signature for GetAuthors
+🔧 Fixed handler signature for GetAuthor
+🔧 Fixed handler signature for UpdateAuthor
+🔧 Fixed handler signature for DeleteAuthor
+✅ Written: experiments/out/ResearchAPI/internal/handlers/author.go
+📝 Processing: internal/handlers/author_test.go
+🔧 Fixed test signature for TestCreateAuthor
+🔧 Fixed test signature for TestGetAuthors
+🔧 Fixed test signature for TestGetAuthor
+🔧 Fixed test signature for TestUpdateAuthor
+🔧 Fixed test signature for TestDeleteAuthor
+✅ Auto-fixed test signatures in internal/handlers/author_test.go
+✅ Written: experiments/out/ResearchAPI/internal/handlers/author_test.go
+📝 Processing: internal/models/review.go
+✅ Written: experiments/out/ResearchAPI/internal/models/review.go
+📝 Processing: internal/handlers/review.go
+🔧 Fixed handler signature for CreateReview
+🔧 Fixed handler signature for GetReviews
+🔧 Fixed handler signature for GetReview
+🔧 Fixed handler signature for UpdateReview
+🔧 Fixed handler signature for DeleteReview
+✅ Written: experiments/out/ResearchAPI/internal/handlers/review.go
+📝 Processing: internal/handlers/review_test.go
+🔧 Fixed test signature for TestCreateReview
+🔧 Fixed test signature for TestGetReviews
+🔧 Fixed test signature for TestGetReview
+🔧 Fixed test signature for TestUpdateReview
+🔧 Fixed test signature for TestDeleteReview
+✅ Auto-fixed test signatures in internal/handlers/review_test.go
+✅ Written: experiments/out/ResearchAPI/internal/handlers/review_test.go
+📝 Processing: internal/routes/routes.go
+🔧 Fixed Register function parameter
+✅ Written: experiments/out/ResearchAPI/internal/routes/routes.go
+📝 Processing: cmd/main.go
+✅ Written: experiments/out/ResearchAPI/cmd/main.go
+📝 Processing: tasks.md
+⚠️  Syntax validation failed for tasks.md: temp.go:1:1: illegal character U+0023 '#'
+🔧 Attempting additional fixes...
+❌ Could not auto-fix syntax errors in tasks.md
+✅ Written: experiments/out/ResearchAPI/tasks.md
+
+🔧 Total rule-based fixes applied: 25
+
+🔧 Running auto-fix on generated files...
+
+🔧 Auto-fixing all files in: experiments/out/ResearchAPI
+
+📝 Fixing test function signatures...
+  ✅ Fixed test signatures in author_test.go
+  ✅ Fixed test signatures in paper_test.go
+  ✅ Fixed test signatures in review_test.go
+
+📝 Fixing handler function signatures...
+
+📝 Fixing routes Register function...
+
+📝 Fixing missing commas in struct literals...
+
+📝 Ensuring test file imports...
+
+✅ Applied 3 fixes total!
+✅ Auto-fix completed successfully
+
+🔍 Validating Go syntax...
+✅ All generated files have valid Go syntax
+2025/10/21 07:27:55 ✅ Generated 3 test file(s)
+
+🔧 Fixing import paths...
+2025/10/21 07:27:55 🔧 Detected module name: ResearchAPI — fixing imports...
+2025/10/21 07:27:55 ✅ No import fixes needed
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+
+🔍 Final syntax validation after fixes...
+✅ All syntax errors resolved
+✅ ML generation completed (62.53s)
+🔧 Injected mux import → experiments/out/ResearchAPI/internal/handlers/author.go
+🔧 Injected mux import → experiments/out/ResearchAPI/internal/handlers/paper.go
+🔧 Injected mux import → experiments/out/ResearchAPI/internal/handlers/review.go
+🔧 Verified mux dependency and tidied module
+📁 Saved per-package coverage → experiments/out/ResearchAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/ResearchAPI/internal/handlers ---
+# ResearchAPI/internal/models
+../models/paper.go:9:6: Author redeclared in this block
+	../models/author.go:3:6: other declaration of Author
+../models/review.go:3:6: Review redeclared in this block
+	../models/paper.go:13:6: other declaration of Review
+FAIL	ResearchAPI/internal/handlers [build failed]
+
+------------------------
+✅ Validation completed in 1.01s
+
+📊 Summary for ResearchAPI:
+  • BuildSuccess = false
+  • LintWarnings = 15
+  • TestsPass    = false
+  • Coverage     = 0.0%
+  • Generation Duration = 1m2.533949072s
+  • Repair Attempts = 0
+  • Rule Fixes   = 25
+  • Mode: hybrid
+🧾 Appended 30 experiments into experiments/logs/summary.csv
+
+🧾 Generating Markdown summary from JSON metrics...
+📊 Markdown results saved → experiments/logs/results.md
+✅ Summary successfully written to experiments/logs/results.md
+
+✅ Experiment complete..

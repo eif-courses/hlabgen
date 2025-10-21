@@ -1,0 +1,147 @@
+
+🚀 Starting generation for app: HotelAPI (mode=hybrid)
+✅ Rule-based scaffold created
+2025/10/21 07:17:07 🧠 Starting ML-based code generation...
+🌍 Using custom endpoint: https://api.openai.com/v1
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 1m22.281589634s (model: gpt-4o-mini, attempt: 1)
+✅ Parsed 12 files
+
+📊 Generation Summary:
+  • Duration: 1m22.282521721s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+✅ HotelAPI generation completed successfully
+🧾 Saved ML metrics → experiments/HotelAPI/gen_metrics.json
+📝 Processing: internal/models/hotel.go
+✅ Written: experiments/out/HotelAPI/internal/models/hotel.go
+📝 Processing: internal/models/room.go
+✅ Written: experiments/out/HotelAPI/internal/models/room.go
+📝 Processing: internal/models/reservation.go
+✅ Written: experiments/out/HotelAPI/internal/models/reservation.go
+📝 Processing: internal/handlers/hotel.go
+🔧 Fixed handler signature for CreateHotel
+🔧 Fixed handler signature for GetHotels
+🔧 Fixed handler signature for GetHotel
+🔧 Fixed handler signature for UpdateHotel
+🔧 Fixed handler signature for DeleteHotel
+✅ Written: experiments/out/HotelAPI/internal/handlers/hotel.go
+📝 Processing: internal/handlers/room.go
+🔧 Fixed handler signature for CreateRoom
+🔧 Fixed handler signature for GetRooms
+🔧 Fixed handler signature for GetRoom
+🔧 Fixed handler signature for UpdateRoom
+🔧 Fixed handler signature for DeleteRoom
+✅ Written: experiments/out/HotelAPI/internal/handlers/room.go
+📝 Processing: internal/handlers/reservation.go
+🔧 Fixed handler signature for CreateReservation
+🔧 Fixed handler signature for GetReservations
+🔧 Fixed handler signature for GetReservation
+🔧 Fixed handler signature for UpdateReservation
+🔧 Fixed handler signature for DeleteReservation
+✅ Written: experiments/out/HotelAPI/internal/handlers/reservation.go
+📝 Processing: internal/handlers/hotel_test.go
+🔧 Fixed test signature for TestCreateHotel
+🔧 Fixed test signature for TestGetHotels
+🔧 Fixed test signature for TestGetHotel
+🔧 Fixed test signature for TestUpdateHotel
+🔧 Fixed test signature for TestDeleteHotel
+✅ Auto-fixed test signatures in internal/handlers/hotel_test.go
+✅ Written: experiments/out/HotelAPI/internal/handlers/hotel_test.go
+📝 Processing: internal/handlers/room_test.go
+🔧 Fixed test signature for TestCreateRoom
+🔧 Fixed test signature for TestGetRooms
+🔧 Fixed test signature for TestGetRoom
+🔧 Fixed test signature for TestUpdateRoom
+🔧 Fixed test signature for TestDeleteRoom
+✅ Auto-fixed test signatures in internal/handlers/room_test.go
+✅ Written: experiments/out/HotelAPI/internal/handlers/room_test.go
+📝 Processing: internal/handlers/reservation_test.go
+🔧 Fixed test signature for TestCreateReservation
+🔧 Fixed test signature for TestGetReservations
+🔧 Fixed test signature for TestGetReservation
+🔧 Fixed test signature for TestUpdateReservation
+🔧 Fixed test signature for TestDeleteReservation
+✅ Auto-fixed test signatures in internal/handlers/reservation_test.go
+✅ Written: experiments/out/HotelAPI/internal/handlers/reservation_test.go
+📝 Processing: internal/routes/routes.go
+🔧 Fixed Register function parameter
+✅ Written: experiments/out/HotelAPI/internal/routes/routes.go
+📝 Processing: cmd/main.go
+✅ Written: experiments/out/HotelAPI/cmd/main.go
+📝 Processing: tasks.md
+⚠️  Syntax validation failed for tasks.md: temp.go:1:1: illegal character U+0023 '#'
+🔧 Attempting additional fixes...
+❌ Could not auto-fix syntax errors in tasks.md
+✅ Written: experiments/out/HotelAPI/tasks.md
+
+🔧 Total rule-based fixes applied: 25
+
+🔧 Running auto-fix on generated files...
+
+🔧 Auto-fixing all files in: experiments/out/HotelAPI
+
+📝 Fixing test function signatures...
+  ✅ Fixed test signatures in hotel_test.go
+  ✅ Fixed test signatures in reservation_test.go
+  ✅ Fixed test signatures in room_test.go
+
+📝 Fixing handler function signatures...
+
+📝 Fixing routes Register function...
+
+📝 Fixing missing commas in struct literals...
+
+📝 Ensuring test file imports...
+
+✅ Applied 3 fixes total!
+✅ Auto-fix completed successfully
+
+🔍 Validating Go syntax...
+✅ All generated files have valid Go syntax
+2025/10/21 07:18:29 ✅ Generated 3 test file(s)
+
+🔧 Fixing import paths...
+2025/10/21 07:18:29 🔧 Detected module name: HotelAPI — fixing imports...
+2025/10/21 07:18:29 ✅ No import fixes needed
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+
+🔍 Final syntax validation after fixes...
+✅ All syntax errors resolved
+✅ ML generation completed (82.28s)
+🔧 Injected mux import → experiments/out/HotelAPI/internal/handlers/hotel.go
+🔧 Injected mux import → experiments/out/HotelAPI/internal/handlers/reservation.go
+🔧 Injected mux import → experiments/out/HotelAPI/internal/handlers/room.go
+🔧 Verified mux dependency and tidied module
+📁 Saved per-package coverage → experiments/out/HotelAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/HotelAPI/internal/handlers ---
+# HotelAPI/internal/handlers [HotelAPI/internal/handlers.test]
+./room.go:90:4: undefined: rrooms
+FAIL	HotelAPI/internal/handlers [build failed]
+
+------------------------
+✅ Validation completed in 1.02s
+
+📊 Summary for HotelAPI:
+  • BuildSuccess = false
+  • LintWarnings = 6
+  • TestsPass    = false
+  • Coverage     = 0.0%
+  • Generation Duration = 1m22.282521721s
+  • Repair Attempts = 0
+  • Rule Fixes   = 25
+  • Mode: hybrid
+🧾 Appended 30 experiments into experiments/logs/summary.csv
+
+🧾 Generating Markdown summary from JSON metrics...
+📊 Markdown results saved → experiments/logs/results.md
+✅ Summary successfully written to experiments/logs/results.md
+
+✅ Experiment complete..

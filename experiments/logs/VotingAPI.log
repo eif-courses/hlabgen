@@ -1,0 +1,114 @@
+
+🚀 Starting generation for app: VotingAPI (mode=hybrid)
+✅ Rule-based scaffold created
+2025/10/21 07:41:56 🧠 Starting ML-based code generation...
+🌍 Using custom endpoint: https://api.openai.com/v1
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 36.25543495s (model: gpt-4o-mini, attempt: 1)
+✅ Parsed 6 files
+
+📊 Generation Summary:
+  • Duration: 36.256039009s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+✅ VotingAPI generation completed successfully
+🧾 Saved ML metrics → experiments/VotingAPI/gen_metrics.json
+📝 Processing: internal/models/election.go
+✅ Written: experiments/out/VotingAPI/internal/models/election.go
+📝 Processing: internal/handlers/election.go
+🔧 Fixed handler signature for CreateElection
+🔧 Fixed handler signature for GetElections
+🔧 Fixed handler signature for GetElection
+🔧 Fixed handler signature for UpdateElection
+🔧 Fixed handler signature for DeleteElection
+🔧 Fixed handler signature for CreateCandidate
+🔧 Fixed handler signature for CreateVote
+✅ Written: experiments/out/VotingAPI/internal/handlers/election.go
+📝 Processing: internal/handlers/election_test.go
+🔧 Fixed test signature for TestCreateElection
+🔧 Fixed test signature for TestGetElections
+🔧 Fixed test signature for TestGetElection
+🔧 Fixed test signature for TestUpdateElection
+🔧 Fixed test signature for TestDeleteElection
+✅ Auto-fixed test signatures in internal/handlers/election_test.go
+✅ Written: experiments/out/VotingAPI/internal/handlers/election_test.go
+📝 Processing: internal/routes/routes.go
+🔧 Fixed Register function parameter
+✅ Written: experiments/out/VotingAPI/internal/routes/routes.go
+📝 Processing: cmd/main.go
+✅ Written: experiments/out/VotingAPI/cmd/main.go
+📝 Processing: tasks.md
+⚠️  Syntax validation failed for tasks.md: temp.go:1:1: illegal character U+0023 '#'
+🔧 Attempting additional fixes...
+❌ Could not auto-fix syntax errors in tasks.md
+✅ Written: experiments/out/VotingAPI/tasks.md
+
+🔧 Total rule-based fixes applied: 11
+
+🔧 Running auto-fix on generated files...
+
+🔧 Auto-fixing all files in: experiments/out/VotingAPI
+
+📝 Fixing test function signatures...
+  ✅ Fixed test signatures in election_test.go
+
+📝 Fixing handler function signatures...
+
+📝 Fixing routes Register function...
+
+📝 Fixing missing commas in struct literals...
+
+📝 Ensuring test file imports...
+
+✅ Applied 1 fixes total!
+✅ Auto-fix completed successfully
+
+🔍 Validating Go syntax...
+✅ All generated files have valid Go syntax
+2025/10/21 07:42:33 ✅ Generated 1 test file(s)
+
+🔧 Fixing import paths...
+2025/10/21 07:42:33 🔧 Detected module name: VotingAPI — fixing imports...
+2025/10/21 07:42:33 ✅ No import fixes needed
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+
+🔍 Final syntax validation after fixes...
+✅ All syntax errors resolved
+✅ ML generation completed (36.26s)
+🔧 Injected mux import → experiments/out/VotingAPI/internal/handlers/election.go
+🔧 Verified mux dependency and tidied module
+📁 Saved per-package coverage → experiments/out/VotingAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/VotingAPI/internal/handlers ---
+# VotingAPI/internal/models
+../models/election.go:9:6: Candidate redeclared in this block
+	../models/candidate.go:4:6: other declaration of Candidate
+../models/vote.go:4:6: Vote redeclared in this block
+	../models/election.go:14:6: other declaration of Vote
+FAIL	VotingAPI/internal/handlers [build failed]
+
+------------------------
+✅ Validation completed in 0.80s
+
+📊 Summary for VotingAPI:
+  • BuildSuccess = false
+  • LintWarnings = 23
+  • TestsPass    = false
+  • Coverage     = 0.0%
+  • Generation Duration = 36.256039009s
+  • Repair Attempts = 0
+  • Rule Fixes   = 11
+  • Mode: hybrid
+🧾 Appended 30 experiments into experiments/logs/summary.csv
+
+🧾 Generating Markdown summary from JSON metrics...
+📊 Markdown results saved → experiments/logs/results.md
+✅ Summary successfully written to experiments/logs/results.md
+
+✅ Experiment complete..

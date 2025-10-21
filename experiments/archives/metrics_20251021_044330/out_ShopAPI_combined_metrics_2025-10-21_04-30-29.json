@@ -1,0 +1,24 @@
+{
+  "timestamp": "2025-10-21T04:30:29+03:00",
+  "build": {
+    "build_success": true,
+    "vet_warnings": 0,
+    "lint_warnings": 3,
+    "tests_pass": true,
+    "coverage_pct": 70.2,
+    "cyclomatic_avg": 3.019230769230769,
+    "gen_time_sec": 1.53522692,
+    "timestamp": "2025-10-21T04:30:29+03:00"
+  },
+  "generation": {
+    "StartTime": "2025-10-21T04:28:25.558743662+03:00",
+    "EndTime": "2025-10-21T04:30:27.996036345+03:00",
+    "Duration": 122437292715,
+    "PrimarySuccess": true,
+    "RepairAttempts": 0,
+    "FinalSuccess": true,
+    "ErrorMessage": "",
+    "RuleFixes": 39,
+    "Mode": "hybrid"
+  }
+}

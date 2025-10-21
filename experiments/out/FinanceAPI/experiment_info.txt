@@ -1,0 +1,10 @@
+App: FinanceAPI
+Mode: hybrid
+Timestamp: 2025-10-21T07:13:04+03:00
+OpenAI Model: gpt-4o-mini
+BuildSuccess: true
+TestsPass: true
+Coverage: 70.2%
+Duration: 2m27.059009965s
+RepairAttempts: 1
+RuleFixes: 25

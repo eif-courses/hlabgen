@@ -1,0 +1,10 @@
+App: EcommerceAPI
+Mode: hybrid
+Timestamp: 2025-10-21T07:10:35+03:00
+OpenAI Model: gpt-4o-mini
+BuildSuccess: false
+TestsPass: false
+Coverage: 0.0%
+Duration: 1m53.627053887s
+RepairAttempts: 0
+RuleFixes: 32
