@@ -1,4 +1,0 @@
-AppName,Mode,Timestamp,Model,BuildSuccess,TestsPass,CoveragePct,LintWarnings,MLDuration,RepairAttempts
-LibraryAPI_hybrid,hybrid,2025-10-22T00:15:20+03:00,gpt-4o-mini,false,false,0.00,0,115.47,0
-LibraryAPI_ml,ml,2025-10-22T00:13:23+03:00,gpt-4o-mini,false,false,0.00,0,108.69,0
-LibraryAPI_rules,rules,2025-10-22T00:11:34+03:00,gpt-4o-mini,false,false,0.00,0,0.02,0
