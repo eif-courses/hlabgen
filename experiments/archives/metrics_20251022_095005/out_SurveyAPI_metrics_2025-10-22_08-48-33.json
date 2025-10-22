@@ -1,0 +1,10 @@
+{
+  "build_success": false,
+  "vet_warnings": 13,
+  "lint_warnings": 39,
+  "tests_pass": false,
+  "coverage_pct": 0,
+  "cyclomatic_avg": 2.96875,
+  "gen_time_sec": 0.95992429,
+  "timestamp": "2025-10-22T08:48:33+03:00"
+}

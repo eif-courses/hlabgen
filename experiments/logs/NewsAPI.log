@@ -1,0 +1,303 @@
+
+🚀 Starting generation for app: NewsAPI (mode=hybrid)
+2025/10/22 09:17:31 🔀 Starting HYBRID generation (rules + ML + validation)...
+2025/10/22 09:17:31 📐 Step 1/3: Creating rule-based scaffold...
+✅ Rule-based scaffold created (structure only)
+2025/10/22 09:17:31 🧠 Step 2/3: Using ML to enhance scaffold logic...
+🌍 Using custom endpoint: https://api.openai.com/v1
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 1m22.022037119s (model: gpt-4o-mini, attempt: 1)
+❌ JSON error: invalid character 'e' after object key:value pair
+⚠️ Primary parse failed, retrying with JSON repair prompt...
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 1m4.807703075s (model: gpt-4o-mini, attempt: 1)
+🔁 Repair call took 1m4.807741582s
+❌ JSON error: invalid character 'e' after object key:value pair
+--- CLEANED JSON ---
+[
+  {
+    "filename": "internal/models/article.go",
+    "code": "package models\n\ntype Article struct {\n\tID       int      `json:\"id\"`\n\tTitle    string   `json:\"title\"`\n\tContent  string   `json:\"content\"`\n\tAuthorID int      `json:\"author_id\"`\n\tCategoryID int    `json:\"category_id\"`\n}\n"
+  },
+  {
+    "filename": "internal/models/category.go",
+    "code": "package models\n\ntype Category struct {\n\tID   int    `json:\"id\"`\n\tName string `json:\"name\"`\n}\n"
+  },
+  {
+    "filename": "internal/models/author.go",
+    "code": "package models\n\ntype Author struct {\n\tID       int    `json:\"id\"`\n\tName     string `json:\"name\"`\n\tEmail    string `json:\"email\"`\n}\n"
+  },
+  {
+    "filename": "internal/handlers/article.go",
+    "code": "package handlers\n\nimport (\n\t"encoding/json\"\n\t\"net/http\"\n\t\"strconv\"\n\t\"github.com/gorilla/mux\"\n\t\"NewsAPI/internal/models\"\n)\n\nvar articles []models.Article\nvar nextArticleID = 1\n\nfunc CreateArticle(w http.ResponseWriter, r *http.Request) {\n\tvar article models.Article\n\tif r.Body == nil {\n\t\thttp.Error(w, \"missing body\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif err := json.NewDecoder(r.Body).Decode(&article); err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}\n\tarticle.ID = nextArticleID\n\tnextArticleID++\n\tarticles = append(articles, article)\n\tw.WriteHeader(http.StatusCreated)\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(article)\n}\n\nfunc GetArticles(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(articles)\n}\n\nfunc GetArticle(w http.ResponseWriter, r *http.Request) {\n\tvars := mux.Vars(r)\n\tid, err := strconv.Atoi(vars[\"id\"])\n\tif err != nil {\n\t\thttp.Error(w, \"Invalid ID\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tfor _, article := range articles {\n\t\tif article.ID == id {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tjson.NewEncoder(w).Encode(article)\n\t\t\treturn\n\t\t}\n\t}\n\thttp.Error(w, \"Article not found\", http.StatusNotFound)\n}\n\nfunc UpdateArticle(w http.ResponseWriter, r *http.Request) {\n\tvars := mux.Vars(r)\n\tid, err := strconv.Atoi(vars[\"id\"])\n\tif err != nil {\n\t\thttp.Error(w, \"Invalid ID\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tvar updatedArticle models.Article\n\tif r.Body == nil {\n\t\thttp.Error(w, \"missing body\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif err := json.NewDecoder(r.Body).Decode(&updatedArticle); err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}\n\tfor i, article := range articles {\n\t\tif article.ID == id {\n\t\t\tupdatedArticle.ID = id\n\t\t\tarticles[i] = updatedArticle\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tjson.NewEncoder(w).Encode(updatedArticle)\n\t\t\treturn\n\t\t}\n\t}\n\thttp.Error(w, \"Article not found\", http.StatusNotFound)\n}\n\nfunc DeleteArticle(w http.ResponseWriter, r *http.Request) {\n\tvars := mux.Vars(r)\n\tid, err := strconv.Atoi(vars[\"id\"])\n\tif err != nil {\n\t\thttp.Error(w, \"Invalid ID\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tfor i, article := range articles {\n\t\tif article.ID == id {\n\t\t\tarticles = append(articles[:i], articles[i+1:]...)\n\t\t\tw.WriteHeader(http.StatusNoContent)\n\t\t\treturn\n\t\t}\n\t}\n\thttp.Error(w, \"Article not found\", http.StatusNotFound)\n}\n"
+  },
+  {
+    "filename": "internal/handlers/article_test.go",
+    "code": "package handlers_test\n\nimport (\n\t\"bytes\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"net/http/httptest\"\n\t\"testing\"\n\t\"github.com/gorilla/mux\"\n\t\"NewsAPI/internal/handlers\"\n\t\"NewsAPI/internal/models\"\n)\n\nfunc TestCreateArticle(t *testing.T) {\n\tarticle := models.Article{\n\t\tTitle:    \"Test Article\",\n\t\tContent:  \"This is a test article.\",\n\t\tAuthorID: 1,\n\t\tCategoryID: 1,\n\t}\n\tbody, _ := json.Marshal(article)\n\treq := httptest.NewRequest(\"POST\", \"/articles\", bytes.NewBuffer(body))\n\treq.Header.Set(\"Content-Type\", \"application/json\")\n\tw := httptest.NewRecorder()\n\thandlers.CreateArticle(w, req)\n\tif w.Code != http.StatusCreated {\n\t\tt.Errorf(\"Expected 201, got %d\", w.Code)\n\t}\n}\n\nfunc TestGetArticles(t *testing.T) {\n\treq := httptest.NewRequest(\"GET\", \"/articles\", nil)\n\tw := httptest.NewRecorder()\n\thandlers.GetArticles(w, req)\n\tif w.Code != http.StatusOK {\n\t\tt.Errorf(\"Expected 200, got %d\", w.Code)\n\t}\n}\n\nfunc TestGetArticle(t *testing.T) {\n\treq := httptest.NewRequest(\"GET\", \"/articles/1\", nil)\n\treq = mux.SetURLVars(req, map[string]string{\"id\": \"1\"})\n\tw := httptest.NewRecorder()\n\thandlers.GetArticle(w, req)\n\tif w.Code != http.StatusOK && w.Code != http.StatusNotFound {\n\t\tt.Errorf(\"Expected 200 or 404, got %d\", w.Code)\n\t}\n}\n\nfunc TestUpdateArticle(t *testing.T) {\n\tarticle := models.Article{\n\t\tTitle:    \"Updated Article\",\n\t\tContent:  \"This is an updated article.\",\n\t\tAuthorID: 1,\n\t\tCategoryID: 1,\n\t}\n\tbody, _ := json.Marshal(article)\n\treq := httptest.NewRequest(\"PUT\", \"/articles/1\", bytes.NewBuffer(body))\n\treq = mux.SetURLVars(req, map[string]string{\"id\": \"1\"})\n\treq.Header.Set(\"Content-Type\", \"application/json\")\n\tw := httptest.NewRecorder()\n\thandlers.UpdateArticle(w, req)\n\tif w.Code != http.StatusOK && w.Code != http.StatusNotFound {\n\t\tt.Errorf(\"Expected 200 or 404, got %d\", w.Code)\n\t}\n}\n\nfunc TestDeleteArticle(t *testing.T) {\n\treq := httptest.NewRequest(\"DELETE\", \"/articles/1\", nil)\n\treq = mux.SetURLVars(req, map[string]string{\"id\": \"1\"})\n\tw := httptest.NewRecorder()\n\thandlers.DeleteArticle(w, req)\n\tif w.Code != http.StatusNoContent && w.Code != http.StatusNotFound {\n\t\tt.Errorf(\"Expected 204 or 404, got %d\", w.Code)\n\t}\n}\n"
+  },
+  {
+    "filename": "internal/handlers/category.go",
+    "code": "package handlers\n\nimport (\n\t"encoding/json\"\n\t\"net/http\"\n\t\"strconv\"\n\t\"github.com/gorilla/mux\"\n\t\"NewsAPI/internal/models\"\n)\n\nvar categories []models.Category\nvar nextCategoryID = 1\n\nfunc CreateCategory(w http.ResponseWriter, r *http.Request) {\n\tvar category models.Category\n\tif r.Body == nil {\n\t\thttp.Error(w, \"missing body\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif err := json.NewDecoder(r.Body).Decode(&category); err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}\n\tcategory.ID = nextCategoryID\n\tnextCategoryID++\n\tcategories = append(categories, category)\n\tw.WriteHeader(http.StatusCreated)\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(category)\n}\n\nfunc GetCategories(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(categories)\n}\n\nfunc GetCategory(w http.ResponseWriter, r *http.Request) {\n\tvars := mux.Vars(r)\n\tid, err := strconv.Atoi(vars[\"id\"])\n\tif err != nil {\n\t\thttp.Error(w, \"Invalid ID\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tfor _, category := range categories {\n\t\tif category.ID == id {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tjson.NewEncoder(w).Encode(category)\n\t\t\treturn\n\t\t}\n\t}\n\thttp.Error(w, \"Category not found\", http.StatusNotFound)\n}\n\nfunc UpdateCategory(w http.ResponseWriter, r *http.Request) {\n\tvars := mux.Vars(r)\n\tid, err := strconv.Atoi(vars[\"id\"])\n\tif err != nil {\n\t\thttp.Error(w, \"Invalid ID\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tvar updatedCategory models.Category\n\tif r.Body == nil {\n\t\thttp.Error(w, \"missing body\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif err := json.NewDecoder(r.Body).Decode(&updatedCategory); err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}\n\tfor i, category := range categories {\n\t\tif category.ID == id {\n\t\t\tupdatedCategory.ID = id\n\t\t\tcategories[i] = updatedCategory\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tjson.NewEncoder(w).Encode(updatedCategory)\n\t\t\treturn\n\t\t}\n\t}\n\thttp.Error(w, \"Category not found\", http.StatusNotFound)\n}\n\nfunc DeleteCategory(w http.ResponseWriter, r *http.Request) {\n\tvars := mux.Vars(r)\n\tid, err := strconv.Atoi(vars[\"id\"])\n\tif err != nil {\n\t\thttp.Error(w, \"Invalid ID\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tfor i, category := range categories {\n\t\tif category.ID == id {\n\t\t\tcategories = append(categories[:i], categories[i+1:]...)\n\t\t\tw.WriteHeader(http.StatusNoContent)\n\t\t\treturn\n\t\t}\n\t}\n\thttp.Error(w, \"Category not found\", http.StatusNotFound)\n}\n"
+  },
+  {
+    "filename": "internal/handlers/category_test.go",
+    "code": "package handlers_test\n\nimport (\n\t\"bytes\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"net/http/httptest\"\n\t\"testing\"\n\t\"github.com/gorilla/mux\"\n\t\"NewsAPI/internal/handlers\"\n\t\"NewsAPI/internal/models\"\n)\n\nfunc TestCreateCategory(t *testing.T) {\n\tcategory := models.Category{\n\t\tName: \"Test Category\",\n\t}\n\tbody, _ := json.Marshal(category)\n\treq := httptest.NewRequest(\"POST\", \"/categories\", bytes.NewBuffer(body))\n\treq.Header.Set(\"Content-Type\", \"application/json\")\n\tw := httptest.NewRecorder()\n\thandlers.CreateCategory(w, req)\n\tif w.Code != http.StatusCreated {\n\t\tt.Errorf(\"Expected 201, got %d\", w.Code)\n\t}\n}\n\nfunc TestGetCategories(t *testing.T) {\n\treq := httptest.NewRequest(\"GET\", \"/categories\", nil)\n\tw := httptest.NewRecorder()\n\thandlers.GetCategories(w, req)\n\tif w.Code != http.StatusOK {\n\t\tt.Errorf(\"Expected 200, got %d\", w.Code)\n\t}\n}\n\nfunc TestGetCategory(t *testing.T) {\n\treq := httptest.NewRequest(\"GET\", \"/categories/1\", nil)\n\treq = mux.SetURLVars(req, map[string]string{\"id\": \"1\"})\n\tw := httptest.NewRecorder()\n\thandlers.GetCategory(w, req)\n\tif w.Code != http.StatusOK && w.Code != http.StatusNotFound {\n\t\tt.Errorf(\"Expected 200 or 404, got %d\", w.Code)\n\t}\n}\n\nfunc TestUpdateCategory(t *testing.T) {\n\tcategory := models.Category{\n\t\tName: \"Updated Category\",\n\t}\n\tbody, _ := json.Marshal(category)\n\treq := httptest.NewRequest(\"PUT\", \"/categories/1\", bytes.NewBuffer(body))\n\treq = mux.SetURLVars(req, map[string]string{\"id\": \"1\"})\n\treq.Header.Set(\"Content-Type\", \"application/json\")\n\tw := httptest.NewRecorder()\n\thandlers.UpdateCategory(w, req)\n\tif w.Code != http.StatusOK && w.Code != http.StatusNotFound {\n\t\tt.Errorf(\"Expected 200 or 404, got %d\", w.Code)\n\t}\n}\n\nfunc TestDeleteCategory(t *testing.T) {\n\treq := httptest.NewRequest(\"DELETE\", \"/categories/1\", nil)\n\treq = mux.SetURLVars(req, map[string]string{\"id\": \"1\"})\n\tw := httptest.NewRecorder()\n\thandlers.DeleteCategory(w, req)\n\tif w.Code != http.StatusNoContent && w.Code != http.StatusNotFound {\n\t\tt.Errorf(\"Expected 204 or 404, got %d\", w.Code)\n\t}\n}\n"
+  },
+  {
+    "filename": "internal/handlers/author.go",
+    "code": "package handlers\n\nimport (\n\t"encoding/json\"\n\t\"net/http\"\n\t\"strconv\"\n\t\"github.com/gorilla/mux\"\n\t\"NewsAPI/internal/models\"\n)\n\nvar authors []models.Author\nvar nextAuthorID = 1\n\nfunc CreateAuthor(w http.ResponseWriter, r *http.Request) {\n\tvar author models.Author\n\tif r.Body == nil {\n\t\thttp.Error(w, \"missing body\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif err := json.NewDecoder(r.Body).Decode(&author); err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}\n\tauthor.ID = nextAuthorID\n\tnextAuthorID++\n\tauthors = append(authors, author)\n\tw.WriteHeader(http.StatusCreated)\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(author)\n}\n\nfunc GetAuthors(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(authors)\n}\n\nfunc GetAuthor(w http.ResponseWriter, r *http.Request) {\n\tvars := mux.Vars(r)\n\tid, err := strconv.Atoi(vars[\"id\"])\n\tif err != nil {\n\t\thttp.Error(w, \"Invalid ID\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tfor _, author := range authors {\n\t\tif author.ID == id {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tjson.NewEncoder(w).Encode(author)\n\t\t\treturn\n\t\t}\n\t}\n\thttp.Error(w, \"Author not found\", http.StatusNotFound)\n}\n\nfunc UpdateAuthor(w http.ResponseWriter, r *http.Request) {\n\tvars := mux.Vars(r)\n\tid, err := strconv.Atoi(vars[\"id\"])\n\tif err != nil {\n\t\thttp.Error(w, \"Invalid ID\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tvar updatedAuthor models.Author\n\tif r.Body == nil {\n\t\thttp.Error(w, \"missing body\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif err := json.NewDecoder(r.Body).Decode(&updatedAuthor); err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}\n\tfor i, author := range authors {\n\t\tif author.ID == id {\n\t\t\tupdatedAuthor.ID = id\n\t\t\tauthors[i] = updatedAuthor\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tjson.NewEncoder(w).Encode(updatedAuthor)\n\t\t\treturn\n\t\t}\n\t}\n\thttp.Error(w, \"Author not found\", http.StatusNotFound)\n}\n\nfunc DeleteAuthor(w http.ResponseWriter, r *http.Request) {\n\tvars := mux.Vars(r)\n\tid, err := strconv.Atoi(vars[\"id\"])\n\tif err != nil {\n\t\thttp.Error(w, \"Invalid ID\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tfor i, author := range authors {\n\t\tif author.ID == id {\n\t\t\tauthors = append(authors[:i], authors[i+1:]...)\n\t\t\tw.WriteHeader(http.StatusNoContent)\n\t\t\treturn\n\t\t}\n\t}\n\thttp.Error(w, \"Author not found\", http.StatusNotFound)\n}\n"
+  },
+  {
+    "filename": "internal/handlers/author_test.go",
+    "code": "package handlers_test\n\nimport (\n\t\"bytes\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"net/http/httptest\"\n\t\"testing\"\n\t\"github.com/gorilla/mux\"\n\t\"NewsAPI/internal/handlers\"\n\t\"NewsAPI/internal/models\"\n)\n\nfunc TestCreateAuthor(t *testing.T) {\n\tauthor := models.Author{\n\t\tName:  \"Test Author\",\n\t\tEmail: \"author@example.com\",\n\t}\n\tbody, _ := json.Marshal(author)\n\treq := httptest.NewRequest(\"POST\", \"/authors\", bytes.NewBuffer(body))\n\treq.Header.Set(\"Content-Type\", \"application/json\")\n\tw := httptest.NewRecorder()\n\thandlers.CreateAuthor(w, req)\n\tif w.Code != http.StatusCreated {\n\t\tt.Errorf(\"Expected 201, got %d\", w.Code)\n\t}\n}\n\nfunc TestGetAuthors(t *testing.T) {\n\treq := httptest.NewRequest(\"GET\", \"/authors\", nil)\n\tw := httptest.NewRecorder()\n\thandlers.GetAuthors(w, req)\n\tif w.Code != http.StatusOK {\n\t\tt.Errorf(\"Expected 200, got %d\", w.Code)\n\t}\n}\n\nfunc TestGetAuthor(t *testing.T) {\n\treq := httptest.NewRequest(\"GET\", \"/authors/1\", nil)\n\treq = mux.SetURLVars(req, map[string]string{\"id\": \"1\"})\n\tw := httptest.NewRecorder()\n\thandlers.GetAuthor(w, req)\n\tif w.Code != http.StatusOK && w.Code != http.StatusNotFound {\n\t\tt.Errorf(\"Expected 200 or 404, got %d\", w.Code)\n\t}\n}\n\nfunc TestUpdateAuthor(t *testing.T) {\n\tauthor := models.Author{\n\t\tName:  \"Updated Author\",\n\t\tEmail: \"updated@example.com\",\n\t}\n\tbody, _ := json.Marshal(author)\n\treq := httptest.NewRequest(\"PUT\", \"/authors/1\", bytes.NewBuffer(body))\n\treq = mux.SetURLVars(req, map[string]string{\"id\": \"1\"})\n\treq.Header.Set(\"Content-Type\", \"application/json\")\n\tw := httptest.NewRecorder()\n\thandlers.UpdateAuthor(w, req)\n\tif w.Code != http.StatusOK && w.Code != http.StatusNotFound {\n\t\tt.Errorf(\"Expected 200 or 404, got %d\", w.Code)\n\t}\n}\n\nfunc TestDeleteAuthor(t *testing.T) {\n\treq := httptest.NewRequest(\"DELETE\", \"/authors/1\", nil)\n\treq = mux.SetURLVars(req, map[string]string{\"id\": \"1\"})\n\tw := httptest.NewRecorder()\n\thandlers.DeleteAuthor(w, req)\n\tif w.Code != http.StatusNoContent && w.Code != http.StatusNotFound {\n\t\tt.Errorf(\"Expected 204 or 404, got %d\", w.Code)\n\t}\n}\n"
+  },
+  {
+    "filename": "internal/routes/routes.go",
+    "code": "package routes\n\nimport (\n\t\"github.com/gorilla/mux\"\n\t\"NewsAPI/internal/handlers\"\n)\n\nfunc Register(r *mux.Router) {\n\t// Article routes\n\tr.HandleFunc(\"/articles\", handlers.CreateArticle).Methods(\"POST\")\n\tr.HandleFunc(\"/articles\", handlers.GetArticles).Methods(\"GET\")\n\tr.HandleFunc(\"/articles/{id}\", handlers.GetArticle).Methods(\"GET\")\n\tr.HandleFunc(\"/articles/{id}\", handlers.UpdateArticle).Methods(\"PUT\")\n\tr.HandleFunc(\"/articles/{id}\", handlers.DeleteArticle).Methods(\"DELETE\")\n\n\t// Category routes\n\tr.HandleFunc(\"/categories\", handlers.CreateCategory).Methods(\"POST\")\n\tr.HandleFunc(\"/categories\", handlers.GetCategories).Methods(\"GET\")\n\tr.HandleFunc(\"/categories/{id}\", handlers.GetCategory).Methods(\"GET\")\n\tr.HandleFunc(\"/categories/{id}\", handlers.UpdateCategory).Methods(\"PUT\")\n\tr.HandleFunc(\"/categories/{id}\", handlers.DeleteCategory).Methods(\"DELETE\")\n\n\t// Author routes\n\tr.HandleFunc(\"/authors\", handlers.CreateAuthor).Methods(\"POST\")\n\tr.HandleFunc(\"/authors\", handlers.GetAuthors).Methods(\"GET\")\n\tr.HandleFunc(\"/authors/{id}\", handlers.GetAuthor).Methods(\"GET\")\n\tr.HandleFunc(\"/authors/{id}\", handlers.UpdateAuthor).Methods(\"PUT\")\n\tr.HandleFunc(\"/authors/{id}\", handlers.DeleteAuthor).Methods(\"DELETE\")\n}\n"
+  },
+  {
+    "filename": "cmd/main.go",
+    "code": "package main\n\nimport (\n\t\"log\"\n\t\"net/http\"\n\t\"github.com/gorilla/mux\"\n\t\"NewsAPI/internal/routes\"\n)\n\nfunc main() {\n\tr := mux.NewRouter()\n\troutes.Register(r)\n\tlog.Println(\"Server listening on :8080\")\n\tlog.Fatal(http.ListenAndServe(\":8080\", r))\n}\n"
+  },
+  {
+    "filename": "tasks.md",
+    "code": "# Lab Tasks - Advanced Features\n\n## Completed Implementation\n✅ All CRUD operations are fully implemented\n✅ Complete test suite for all handlers\n✅ Proper error handling and status codes\n\n## Optional Enhancements (Student Tasks)\n1. Add database persistence using MongoDB\n2. Implement authentication and authorization middleware\n3. Add request validation using a validation library\n4. Implement pagination for GetArticles endpoint\n5. Add filtering and sorting capabilities\n6. Create OpenAPI/Swagger documentation\n7. Implement rate limiting middleware\n8. Add logging middleware for all requests\n"
+  }
+]
+--- END ---
+🧾 Saved ML metrics → experiments/NewsAPI/gen_metrics.json
+2025/10/22 09:19:58 ⚠️  ML enhancement failed: failed to parse repaired output: json parse error: invalid character 'e' after object key:value pair
+2025/10/22 09:19:58 🔁 Retrying with relaxed mode...
+2025/10/22 09:19:58 🪄 Using relaxed ML generation mode (cleaning JSON output)...
+🌍 Using custom endpoint: https://api.openai.com/v1
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 1m17.508397183s (model: gpt-4o-mini, attempt: 1)
+❌ JSON error: invalid character 'e' after object key:value pair
+⚠️ Primary parse failed, retrying with JSON repair prompt...
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 1m0.317339955s (model: gpt-4o-mini, attempt: 1)
+🔁 Repair call took 1m0.317384547s
+❌ JSON error: invalid character 'e' after object key:value pair
+--- CLEANED JSON ---
+[
+  {
+    "filename": "internal/models/article.go",
+    "code": "package models\n\ntype Article struct {\n\tID       int      `json:\"id\"`\n\tTitle    string   `json:\"title\"`\n\tContent  string   `json:\"content\"`\n\tAuthorID int      `json:\"author_id\"`\n\tCategoryID int    `json:\"category_id\"`\n}\n"
+  },
+  {
+    "filename": "internal/models/category.go",
+    "code": "package models\n\ntype Category struct {\n\tID   int    `json:\"id\"`\n\tName string `json:\"name\"`\n}\n"
+  },
+  {
+    "filename": "internal/models/author.go",
+    "code": "package models\n\ntype Author struct {\n\tID       int    `json:\"id\"`\n\tName     string `json:\"name\"`\n\tEmail    string `json:\"email\"`\n\tPassword string `json:\"password\"`\n}\n"
+  },
+  {
+    "filename": "internal/handlers/article.go",
+    "code": "package handlers\n\nimport (\n\t"encoding/json\"\n\t"net/http\"\n\t"strconv\"\n\t\"github.com/gorilla/mux\"\n\t\"NewsAPI/internal/models\"\n)\n\nvar articles []models.Article\nvar nextArticleID = 1\n\nfunc CreateArticle(w http.ResponseWriter, r *http.Request) {\n\tvar article models.Article\n\tif r.Body == nil {\n\t\thttp.Error(w, \"missing body\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif err := json.NewDecoder(r.Body).Decode(&article); err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}\n\tarticle.ID = nextArticleID\n\tnextArticleID++\n\tarticles = append(articles, article)\n\tw.WriteHeader(http.StatusCreated)\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(article)\n}\n\nfunc GetArticles(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(articles)\n}\n\nfunc GetArticle(w http.ResponseWriter, r *http.Request) {\n\tvars := mux.Vars(r)\n\tid, err := strconv.Atoi(vars[\"id\"])\n\tif err != nil {\n\t\thttp.Error(w, \"Invalid ID\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tfor _, article := range articles {\n\t\tif article.ID == id {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tjson.NewEncoder(w).Encode(article)\n\t\t\treturn\n\t\t}\n\t}\n\thttp.Error(w, \"Article not found\", http.StatusNotFound)\n}\n\nfunc UpdateArticle(w http.ResponseWriter, r *http.Request) {\n\tvars := mux.Vars(r)\n\tid, err := strconv.Atoi(vars[\"id\"])\n\tif err != nil {\n\t\thttp.Error(w, \"Invalid ID\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tvar updatedArticle models.Article\n\tif r.Body == nil {\n\t\thttp.Error(w, \"missing body\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif err := json.NewDecoder(r.Body).Decode(&updatedArticle); err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}\n\tfor i, article := range articles {\n\t\tif article.ID == id {\n\t\t\tupdatedArticle.ID = id\n\t\t\tarticles[i] = updatedArticle\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tjson.NewEncoder(w).Encode(updatedArticle)\n\t\t\treturn\n\t\t}\n\t}\n\thttp.Error(w, \"Article not found\", http.StatusNotFound)\n}\n\nfunc DeleteArticle(w http.ResponseWriter, r *http.Request) {\n\tvars := mux.Vars(r)\n\tid, err := strconv.Atoi(vars[\"id\"])\n\tif err != nil {\n\t\thttp.Error(w, \"Invalid ID\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tfor i, article := range articles {\n\t\tif article.ID == id {\n\t\t\tarticles = append(articles[:i], articles[i+1:]...)\n\t\t\tw.WriteHeader(http.StatusNoContent)\n\t\t\treturn\n\t\t}\n\t}\n\thttp.Error(w, \"Article not found\", http.StatusNotFound)\n}\n"
+  },
+  {
+    "filename": "internal/handlers/article_test.go",
+    "code": "package handlers_test\n\nimport (\n\t\"bytes\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"net/http/httptest\"\n\t\"testing\"\n\t\"github.com/gorilla/mux\"\n\t\"NewsAPI/internal/handlers\"\n\t\"NewsAPI/internal/models\"\n)\n\nfunc TestCreateArticle(t *testing.T) {\n\tarticle := models.Article{\n\t\tTitle:    \"Test Article\",\n\t\tContent:  \"This is a test article.\",\n\t\tAuthorID: 1,\n\t\tCategoryID: 1,\n\t}\n\tbody, _ := json.Marshal(article)\n\treq := httptest.NewRequest(\"POST\", \"/articles\", bytes.NewBuffer(body))\n\treq.Header.Set(\"Content-Type\", \"application/json\")\n\tw := httptest.NewRecorder()\n\thandlers.CreateArticle(w, req)\n\tif w.Code != http.StatusCreated {\n\t\tt.Errorf(\"Expected 201, got %d\", w.Code)\n\t}\n}\n\nfunc TestGetArticles(t *testing.T) {\n\treq := httptest.NewRequest(\"GET\", \"/articles\", nil)\n\tw := httptest.NewRecorder()\n\thandlers.GetArticles(w, req)\n\tif w.Code != http.StatusOK {\n\t\tt.Errorf(\"Expected 200, got %d\", w.Code)\n\t}\n}\n\nfunc TestGetArticle(t *testing.T) {\n\treq := httptest.NewRequest(\"GET\", \"/articles/1\", nil)\n\treq = mux.SetURLVars(req, map[string]string{\"id\": \"1\"})\n\tw := httptest.NewRecorder()\n\thandlers.GetArticle(w, req)\n\tif w.Code != http.StatusOK && w.Code != http.StatusNotFound {\n\t\tt.Errorf(\"Expected 200 or 404, got %d\", w.Code)\n\t}\n}\n\nfunc TestUpdateArticle(t *testing.T) {\n\tarticle := models.Article{\n\t\tTitle:    \"Updated Article\",\n\t\tContent:  \"This is an updated test article.\",\n\t\tAuthorID: 1,\n\t\tCategoryID: 1,\n\t}\n\tbody, _ := json.Marshal(article)\n\treq := httptest.NewRequest(\"PUT\", \"/articles/1\", bytes.NewBuffer(body))\n\treq = mux.SetURLVars(req, map[string]string{\"id\": \"1\"})\n\treq.Header.Set(\"Content-Type\", \"application/json\")\n\tw := httptest.NewRecorder()\n\thandlers.UpdateArticle(w, req)\n\tif w.Code != http.StatusOK && w.Code != http.StatusNotFound {\n\t\tt.Errorf(\"Expected 200 or 404, got %d\", w.Code)\n\t}\n}\n\nfunc TestDeleteArticle(t *testing.T) {\n\treq := httptest.NewRequest(\"DELETE\", \"/articles/1\", nil)\n\treq = mux.SetURLVars(req, map[string]string{\"id\": \"1\"})\n\tw := httptest.NewRecorder()\n\thandlers.DeleteArticle(w, req)\n\tif w.Code != http.StatusNoContent && w.Code != http.StatusNotFound {\n\t\tt.Errorf(\"Expected 204 or 404, got %d\", w.Code)\n\t}\n}\n"
+  },
+  {
+    "filename": "internal/handlers/category.go",
+    "code": "package handlers\n\nimport (\n\t"encoding/json\"\n\t"net/http\"\n\t"strconv\"\n\t\"github.com/gorilla/mux\"\n\t\"NewsAPI/internal/models\"\n)\n\nvar categories []models.Category\nvar nextCategoryID = 1\n\nfunc CreateCategory(w http.ResponseWriter, r *http.Request) {\n\tvar category models.Category\n\tif r.Body == nil {\n\t\thttp.Error(w, \"missing body\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif err := json.NewDecoder(r.Body).Decode(&category); err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}\n\tcategory.ID = nextCategoryID\n\tnextCategoryID++\n\tcategories = append(categories, category)\n\tw.WriteHeader(http.StatusCreated)\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(category)\n}\n\nfunc GetCategories(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(categories)\n}\n\nfunc GetCategory(w http.ResponseWriter, r *http.Request) {\n\tvars := mux.Vars(r)\n\tid, err := strconv.Atoi(vars[\"id\"])\n\tif err != nil {\n\t\thttp.Error(w, \"Invalid ID\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tfor _, category := range categories {\n\t\tif category.ID == id {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tjson.NewEncoder(w).Encode(category)\n\t\t\treturn\n\t\t}\n\t}\n\thttp.Error(w, \"Category not found\", http.StatusNotFound)\n}\n\nfunc UpdateCategory(w http.ResponseWriter, r *http.Request) {\n\tvars := mux.Vars(r)\n\tid, err := strconv.Atoi(vars[\"id\"])\n\tif err != nil {\n\t\thttp.Error(w, \"Invalid ID\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tvar updatedCategory models.Category\n\tif r.Body == nil {\n\t\thttp.Error(w, \"missing body\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif err := json.NewDecoder(r.Body).Decode(&updatedCategory); err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}\n\tfor i, category := range categories {\n\t\tif category.ID == id {\n\t\t\tupdatedCategory.ID = id\n\t\t\tcategories[i] = updatedCategory\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tjson.NewEncoder(w).Encode(updatedCategory)\n\t\t\treturn\n\t\t}\n\t}\n\thttp.Error(w, \"Category not found\", http.StatusNotFound)\n}\n\nfunc DeleteCategory(w http.ResponseWriter, r *http.Request) {\n\tvars := mux.Vars(r)\n\tid, err := strconv.Atoi(vars[\"id\"])\n\tif err != nil {\n\t\thttp.Error(w, \"Invalid ID\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tfor i, category := range categories {\n\t\tif category.ID == id {\n\t\t\tcategories = append(categories[:i], categories[i+1:]...)\n\t\t\tw.WriteHeader(http.StatusNoContent)\n\t\t\treturn\n\t\t}\n\t}\n\thttp.Error(w, \"Category not found\", http.StatusNotFound)\n}\n"
+  },
+  {
+    "filename": "internal/handlers/category_test.go",
+    "code": "package handlers_test\n\nimport (\n\t\"bytes\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"net/http/httptest\"\n\t\"testing\"\n\t\"github.com/gorilla/mux\"\n\t\"NewsAPI/internal/handlers\"\n\t\"NewsAPI/internal/models\"\n)\n\nfunc TestCreateCategory(t *testing.T) {\n\tcategory := models.Category{\n\t\tName: \"Test Category\",\n\t}\n\tbody, _ := json.Marshal(category)\n\treq := httptest.NewRequest(\"POST\", \"/categories\", bytes.NewBuffer(body))\n\treq.Header.Set(\"Content-Type\", \"application/json\")\n\tw := httptest.NewRecorder()\n\thandlers.CreateCategory(w, req)\n\tif w.Code != http.StatusCreated {\n\t\tt.Errorf(\"Expected 201, got %d\", w.Code)\n\t}\n}\n\nfunc TestGetCategories(t *testing.T) {\n\treq := httptest.NewRequest(\"GET\", \"/categories\", nil)\n\tw := httptest.NewRecorder()\n\thandlers.GetCategories(w, req)\n\tif w.Code != http.StatusOK {\n\t\tt.Errorf(\"Expected 200, got %d\", w.Code)\n\t}\n}\n\nfunc TestGetCategory(t *testing.T) {\n\treq := httptest.NewRequest(\"GET\", \"/categories/1\", nil)\n\treq = mux.SetURLVars(req, map[string]string{\"id\": \"1\"})\n\tw := httptest.NewRecorder()\n\thandlers.GetCategory(w, req)\n\tif w.Code != http.StatusOK && w.Code != http.StatusNotFound {\n\t\tt.Errorf(\"Expected 200 or 404, got %d\", w.Code)\n\t}\n}\n\nfunc TestUpdateCategory(t *testing.T) {\n\tcategory := models.Category{\n\t\tName: \"Updated Category\",\n\t}\n\tbody, _ := json.Marshal(category)\n\treq := httptest.NewRequest(\"PUT\", \"/categories/1\", bytes.NewBuffer(body))\n\treq = mux.SetURLVars(req, map[string]string{\"id\": \"1\"})\n\treq.Header.Set(\"Content-Type\", \"application/json\")\n\tw := httptest.NewRecorder()\n\thandlers.UpdateCategory(w, req)\n\tif w.Code != http.StatusOK && w.Code != http.StatusNotFound {\n\t\tt.Errorf(\"Expected 200 or 404, got %d\", w.Code)\n\t}\n}\n\nfunc TestDeleteCategory(t *testing.T) {\n\treq := httptest.NewRequest(\"DELETE\", \"/categories/1\", nil)\n\treq = mux.SetURLVars(req, map[string]string{\"id\": \"1\"})\n\tw := httptest.NewRecorder()\n\thandlers.DeleteCategory(w, req)\n\tif w.Code != http.StatusNoContent && w.Code != http.StatusNotFound {\n\t\tt.Errorf(\"Expected 204 or 404, got %d\", w.Code)\n\t}\n}\n"
+  },
+  {
+    "filename": "internal/routes/routes.go",
+    "code": "package routes\n\nimport (\n\t\"github.com/gorilla/mux\"\n\t\"NewsAPI/internal/handlers\"\n)\n\nfunc Register(r *mux.Router) {\n\t// Article routes\n\tr.HandleFunc(\"/articles\", handlers.CreateArticle).Methods(\"POST\")\n\tr.HandleFunc(\"/articles\", handlers.GetArticles).Methods(\"GET\")\n\tr.HandleFunc(\"/articles/{id}\", handlers.GetArticle).Methods(\"GET\")\n\tr.HandleFunc(\"/articles/{id}\", handlers.UpdateArticle).Methods(\"PUT\")\n\tr.HandleFunc(\"/articles/{id}\", handlers.DeleteArticle).Methods(\"DELETE\")\n\n\t// Category routes\n\tr.HandleFunc(\"/categories\", handlers.CreateCategory).Methods(\"POST\")\n\tr.HandleFunc(\"/categories\", handlers.GetCategories).Methods(\"GET\")\n\tr.HandleFunc(\"/categories/{id}\", handlers.GetCategory).Methods(\"GET\")\n\tr.HandleFunc(\"/categories/{id}\", handlers.UpdateCategory).Methods(\"PUT\")\n\tr.HandleFunc(\"/categories/{id}\", handlers.DeleteCategory).Methods(\"DELETE\")\n\n\t// Author routes\n\tr.HandleFunc(\"/authors\", handlers.CreateAuthor).Methods(\"POST\")\n\tr.HandleFunc(\"/authors\", handlers.GetAuthors).Methods(\"GET\")\n\tr.HandleFunc(\"/authors/{id}\", handlers.GetAuthor).Methods(\"GET\")\n\tr.HandleFunc(\"/authors/{id}\", handlers.UpdateAuthor).Methods(\"PUT\")\n\tr.HandleFunc(\"/authors/{id}\", handlers.DeleteAuthor).Methods(\"DELETE\")\n}\n"
+  },
+  {
+    "filename": "internal/handlers/author.go",
+    "code": "package handlers\n\nimport (\n\t"encoding/json\"\n\t\"net/http\"\n\t"strconv\"\n\t\"github.com/gorilla/mux\"\n\t\"NewsAPI/internal/models\"\n)\n\nvar authors []models.Author\nvar nextAuthorID = 1\n\nfunc CreateAuthor(w http.ResponseWriter, r *http.Request) {\n\tvar author models.Author\n\tif r.Body == nil {\n\t\thttp.Error(w, \"missing body\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif err := json.NewDecoder(r.Body).Decode(&author); err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}\n\tauthor.ID = nextAuthorID\n\tnextAuthorID++\n\tauthors = append(authors, author)\n\tw.WriteHeader(http.StatusCreated)\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(author)\n}\n\nfunc GetAuthors(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\tjson.NewEncoder(w).Encode(authors)\n}\n\nfunc GetAuthor(w http.ResponseWriter, r *http.Request) {\n\tvars := mux.Vars(r)\n\tid, err := strconv.Atoi(vars[\"id\"])\n\tif err != nil {\n\t\thttp.Error(w, \"Invalid ID\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tfor _, author := range authors {\n\t\tif author.ID == id {\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tjson.NewEncoder(w).Encode(author)\n\t\t\treturn\n\t\t}\n\t}\n\thttp.Error(w, \"Author not found\", http.StatusNotFound)\n}\n\nfunc UpdateAuthor(w http.ResponseWriter, r *http.Request) {\n\tvars := mux.Vars(r)\n\tid, err := strconv.Atoi(vars[\"id\"])\n\tif err != nil {\n\t\thttp.Error(w, \"Invalid ID\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tvar updatedAuthor models.Author\n\tif r.Body == nil {\n\t\thttp.Error(w, \"missing body\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tif err := json.NewDecoder(r.Body).Decode(&updatedAuthor); err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}\n\tfor i, author := range authors {\n\t\tif author.ID == id {\n\t\t\tupdatedAuthor.ID = id\n\t\t\tauthors[i] = updatedAuthor\n\t\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t\tjson.NewEncoder(w).Encode(updatedAuthor)\n\t\t\treturn\n\t\t}\n\t}\n\thttp.Error(w, \"Author not found\", http.StatusNotFound)\n}\n\nfunc DeleteAuthor(w http.ResponseWriter, r *http.Request) {\n\tvars := mux.Vars(r)\n\tid, err := strconv.Atoi(vars[\"id\"])\n\tif err != nil {\n\t\thttp.Error(w, \"Invalid ID\", http.StatusBadRequest)\n\t\treturn\n\t}\n\tfor i, author := range authors {\n\t\tif author.ID == id {\n\t\t\tauthors = append(authors[:i], authors[i+1:]...)\n\t\t\tw.WriteHeader(http.StatusNoContent)\n\t\t\treturn\n\t\t}\n\t}\n\thttp.Error(w, \"Author not found\", http.StatusNotFound)\n}\n"
+  },
+  {
+    "filename": "internal/handlers/author_test.go",
+    "code": "package handlers_test\n\nimport (\n\t\"bytes\"\n\t\"encoding/json\"\n\t\"net/http\"\n\t\"net/http/httptest\"\n\t\"testing\"\n\t\"github.com/gorilla/mux\"\n\t\"NewsAPI/internal/handlers\"\n\t\"NewsAPI/internal/models\"\n)\n\nfunc TestCreateAuthor(t *testing.T) {\n\tauthor := models.Author{\n\t\tName:     \"Test Author\",\n\t\tEmail:    \"test@example.com\",\n\t\tPassword: \"password\",\n\t}\n\tbody, _ := json.Marshal(author)\n\treq := httptest.NewRequest(\"POST\", \"/authors\", bytes.NewBuffer(body))\n\treq.Header.Set(\"Content-Type\", \"application/json\")\n\tw := httptest.NewRecorder()\n\thandlers.CreateAuthor(w, req)\n\tif w.Code != http.StatusCreated {\n\t\tt.Errorf(\"Expected 201, got %d\", w.Code)\n\t}\n}\n\nfunc TestGetAuthors(t *testing.T) {\n\treq := httptest.NewRequest(\"GET\", \"/authors\", nil)\n\tw := httptest.NewRecorder()\n\thandlers.GetAuthors(w, req)\n\tif w.Code != http.StatusOK {\n\t\tt.Errorf(\"Expected 200, got %d\", w.Code)\n\t}\n}\n\nfunc TestGetAuthor(t *testing.T) {\n\treq := httptest.NewRequest(\"GET\", \"/authors/1\", nil)\n\treq = mux.SetURLVars(req, map[string]string{\"id\": \"1\"})\n\tw := httptest.NewRecorder()\n\thandlers.GetAuthor(w, req)\n\tif w.Code != http.StatusOK && w.Code != http.StatusNotFound {\n\t\tt.Errorf(\"Expected 200 or 404, got %d\", w.Code)\n\t}\n}\n\nfunc TestUpdateAuthor(t *testing.T) {\n\tauthor := models.Author{\n\t\tName:     \"Updated Author\",\n\t\tEmail:    \"updated@example.com\",\n\t\tPassword: \"newpassword\",\n\t}\n\tbody, _ := json.Marshal(author)\n\treq := httptest.NewRequest(\"PUT\", \"/authors/1\", bytes.NewBuffer(body))\n\treq = mux.SetURLVars(req, map[string]string{\"id\": \"1\"})\n\treq.Header.Set(\"Content-Type\", \"application/json\")\n\tw := httptest.NewRecorder()\n\thandlers.UpdateAuthor(w, req)\n\tif w.Code != http.StatusOK && w.Code != http.StatusNotFound {\n\t\tt.Errorf(\"Expected 200 or 404, got %d\", w.Code)\n\t}\n}\n\nfunc TestDeleteAuthor(t *testing.T) {\n\treq := httptest.NewRequest(\"DELETE\", \"/authors/1\", nil)\n\treq = mux.SetURLVars(req, map[string]string{\"id\": \"1\"})\n\tw := httptest.NewRecorder()\n\thandlers.DeleteAuthor(w, req)\n\tif w.Code != http.StatusNoContent && w.Code != http.StatusNotFound {\n\t\tt.Errorf(\"Expected 204 or 404, got %d\", w.Code)\n\t}\n}\n"
+  },
+  {
+    "filename": "cmd/main.go",
+    "code": "package main\n\nimport (\n\t\"log\"\n\t\"net/http\"\n\t\"github.com/gorilla/mux\"\n\t\"NewsAPI/internal/routes\"\n)\n\nfunc main() {\n\tr := mux.NewRouter()\n\troutes.Register(r)\n\tlog.Println(\"Server listening on :8080\")\n\tlog.Fatal(http.ListenAndServe(\":8080\", r))\n}\n"
+  },
+  {
+    "filename": "tasks.md",
+    "code": "# Lab Tasks - Advanced Features\n\n## Completed Implementation\n✅ All CRUD operations are fully implemented\n✅ Complete test suite for all handlers\n✅ Proper error handling and status codes\n\n## Optional Enhancements (Student Tasks)\n1. Add database persistence using MongoDB\n2. Implement authentication and authorization middleware\n3. Add request validation using a validation library\n4. Implement pagination for GetArticles endpoint\n5. Add filtering and sorting capabilities\n6. Create OpenAPI/Swagger documentation\n7. Implement rate limiting middleware\n8. Add logging middleware for all requests\n"
+  }
+]
+--- END ---
+🧾 Saved ML metrics → experiments/NewsAPI/gen_metrics.json
+2025/10/22 09:22:16 🧹 Cleaning malformed JSON output after error: failed to parse repaired output: json parse error: invalid character 'e' after object key:value pair
+2025/10/22 09:22:16 🔁 Retrying ML generation in relaxed mode (second API call)...
+🌍 Using custom endpoint: https://api.openai.com/v1
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 1m11.178094953s (model: gpt-4o-mini, attempt: 1)
+✅ Parsed 12 files
+
+📊 Generation Summary:
+  • Duration: 1m11.178543153s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+✅ NewsAPI generation completed successfully
+🧾 Saved ML metrics → experiments/NewsAPI/gen_metrics.json
+2025/10/22 09:23:27 ✅ Relaxed ML generation succeeded.
+🧾 Saved ML metrics → experiments/NewsAPI/gen_metrics_relaxed.json
+2025/10/22 09:23:27 🔧 Step 3/3: Applying rule-based validation & fixes...
+📝 Processing: internal/models/article.go
+✅ Written: experiments/out/NewsAPI/internal/models/article.go
+📝 Processing: internal/models/category.go
+✅ Written: experiments/out/NewsAPI/internal/models/category.go
+📝 Processing: internal/models/author.go
+✅ Written: experiments/out/NewsAPI/internal/models/author.go
+📝 Processing: internal/handlers/article.go
+🔧 Fixed handler signature for CreateArticle
+🔧 Fixed handler signature for GetArticles
+🔧 Fixed handler signature for GetArticle
+🔧 Fixed handler signature for UpdateArticle
+🔧 Fixed handler signature for DeleteArticle
+✅ Written: experiments/out/NewsAPI/internal/handlers/article.go
+📝 Processing: internal/handlers/article_test.go
+🔧 Fixed test signature for TestCreateArticle
+🔧 Fixed test signature for TestGetArticles
+🔧 Fixed test signature for TestGetArticle
+🔧 Fixed test signature for TestUpdateArticle
+🔧 Fixed test signature for TestDeleteArticle
+✅ Auto-fixed test signatures in internal/handlers/article_test.go
+✅ Written: experiments/out/NewsAPI/internal/handlers/article_test.go
+📝 Processing: internal/handlers/category.go
+🔧 Fixed handler signature for CreateCategory
+🔧 Fixed handler signature for GetCategories
+🔧 Fixed handler signature for GetCategory
+🔧 Fixed handler signature for UpdateCategory
+🔧 Fixed handler signature for DeleteCategory
+✅ Written: experiments/out/NewsAPI/internal/handlers/category.go
+📝 Processing: internal/handlers/category_test.go
+🔧 Fixed test signature for TestCreateCategory
+🔧 Fixed test signature for TestGetCategories
+🔧 Fixed test signature for TestGetCategory
+🔧 Fixed test signature for TestUpdateCategory
+🔧 Fixed test signature for TestDeleteCategory
+✅ Auto-fixed test signatures in internal/handlers/category_test.go
+✅ Written: experiments/out/NewsAPI/internal/handlers/category_test.go
+📝 Processing: internal/handlers/author.go
+🔧 Fixed handler signature for CreateAuthor
+🔧 Fixed handler signature for GetAuthors
+🔧 Fixed handler signature for GetAuthor
+🔧 Fixed handler signature for UpdateAuthor
+🔧 Fixed handler signature for DeleteAuthor
+✅ Written: experiments/out/NewsAPI/internal/handlers/author.go
+📝 Processing: internal/handlers/author_test.go
+🔧 Fixed test signature for TestCreateAuthor
+🔧 Fixed test signature for TestGetAuthors
+🔧 Fixed test signature for TestGetAuthor
+🔧 Fixed test signature for TestUpdateAuthor
+🔧 Fixed test signature for TestDeleteAuthor
+✅ Auto-fixed test signatures in internal/handlers/author_test.go
+✅ Written: experiments/out/NewsAPI/internal/handlers/author_test.go
+📝 Processing: internal/routes/routes.go
+🔧 Fixed Register function parameter
+✅ Written: experiments/out/NewsAPI/internal/routes/routes.go
+📝 Processing: cmd/main.go
+✅ Written: experiments/out/NewsAPI/cmd/main.go
+📝 Processing: tasks.md
+⚠️  Syntax validation failed for tasks.md: temp.go:1:1: illegal character U+0023 '#'
+🔧 Attempting additional fixes...
+❌ Could not auto-fix syntax errors in tasks.md
+✅ Written: experiments/out/NewsAPI/tasks.md
+
+🔧 Total rule-based fixes applied: 25
+🔧 Running rule-based auto-fix on ML-generated files...
+
+🔧 Auto-fixing all files in: experiments/out/NewsAPI
+
+📝 Fixing test function signatures...
+  ✅ Fixed test signatures in article_test.go
+  ✅ Fixed test signatures in author_test.go
+  ✅ Fixed test signatures in category_test.go
+
+📝 Fixing handler function signatures...
+
+📝 Fixing routes Register function...
+
+📝 Fixing missing commas in struct literals...
+
+📝 Ensuring test file imports...
+
+✅ Applied 3 fixes total!
+✅ Rule-based fixes applied successfully
+🔧 Fixing parseID type mismatches...
+🔍 Validating Go syntax...
+✅ All generated files have valid Go syntax
+2025/10/22 09:23:27 🔧 Detected module name: NewsAPI — fixing imports...
+2025/10/22 09:23:27 ✅ No import fixes needed
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+✅ Hybrid generation completed (71.22s) - rules + ML synergy applied
+🔧 Injected mux import → experiments/out/NewsAPI/internal/handlers/article.go
+🔧 Injected mux import → experiments/out/NewsAPI/internal/handlers/author.go
+🔧 Injected mux import → experiments/out/NewsAPI/internal/handlers/category.go
+🔧 Verified mux dependency and tidied module
+📁 Saved per-package coverage → experiments/out/NewsAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/NewsAPI/internal/handlers ---
+=== RUN   TestCreateArticle
+--- PASS: TestCreateArticle (0.00s)
+=== RUN   TestGetArticles
+--- PASS: TestGetArticles (0.00s)
+=== RUN   TestGetArticle
+--- PASS: TestGetArticle (0.00s)
+=== RUN   TestUpdateArticle
+--- PASS: TestUpdateArticle (0.00s)
+=== RUN   TestDeleteArticle
+--- PASS: TestDeleteArticle (0.00s)
+=== RUN   TestCreateAuthor
+--- PASS: TestCreateAuthor (0.00s)
+=== RUN   TestGetAuthors
+--- PASS: TestGetAuthors (0.00s)
+=== RUN   TestGetAuthor
+--- PASS: TestGetAuthor (0.00s)
+=== RUN   TestUpdateAuthor
+--- PASS: TestUpdateAuthor (0.00s)
+=== RUN   TestDeleteAuthor
+--- PASS: TestDeleteAuthor (0.00s)
+=== RUN   TestCreateCategory
+--- PASS: TestCreateCategory (0.00s)
+=== RUN   TestGetCategories
+--- PASS: TestGetCategories (0.00s)
+=== RUN   TestGetCategory
+--- PASS: TestGetCategory (0.00s)
+=== RUN   TestUpdateCategory
+--- PASS: TestUpdateCategory (0.00s)
+=== RUN   TestDeleteCategory
+--- PASS: TestDeleteCategory (0.00s)
+PASS
+coverage: 70.2% of statements
+ok  	NewsAPI/internal/handlers	0.002s
+
+------------------------
+✅ Validation completed in 1.25s
+
+📊 Summary for NewsAPI (mode: hybrid):
+  • BuildSuccess = true
+  • LintWarnings = 3
+  • TestsPass    = true
+  • Coverage     = 70.2%
+  • Generation Duration = 1m11.219351244s
+  • Repair Attempts = 0
+  • Rule Fixes   = 26
+🧾 Wrote 30 unique experiments to experiments/logs/summary.csv
+
+🧾 Generating Markdown summary from JSON metrics...
+📊 Markdown results saved → experiments/logs/results.md
+✅ Summary successfully written to experiments/logs/results.md
+
+✅ Experiment complete..

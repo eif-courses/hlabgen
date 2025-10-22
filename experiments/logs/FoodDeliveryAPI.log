@@ -1,0 +1,175 @@
+
+🚀 Starting generation for app: FoodDeliveryAPI (mode=hybrid)
+2025/10/22 09:08:07 🔀 Starting HYBRID generation (rules + ML + validation)...
+2025/10/22 09:08:07 📐 Step 1/3: Creating rule-based scaffold...
+✅ Rule-based scaffold created (structure only)
+2025/10/22 09:08:07 🧠 Step 2/3: Using ML to enhance scaffold logic...
+🌍 Using custom endpoint: https://api.openai.com/v1
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 2m11.098487247s (model: gpt-4o-mini, attempt: 1)
+✅ Parsed 12 files
+
+📊 Generation Summary:
+  • Duration: 2m11.099249888s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+✅ FoodDeliveryAPI generation completed successfully
+🧾 Saved ML metrics → experiments/FoodDeliveryAPI/gen_metrics.json
+2025/10/22 09:10:18 🔧 Step 3/3: Applying rule-based validation & fixes...
+📝 Processing: internal/models/restaurant.go
+✅ Written: experiments/out/FoodDeliveryAPI/internal/models/restaurant.go
+📝 Processing: internal/models/menuitem.go
+✅ Written: experiments/out/FoodDeliveryAPI/internal/models/menuitem.go
+📝 Processing: internal/models/order.go
+✅ Written: experiments/out/FoodDeliveryAPI/internal/models/order.go
+📝 Processing: internal/handlers/restaurant.go
+🔧 Fixed handler signature for CreateRestaurant
+🔧 Fixed handler signature for GetRestaurants
+🔧 Fixed handler signature for GetRestaurant
+🔧 Fixed handler signature for UpdateRestaurant
+🔧 Fixed handler signature for DeleteRestaurant
+✅ Written: experiments/out/FoodDeliveryAPI/internal/handlers/restaurant.go
+📝 Processing: internal/handlers/menuitem.go
+🔧 Fixed handler signature for CreateMenuItem
+🔧 Fixed handler signature for GetMenuItems
+🔧 Fixed handler signature for GetMenuItem
+🔧 Fixed handler signature for UpdateMenuItem
+🔧 Fixed handler signature for DeleteMenuItem
+✅ Written: experiments/out/FoodDeliveryAPI/internal/handlers/menuitem.go
+📝 Processing: internal/handlers/order.go
+🔧 Fixed handler signature for CreateOrder
+🔧 Fixed handler signature for GetOrders
+🔧 Fixed handler signature for GetOrder
+🔧 Fixed handler signature for UpdateOrder
+🔧 Fixed handler signature for DeleteOrder
+✅ Written: experiments/out/FoodDeliveryAPI/internal/handlers/order.go
+📝 Processing: internal/handlers/restaurant_test.go
+🔧 Fixed test signature for TestCreateRestaurant
+🔧 Fixed test signature for TestGetRestaurants
+🔧 Fixed test signature for TestGetRestaurant
+🔧 Fixed test signature for TestUpdateRestaurant
+🔧 Fixed test signature for TestDeleteRestaurant
+✅ Auto-fixed test signatures in internal/handlers/restaurant_test.go
+✅ Written: experiments/out/FoodDeliveryAPI/internal/handlers/restaurant_test.go
+📝 Processing: internal/handlers/menuitem_test.go
+🔧 Fixed test signature for TestCreateMenuItem
+🔧 Fixed test signature for TestGetMenuItems
+🔧 Fixed test signature for TestGetMenuItem
+🔧 Fixed test signature for TestUpdateMenuItem
+🔧 Fixed test signature for TestDeleteMenuItem
+✅ Auto-fixed test signatures in internal/handlers/menuitem_test.go
+✅ Written: experiments/out/FoodDeliveryAPI/internal/handlers/menuitem_test.go
+📝 Processing: internal/handlers/order_test.go
+🔧 Fixed test signature for TestCreateOrder
+🔧 Fixed test signature for TestGetOrders
+🔧 Fixed test signature for TestGetOrder
+🔧 Fixed test signature for TestUpdateOrder
+🔧 Fixed test signature for TestDeleteOrder
+✅ Auto-fixed test signatures in internal/handlers/order_test.go
+✅ Written: experiments/out/FoodDeliveryAPI/internal/handlers/order_test.go
+📝 Processing: internal/routes/routes.go
+🔧 Fixed Register function parameter
+✅ Written: experiments/out/FoodDeliveryAPI/internal/routes/routes.go
+📝 Processing: cmd/main.go
+✅ Written: experiments/out/FoodDeliveryAPI/cmd/main.go
+📝 Processing: tasks.md
+⚠️  Syntax validation failed for tasks.md: temp.go:1:1: illegal character U+0023 '#'
+🔧 Attempting additional fixes...
+❌ Could not auto-fix syntax errors in tasks.md
+✅ Written: experiments/out/FoodDeliveryAPI/tasks.md
+
+🔧 Total rule-based fixes applied: 25
+🔧 Running rule-based auto-fix on ML-generated files...
+
+🔧 Auto-fixing all files in: experiments/out/FoodDeliveryAPI
+
+📝 Fixing test function signatures...
+  ✅ Fixed test signatures in menuitem_test.go
+  ✅ Fixed test signatures in order_test.go
+  ✅ Fixed test signatures in restaurant_test.go
+
+📝 Fixing handler function signatures...
+
+📝 Fixing routes Register function...
+
+📝 Fixing missing commas in struct literals...
+
+📝 Ensuring test file imports...
+
+✅ Applied 3 fixes total!
+✅ Rule-based fixes applied successfully
+🔧 Fixing parseID type mismatches...
+🔍 Validating Go syntax...
+✅ All generated files have valid Go syntax
+2025/10/22 09:10:18 🔧 Detected module name: FoodDeliveryAPI — fixing imports...
+2025/10/22 09:10:18 ✅ No import fixes needed
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+✅ Hybrid generation completed (131.14s) - rules + ML synergy applied
+🔧 Injected mux import → experiments/out/FoodDeliveryAPI/internal/handlers/menuitem.go
+🔧 Injected mux import → experiments/out/FoodDeliveryAPI/internal/handlers/menuitem_test.go
+🔧 Injected mux import → experiments/out/FoodDeliveryAPI/internal/handlers/order.go
+🔧 Injected mux import → experiments/out/FoodDeliveryAPI/internal/handlers/order_test.go
+🔧 Injected mux import → experiments/out/FoodDeliveryAPI/internal/handlers/restaurant.go
+🔧 Injected mux import → experiments/out/FoodDeliveryAPI/internal/handlers/restaurant_test.go
+🔧 Verified mux dependency and tidied module
+📁 Saved per-package coverage → experiments/out/FoodDeliveryAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/FoodDeliveryAPI/internal/handlers ---
+=== RUN   TestCreateMenuItem
+--- PASS: TestCreateMenuItem (0.00s)
+=== RUN   TestGetMenuItems
+--- PASS: TestGetMenuItems (0.00s)
+=== RUN   TestGetMenuItem
+--- PASS: TestGetMenuItem (0.00s)
+=== RUN   TestUpdateMenuItem
+--- PASS: TestUpdateMenuItem (0.00s)
+=== RUN   TestDeleteMenuItem
+--- PASS: TestDeleteMenuItem (0.00s)
+=== RUN   TestCreateOrder
+--- PASS: TestCreateOrder (0.00s)
+=== RUN   TestGetOrders
+--- PASS: TestGetOrders (0.00s)
+=== RUN   TestGetOrder
+--- PASS: TestGetOrder (0.00s)
+=== RUN   TestUpdateOrder
+--- PASS: TestUpdateOrder (0.00s)
+=== RUN   TestDeleteOrder
+--- PASS: TestDeleteOrder (0.00s)
+=== RUN   TestCreateRestaurant
+--- PASS: TestCreateRestaurant (0.00s)
+=== RUN   TestGetRestaurants
+--- PASS: TestGetRestaurants (0.00s)
+=== RUN   TestGetRestaurant
+--- PASS: TestGetRestaurant (0.00s)
+=== RUN   TestUpdateRestaurant
+--- PASS: TestUpdateRestaurant (0.00s)
+=== RUN   TestDeleteRestaurant
+--- PASS: TestDeleteRestaurant (0.00s)
+PASS
+coverage: 70.2% of statements
+ok  	FoodDeliveryAPI/internal/handlers	0.003s
+
+------------------------
+✅ Validation completed in 1.56s
+
+📊 Summary for FoodDeliveryAPI (mode: hybrid):
+  • BuildSuccess = true
+  • LintWarnings = 3
+  • TestsPass    = true
+  • Coverage     = 70.2%
+  • Generation Duration = 2m11.142669362s
+  • Repair Attempts = 0
+  • Rule Fixes   = 26
+🧾 Wrote 30 unique experiments to experiments/logs/summary.csv
+
+🧾 Generating Markdown summary from JSON metrics...
+📊 Markdown results saved → experiments/logs/results.md
+✅ Summary successfully written to experiments/logs/results.md
+
+✅ Experiment complete..

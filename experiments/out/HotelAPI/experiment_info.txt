@@ -1,0 +1,10 @@
+App: HotelAPI
+Mode: hybrid
+Timestamp: 2025-10-22T09:12:37+03:00
+OpenAI Model: gpt-4o-mini
+BuildSuccess: false
+TestsPass: false
+Coverage: 0.0%
+Duration: 50.770141888s
+RepairAttempts: 0
+RuleFixes: 26

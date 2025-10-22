@@ -1,0 +1,11 @@
+{
+  "StartTime": "2025-10-22T09:14:02.180170049+03:00",
+  "EndTime": "2025-10-22T09:15:29.677326927+03:00",
+  "Duration": 87497156923,
+  "PrimarySuccess": true,
+  "RepairAttempts": 0,
+  "FinalSuccess": true,
+  "ErrorMessage": "",
+  "RuleFixes": 26,
+  "Mode": "hybrid"
+}

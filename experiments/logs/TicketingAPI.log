@@ -1,0 +1,205 @@
+
+🚀 Starting generation for app: TicketingAPI (mode=hybrid)
+2025/10/22 09:42:20 🔀 Starting HYBRID generation (rules + ML + validation)...
+2025/10/22 09:42:20 📐 Step 1/3: Creating rule-based scaffold...
+✅ Rule-based scaffold created (structure only)
+2025/10/22 09:42:20 🧠 Step 2/3: Using ML to enhance scaffold logic...
+🌍 Using custom endpoint: https://api.openai.com/v1
+🤖 Trying model: gpt-4o-mini
+⏱️  Model call took 1m55.849386686s (model: gpt-4o-mini, attempt: 1)
+✅ Parsed 15 files
+
+📊 Generation Summary:
+  • Duration: 1m55.850316823s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+✅ TicketingAPI generation completed successfully
+🧾 Saved ML metrics → experiments/TicketingAPI/gen_metrics.json
+2025/10/22 09:44:16 🔧 Step 3/3: Applying rule-based validation & fixes...
+📝 Processing: internal/models/ticket.go
+✅ Written: experiments/out/TicketingAPI/internal/models/ticket.go
+📝 Processing: internal/models/event.go
+✅ Written: experiments/out/TicketingAPI/internal/models/event.go
+📝 Processing: internal/models/attendee.go
+✅ Written: experiments/out/TicketingAPI/internal/models/attendee.go
+📝 Processing: internal/models/venue.go
+✅ Written: experiments/out/TicketingAPI/internal/models/venue.go
+📝 Processing: internal/handlers/ticket.go
+🔧 Fixed handler signature for CreateTicket
+🔧 Fixed handler signature for GetTickets
+🔧 Fixed handler signature for GetTicket
+🔧 Fixed handler signature for UpdateTicket
+🔧 Fixed handler signature for DeleteTicket
+✅ Written: experiments/out/TicketingAPI/internal/handlers/ticket.go
+📝 Processing: internal/handlers/event.go
+🔧 Fixed handler signature for CreateEvent
+🔧 Fixed handler signature for GetEvents
+🔧 Fixed handler signature for GetEvent
+🔧 Fixed handler signature for UpdateEvent
+🔧 Fixed handler signature for DeleteEvent
+✅ Written: experiments/out/TicketingAPI/internal/handlers/event.go
+📝 Processing: internal/handlers/attendee.go
+🔧 Fixed handler signature for CreateAttendee
+🔧 Fixed handler signature for GetAttendees
+🔧 Fixed handler signature for GetAttendee
+🔧 Fixed handler signature for UpdateAttendee
+🔧 Fixed handler signature for DeleteAttendee
+✅ Written: experiments/out/TicketingAPI/internal/handlers/attendee.go
+📝 Processing: internal/handlers/venue.go
+🔧 Fixed handler signature for CreateVenue
+🔧 Fixed handler signature for GetVenues
+🔧 Fixed handler signature for GetVenue
+🔧 Fixed handler signature for UpdateVenue
+🔧 Fixed handler signature for DeleteVenue
+✅ Written: experiments/out/TicketingAPI/internal/handlers/venue.go
+📝 Processing: internal/handlers/ticket_test.go
+🔧 Fixed test signature for TestCreateTicket
+🔧 Fixed test signature for TestGetTickets
+🔧 Fixed test signature for TestGetTicket
+🔧 Fixed test signature for TestUpdateTicket
+🔧 Fixed test signature for TestDeleteTicket
+✅ Auto-fixed test signatures in internal/handlers/ticket_test.go
+✅ Written: experiments/out/TicketingAPI/internal/handlers/ticket_test.go
+📝 Processing: internal/handlers/event_test.go
+🔧 Fixed test signature for TestCreateEvent
+🔧 Fixed test signature for TestGetEvents
+🔧 Fixed test signature for TestGetEvent
+🔧 Fixed test signature for TestUpdateEvent
+🔧 Fixed test signature for TestDeleteEvent
+✅ Auto-fixed test signatures in internal/handlers/event_test.go
+✅ Written: experiments/out/TicketingAPI/internal/handlers/event_test.go
+📝 Processing: internal/handlers/attendee_test.go
+🔧 Fixed test signature for TestCreateAttendee
+🔧 Fixed test signature for TestGetAttendees
+🔧 Fixed test signature for TestGetAttendee
+🔧 Fixed test signature for TestUpdateAttendee
+🔧 Fixed test signature for TestDeleteAttendee
+✅ Auto-fixed test signatures in internal/handlers/attendee_test.go
+✅ Written: experiments/out/TicketingAPI/internal/handlers/attendee_test.go
+📝 Processing: internal/handlers/venue_test.go
+🔧 Fixed test signature for TestCreateVenue
+🔧 Fixed test signature for TestGetVenues
+🔧 Fixed test signature for TestGetVenue
+🔧 Fixed test signature for TestUpdateVenue
+🔧 Fixed test signature for TestDeleteVenue
+✅ Auto-fixed test signatures in internal/handlers/venue_test.go
+✅ Written: experiments/out/TicketingAPI/internal/handlers/venue_test.go
+📝 Processing: internal/routes/routes.go
+🔧 Fixed Register function parameter
+✅ Written: experiments/out/TicketingAPI/internal/routes/routes.go
+📝 Processing: cmd/main.go
+✅ Written: experiments/out/TicketingAPI/cmd/main.go
+📝 Processing: tasks.md
+⚠️  Syntax validation failed for tasks.md: temp.go:1:1: illegal character U+0023 '#'
+🔧 Attempting additional fixes...
+❌ Could not auto-fix syntax errors in tasks.md
+✅ Written: experiments/out/TicketingAPI/tasks.md
+
+🔧 Total rule-based fixes applied: 32
+🔧 Running rule-based auto-fix on ML-generated files...
+
+🔧 Auto-fixing all files in: experiments/out/TicketingAPI
+
+📝 Fixing test function signatures...
+  ✅ Fixed test signatures in attendee_test.go
+  ✅ Fixed test signatures in event_test.go
+  ✅ Fixed test signatures in ticket_test.go
+  ✅ Fixed test signatures in venue_test.go
+
+📝 Fixing handler function signatures...
+
+📝 Fixing routes Register function...
+
+📝 Fixing missing commas in struct literals...
+
+📝 Ensuring test file imports...
+
+✅ Applied 4 fixes total!
+✅ Rule-based fixes applied successfully
+🔧 Fixing parseID type mismatches...
+🔍 Validating Go syntax...
+✅ All generated files have valid Go syntax
+2025/10/22 09:44:16 🔧 Detected module name: TicketingAPI — fixing imports...
+2025/10/22 09:44:16 ✅ No import fixes needed
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+✅ Hybrid generation completed (115.89s) - rules + ML synergy applied
+🔧 Injected mux import → experiments/out/TicketingAPI/internal/handlers/attendee.go
+🔧 Injected mux import → experiments/out/TicketingAPI/internal/handlers/attendee_test.go
+🔧 Injected mux import → experiments/out/TicketingAPI/internal/handlers/event.go
+🔧 Injected mux import → experiments/out/TicketingAPI/internal/handlers/event_test.go
+🔧 Injected mux import → experiments/out/TicketingAPI/internal/handlers/ticket.go
+🔧 Injected mux import → experiments/out/TicketingAPI/internal/handlers/ticket_test.go
+🔧 Injected mux import → experiments/out/TicketingAPI/internal/handlers/venue.go
+🔧 Injected mux import → experiments/out/TicketingAPI/internal/handlers/venue_test.go
+🔧 Verified mux dependency and tidied module
+📁 Saved per-package coverage → experiments/out/TicketingAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/TicketingAPI/internal/handlers ---
+=== RUN   TestCreateAttendee
+--- PASS: TestCreateAttendee (0.00s)
+=== RUN   TestGetAttendees
+--- PASS: TestGetAttendees (0.00s)
+=== RUN   TestGetAttendee
+--- PASS: TestGetAttendee (0.00s)
+=== RUN   TestUpdateAttendee
+--- PASS: TestUpdateAttendee (0.00s)
+=== RUN   TestDeleteAttendee
+--- PASS: TestDeleteAttendee (0.00s)
+=== RUN   TestCreateEvent
+--- PASS: TestCreateEvent (0.00s)
+=== RUN   TestGetEvents
+--- PASS: TestGetEvents (0.00s)
+=== RUN   TestGetEvent
+--- PASS: TestGetEvent (0.00s)
+=== RUN   TestUpdateEvent
+--- PASS: TestUpdateEvent (0.00s)
+=== RUN   TestDeleteEvent
+--- PASS: TestDeleteEvent (0.00s)
+=== RUN   TestCreateTicket
+--- PASS: TestCreateTicket (0.00s)
+=== RUN   TestGetTickets
+--- PASS: TestGetTickets (0.00s)
+=== RUN   TestGetTicket
+--- PASS: TestGetTicket (0.00s)
+=== RUN   TestUpdateTicket
+--- PASS: TestUpdateTicket (0.00s)
+=== RUN   TestDeleteTicket
+--- PASS: TestDeleteTicket (0.00s)
+=== RUN   TestCreateVenue
+--- PASS: TestCreateVenue (0.00s)
+=== RUN   TestGetVenues
+--- PASS: TestGetVenues (0.00s)
+=== RUN   TestGetVenue
+--- PASS: TestGetVenue (0.00s)
+=== RUN   TestUpdateVenue
+--- PASS: TestUpdateVenue (0.00s)
+=== RUN   TestDeleteVenue
+--- PASS: TestDeleteVenue (0.00s)
+PASS
+coverage: 70.2% of statements
+ok  	TicketingAPI/internal/handlers	0.003s
+
+------------------------
+✅ Validation completed in 1.39s
+
+📊 Summary for TicketingAPI (mode: hybrid):
+  • BuildSuccess = true
+  • LintWarnings = 3
+  • TestsPass    = true
+  • Coverage     = 70.2%
+  • Generation Duration = 1m55.893532338s
+  • Repair Attempts = 0
+  • Rule Fixes   = 33
+🧾 Wrote 30 unique experiments to experiments/logs/summary.csv
+
+🧾 Generating Markdown summary from JSON metrics...
+📊 Markdown results saved → experiments/logs/results.md
+✅ Summary successfully written to experiments/logs/results.md
+
+✅ Experiment complete..
