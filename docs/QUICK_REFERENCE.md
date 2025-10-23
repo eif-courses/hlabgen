@@ -197,7 +197,7 @@ Rule of thumb:
 
 1. **README.md** → How to set up and run HLabGen
 2. **GATHER_METRICS_ANALYSIS.md** → Deep technical analysis
-3. **GATHER_METRICS_IMPLEMENTATION.md** → Step-by-step code guide ← **START HERE**
+3. **IMPLEMENTATION_GUIDE.md.md** → Step-by-step code guide ← **START HERE**
 4. **VISUAL_COMPARISON_GUIDE.md** → Before/after examples
 5. **EXECUTIVE_SUMMARY.md** → Overview and timeline
 
@@ -271,7 +271,7 @@ Results summary:
 
 ## Next Steps (In Order)
 
-1. Read `GATHER_METRICS_IMPLEMENTATION.md`
+1. Read `IMPLEMENTATION_GUIDE.md.md`
 2. Add code to `cmd/gather-metrics/main.go`
 3. Test with `make report`
 4. Verify `results_aggregated.md` exists
@@ -334,7 +334,7 @@ Your Results (Summary):
   Hybrid: 91.3% tests ✓ |  77s ✓    |  64.4% coverage ✓
 
 Files:
-  Read:    GATHER_METRICS_IMPLEMENTATION.md
+  Read:    IMPLEMENTATION_GUIDE.md.md
   Modify:  cmd/gather-metrics/main.go
   Output:  results_aggregated.md (90 rows, publication-ready!)
 
@@ -357,4 +357,4 @@ Next: See IMPLEMENTATION guide for code
 
 ---
 
-**For complete implementation details, see: `GATHER_METRICS_IMPLEMENTATION.md`**
+**For complete implementation details, see: `IMPLEMENTATION_GUIDE.md.md`**

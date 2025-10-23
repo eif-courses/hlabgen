@@ -451,20 +451,20 @@ grep "AuctionAPI,hybrid" results_aggregated.csv  # Should show 1 row with N=5
    - Command reference
    - Reproducibility guide
 
-2. **GATHER_METRICS_ANALYSIS.md** (Comprehensive technical analysis)
+2. **METRICS_ANALYSIS.md** (Comprehensive technical analysis)
    - System architecture
    - Data flow diagrams
    - Metrics reference
    - Root cause analysis
    - Research integration examples
 
-3. **GATHER_METRICS_IMPLEMENTATION.md** (Code implementation guide)
+3. **IMPLEMENTATION_GUIDE.md** (Code implementation guide)
    - Step-by-step implementation
    - Go code examples
    - Testing procedures
    - Makefile integration
 
-4. **VISUAL_COMPARISON_GUIDE.md** (Visual before/after examples)
+4. **VISUAL_EXAMPLES.md** (Visual before/after examples)
    - Concrete examples with data
    - Problem illustration
    - Solution demonstration
@@ -541,7 +541,7 @@ Your `gather-metrics` system is working correctly. The "broken" appearance is si
 
 Implementation is straightforward (~150 lines of Go code), well-documented, and improves publication readiness without losing data integrity.
 
-**Next step**: Implement the aggregation functions following the guide in `GATHER_METRICS_IMPLEMENTATION.md`
+**Next step**: Implement the aggregation functions following the guide in `IMPLEMENTATION_GUIDE.md`
 
 ---
 
@@ -557,11 +557,9 @@ Implementation is straightforward (~150 lines of Go code), well-documented, and 
 ## Contact & Support
 
 For questions on:
-- **Architecture**: See `GATHER_METRICS_ANALYSIS.md`
-- **Implementation**: See `GATHER_METRICS_IMPLEMENTATION.md`
-- **Visual examples**: See `VISUAL_COMPARISON_GUIDE.md`
+- **Architecture**: See `METRICS_ANALYSIS.md`
+- **Implementation**: See `IMPLEMENTATION_GUIDE.md`
+- **Visual examples**: See `VISUAL_EXAMPLES.md`
 - **Quick setup**: See `README.md`
 
 All documentation files are self-contained and provide working code examples.
-
-**Good luck with your research! 🚀**
