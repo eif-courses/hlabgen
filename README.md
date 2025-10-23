@@ -1,627 +1,429 @@
-# 🧪 HLabGen Experiment Automation Framework
+# HLabGen: Hybrid AI-Assisted Code Generation Framework
 
-HLabGen is a **hybrid AI-assisted Go code generator** combining **rule-based scaffolding** and **machine learning (GPT-based)** code synthesis.  
-This framework automates **experiment execution**, **validation**, and **metric collection** for reproducible research in software automation and code generation.
+A research automation framework for reproducible experiments on hybrid AI-assisted Go code generation. HLabGen combines rule-based scaffolding with GPT-based code synthesis to automate testing, validation, and metric collection for scientific evaluation.
 
----
+## 📖 Table of Contents
 
-## 📘 Table of Contents
-
-1. [Overview](#-overview)  
-2. [Repository Structure](#-repository-structure)  
-3. [Setup & Requirements](#-setup--requirements)  
-4. [Quick Start](#-quick-start)  
-5. [Experiment Workflow](#-experiment-workflow)  
-6. [Available Commands](#-available-commands)  
-7. [Metrics Explained](#-metrics-explained)  
-8. [For Researchers](#-for-researchers)  
-9. [Reproducibility Notes](#-reproducibility-notes)  
-10. [Example Experiment Input](#-example-experiment-input)  
-11. [Credits](#-credits)
+- [Overview](#overview)
+- [📚 Documentation](#-documentation) ← **NEW**
+- [Quick Start](#quick-start)
+- [Prerequisites & Setup](#prerequisites--setup)
+- [Repository Structure](#repository-structure)
+- [Running Experiments](#running-experiments)
+- [Understanding Results](#understanding-results)
+- [Reproducibility Guide](#reproducibility-guide)
+- [Research Integration](#research-integration)
+- [Troubleshooting](#troubleshooting)
 
 ---
 
-## 🧩 Overview
+## Overview
 
-HLabGen enables fully automated testing of **AI-generated Go backends** from JSON specifications.  
-Each experiment:
-1. Generates Go code using GPT + rule-based templates  
-2. Attempts self-repair for invalid JSON outputs  
-3. Builds, vets, lints, and tests the generated code  
-4. Records quantitative metrics  
-5. Produces aggregated results for analysis and publication  
+HLabGen automates the complete lifecycle of AI-assisted code generation experiments:
 
-This framework is designed to support **academic experiments** and **automation research** on AI-assisted software engineering.
+1. **Generation**: GPT-4o-Mini generates Go code from JSON specifications
+2. **Repair**: Invalid outputs are automatically self-repaired and re-parsed
+3. **Validation**: Comprehensive testing (build, vet, lint, coverage)
+4. **Metrics**: Quantitative results collected for each phase
+5. **Reporting**: Aggregated Markdown results for analysis and publication
 
----
-
-## 📂 Repository Structure
-
-```
-hlabgen/
-├── cmd/
-│   ├── hlabgen/          # Main CLI tool for generation + validation
-│   ├── analyze/          # Legacy CSV-based summarizer
-│   └── report/           # JSON-based Markdown report generator
-├── internal/
-│   ├── ml/               # GPT-based code generation logic
-│   ├── rules/            # Rule-based code construction templates
-│   ├── metrics/          # Shared experiment result structures
-│   └── validate/         # Build/test/coverage measurement
-├── experiments/
-│   ├── input/            # JSON experiment definitions
-│   ├── out/              # Generated Go projects
-│   ├── logs/             # Logs + aggregated reports
-│   └── LibraryAPI.json   # Example input specification
-├── Makefile              # Automation of all experiments
-└── README.md             # Documentation (you are here)
-```
+This framework enables reproducible research on AI code generation quality, efficiency, and reliability in a fully automated manner.
 
 ---
 
-## ⚙️ Setup & Requirements
+## 📚 Documentation
 
-### 🧰 Prerequisites
+For comprehensive guides on the metrics system and implementation:
 
-| Requirement | Description |
-|--------------|-------------|
-| Go ≥ 1.23 | Required for building and validation |
-| OpenAI API key | Needed for GPT-based code generation |
-| (Optional) `golangci-lint`, `gocyclo` | For lint and complexity metrics |
-| (Optional) `entr` | For live file watching |
+### Quick References
+- **[QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md)** - Problem summary and implementation checklist (3 min read)
+- **[IMPLEMENTATION_GUIDE.md](docs/IMPLEMENTATION_GUIDE.md)** - Step-by-step code implementation with Go examples
 
-### 🔑 Setup
+### Detailed Analysis
+- **[METRICS_ANALYSIS.md](docs/METRICS_ANALYSIS.md)** - Technical deep dive: architecture, data flow, metrics reference
+- **[VISUAL_EXAMPLES.md](docs/VISUAL_EXAMPLES.md)** - Before/after comparisons with real experimental data
+- **[RESEARCH_GUIDE.md](docs/RESEARCH_GUIDE.md)** - Research integration and publication guidelines
+
+### All Documentation
+See [docs/README.md](docs/README.md) for complete navigation guide.
+
+---
+
+## Quick Start
 
 ```bash
+# Clone and setup
 git clone https://github.com/eif-courses/hlabgen.git
 cd hlabgen
 
-# Add your OpenAI key
+# Configure API access
 export OPENAI_API_KEY="sk-..."
 
-# Install validation tools (optional)
+# Run all experiments
+make all-experiments
+
+# View results
+cat experiments/logs/results.md
+```
+
+That's it! Results appear in `experiments/logs/results.md` with a complete metrics summary.
+
+---
+
+## Prerequisites & Setup
+
+### System Requirements
+
+| Requirement | Version | Purpose |
+|------------|---------|---------|
+| **Go** | ≥ 1.23 | Build and validate generated code |
+| **OpenAI API Key** | - | GPT-based code generation |
+| **golangci-lint** | latest | Optional: linting metrics |
+| **gocyclo** | latest | Optional: complexity analysis |
+| **entr** | - | Optional: file watching for development |
+
+### Installation
+
+**1. Clone the repository:**
+```bash
+git clone https://github.com/eif-courses/hlabgen.git
+cd hlabgen
+```
+
+**2. Set your OpenAI API key:**
+```bash
+export OPENAI_API_KEY="sk-..."
+# To persist, add to ~/.bashrc or ~/.zshrc
+```
+
+**3. Install optional validation tools:**
+```bash
+# Linting
 go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+# Complexity analysis
 go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
-brew install entr  # (optional, macOS/Linux)
+
+# File watching (macOS/Linux only)
+brew install entr
+```
+
+**4. Verify setup:**
+```bash
+go version
+echo $OPENAI_API_KEY  # Should print your key
+make list              # Should list available experiments
 ```
 
 ---
 
-## 🚀 Quick Start
+## Repository Structure
 
-Run all experiments in one command:
+```
+hlabgen/
+├── README.md                 # This file
+├── Makefile                  # Experiment automation
+├── cmd/
+│   ├── hlabgen/              # CLI: generation + validation orchestration
+│   ├── analyze/              # CSV-based results summarizer
+│   ├── gather-metrics/       # Metrics aggregation and reporting
+│   └── report/               # JSON-to-Markdown report generator
+├── internal/
+│   ├── ml/                   # GPT-based code generation logic
+│   ├── rules/                # Rule-based templates and construction
+│   ├── metrics/              # Result structures (shared types)
+│   └── validate/             # Build, vet, lint, coverage measurement
+├── experiments/
+│   ├── input/                # JSON experiment definitions (inputs)
+│   ├── out/                  # Generated Go projects (outputs)
+│   ├── logs/                 # Logs, aggregated reports, failures
+│   └── LibraryAPI.json       # Example experiment specification
+└── docs/                     # Documentation
+    ├── README.md             # Documentation index
+    ├── QUICK_REFERENCE.md
+    ├── IMPLEMENTATION_GUIDE.md
+    ├── METRICS_ANALYSIS.md
+    ├── VISUAL_EXAMPLES.md
+    └── RESEARCH_GUIDE.md
+```
 
+**Key directories for reproduction:**
+- `experiments/input/` → Add your experiment JSON files here
+- `experiments/out/` → Generated Go code (auto-created)
+- `experiments/logs/` → Final results and reports
+- `docs/` → Comprehensive documentation
+
+---
+
+## Running Experiments
+
+### Available Commands
+
+```bash
+# List all available experiments
+make list
+
+# Generate Go project for one experiment
+make generate APP=LibraryAPI
+
+# Run full pipeline for one experiment
+make experiment APP=LibraryAPI
+
+# Run all experiments
+make all-experiments
+
+# Generate final Markdown report
+make report
+
+# Quick test (3 sample experiments)
+make quick-test
+
+# Show metrics summary
+make stats
+
+# Clean all outputs
+make clean
+
+# Watch a file and re-run automatically
+make watch APP=LibraryAPI
+```
+
+### Typical Workflow
+
+**For a single experiment:**
+```bash
+make experiment APP=LibraryAPI
+# Output: experiments/out/LibraryAPI/ + experiments/logs/results.md
+```
+
+**For batch processing:**
 ```bash
 make all-experiments
+# Runs all .json files in experiments/input/
+# Results: experiments/logs/results.md
 ```
 
-This will:
-- Generate and validate all JSON inputs in `experiments/input/`
-- Collect build and ML metrics
-- Save Markdown results in `experiments/logs/results.md`
-
----
-
-## 🧬 Experiment Workflow
-
-Each experiment follows these phases:
-
-| Phase | Description |
-|--------|--------------|
-| **1️⃣ Input** | Load JSON description of entities and endpoints |
-| **2️⃣ Generation** | GPT-4o-Mini generates Go code (via OpenAI API) |
-| **3️⃣ Repair** | Invalid outputs are automatically repaired and re-parsed |
-| **4️⃣ Validation** | `go build`, `go vet`, `golangci-lint`, and `go test -cover` |
-| **5️⃣ Metrics** | Store ML + build metrics in JSON |
-| **6️⃣ Reporting** | Summarize results in Markdown for analysis |
-
----
-
-## 💻 Available Commands
-
-| Command | Purpose |
-|----------|----------|
-| `make list` | List all available experiments in `experiments/input/` |
-| `make generate APP=LibraryAPI` | Generate Go project for one app |
-| `make experiment APP=LibraryAPI` | Full pipeline for one experiment |
-| `make all-experiments` | Run all experiments automatically |
-| `make report` | Generate Markdown summary from JSON metrics |
-| `make analyze` | Legacy CSV summarizer (optional) |
-| `make clean` | Remove all outputs and logs |
-| `make quick-test` | Run 3 sample experiments |
-| `make stats` | Show quick metrics summary |
-| `make watch APP=LibraryAPI` | Watch a single file and rerun automatically |
-
----
-
-## 🧾 Output Files
-
-After running experiments, the following files are generated:
-
-| File | Description |
-|-------|--------------|
-| `experiments/out/<App>/` | Generated Go project |
-| `experiments/out/<App>/gen_metrics.json` | GPT generation + repair metrics |
-| `experiments/out/<App>/coverage.json` | Per-package coverage report |
-| `experiments/logs/results.md` | Final Markdown summary of all experiments |
-| `experiments/logs/failed_experiments.txt` | List of failed cases |
-
----
-
-## 📊 Metrics Explained
-
-| Metric | Source | Description |
-|---------|---------|-------------|
-| **BuildSuccess** | Go compiler | Whether `go build ./...` succeeded |
-| **TestsPass** | Go test | True if all tests passed |
-| **CoveragePct** | Go test | Code coverage percentage |
-| **VetWarnings** | `go vet` | Number of detected warnings |
-| **LintWarnings** | `golangci-lint` | Linting issues found |
-| **CyclomaticAvg** | `gocyclo` | Average complexity per function |
-| **GenTimeSec** | Internal | Duration of ML generation |
-| **PrimarySuccess** | ML | Whether the first GPT output was valid JSON |
-| **RepairAttempts** | ML | Number of JSON repairs attempted |
-| **FinalSuccess** | ML + Validation | Overall success after validation |
-| **RuleFixes** | Rule-based | Count of automated code fixes applied |
-| **ErrorMessage** | ML | Description of final failure (if any) |
-
----
-
-## 🧠 For Researchers
-
-This framework was built for **reproducible scientific experiments** on hybrid AI code generation.  
-You can include its results directly in your **appendix**, **evaluation**, or **technical report**.
-
-### 📈 Interpreting Results
-
-| Category | Metrics | Meaning |
-|-----------|----------|---------|
-| **Model Performance** | `PrimarySuccess`, `RepairAttempts`, `FinalSuccess` | Indicates the model’s ability to produce syntactically valid code |
-| **Code Quality** | `VetWarnings`, `LintWarnings`, `CyclomaticAvg` | Reflects structural and maintainability properties |
-| **Functional Validity** | `BuildSuccess`, `TestsPass`, `CoveragePct` | Verifies executable and tested code |
-| **Efficiency** | `GenTimeSec`, `Duration` | Measures time to generation and validation |
-| **Stability** | `RuleFixes`, `RepairAttempts` | Shows resilience of rule/ML hybrid system |
-
-### 📊 Data Aggregation
-
-Use:
+**For reproducible runs:**
 ```bash
-make report
+make clean
+make all-experiments
+# Clears previous results and reruns from scratch
 ```
-
-This produces a Markdown table:
-```markdown
-| App | Primary Success | Repair Attempts | Rule Fixes | Final Success | Build Success | Tests Pass | Coverage (%) | Duration (s) |
-|-----|-----------------|----------------|-------------|----------------|----------------|-------------|---------------|---------------|
-| LibraryAPI | true | 0 | 2 | true | true | true | 89.3 | 8.42 |
-| ShopAPI | false | 1 | 4 | false | false | false | 0.0 | 12.21 |
-```
-
-### 📚 Suggested Evaluation Metrics
-
-In your paper or thesis, you can summarize:
-- **Success Rate (%)** = #FinalSuccess / #Total
-- **Average Coverage (%)**
-- **Mean Generation Time (s)**
-- **Repair Attempts per Experiment**
-- **Correlation** between coverage and ML duration
 
 ---
 
-## ♻️ Reproducibility Notes
+## Understanding Results
 
-To ensure full reproducibility:
-1. Store all inputs (`experiments/input/*.json`) in version control.
-2. Keep generated `gen_metrics.json` files for dataset reuse.
-3. Use `go version` lock files (`go.mod`).
-4. Document your OpenAI model version (currently GPT-4o-mini).
-5. Run all experiments on a clean environment:
-   ```bash
-   make clean && make all-experiments
-   ```
-6. Export metrics as CSV or JSON for supplementary material.
+### Output Structure
+
+After running an experiment, you'll see:
+
+```
+experiments/out/LibraryAPI/
+├── main.go                   # Generated entry point
+├── models/
+│   ├── book.go              # Generated domain models
+│   └── author.go
+├── handlers/
+│   └── api.go               # Generated handlers
+├── gen_metrics.json          # Generation metrics (JSON)
+└── coverage.json             # Coverage report (JSON)
+
+experiments/logs/
+├── results.md               # Final Markdown report (ALL experiments)
+├── failed_experiments.txt   # List of failures
+└── hlabgen.log              # Detailed logs
+```
+
+### Metrics Reference
+
+**Model Performance**
+- `PrimarySuccess`: Was first GPT output valid JSON?
+- `RepairAttempts`: How many self-repairs were needed?
+- `FinalSuccess`: Did model produce valid code after all attempts?
+
+**Code Quality**
+- `VetWarnings`: Issues detected by `go vet`
+- `LintWarnings`: Issues from `golangci-lint`
+- `CyclomaticAvg`: Average cyclomatic complexity per function
+
+**Functional Validity**
+- `BuildSuccess`: Did `go build` succeed?
+- `TestsPass`: Did all tests pass?
+- `CoveragePct`: Code coverage percentage
+
+**Efficiency & Stability**
+- `GenTimeSec`: Seconds spent in GPT generation
+- `RuleFixes`: Automated rule-based fixes applied
+- `ErrorMessage`: Description of failure (if any)
+
+### Reading the Report
+
+The final report (`experiments/logs/results.md`) contains a summary table:
+
+| App | Primary Success | Repair Attempts | Final Success | Build Success | Tests Pass | Coverage (%) |
+|-----|-----------------|-----------------|----------------|----------------|-------------|---------------|
+| LibraryAPI | true | 0 | true | true | true | 89.3 |
+| BlogAPI | true | 1 | true | true | true | 91.1 |
+
+**Key metrics to track:**
+- **Success Rate** = (# Final Success) / (# Total) × 100%
+- **Average Coverage** = Mean of all Coverage (%)
+- **Mean Generation Time** = Average GenTimeSec
+- **Repair Efficiency** = Mean RepairAttempts (lower is better)
 
 ---
 
-## 🧩 Example Experiment Input
+## Reproducibility Guide
 
-File: `experiments/input/LibraryAPI.json`
-```json
-{
-  "title": "LibraryAPI",
-  "description": "A REST API for managing books and authors",
-  "difficulty": "intermediate",
-  "entities": ["Book", "Author"],
-  "endpoints": ["CreateBook", "GetBooks", "DeleteBook"]
+To ensure your experiments are fully reproducible:
+
+### 1. Version Control
+```bash
+# Commit all input specifications
+git add experiments/input/*.json
+git commit -m "Add experiment definitions"
+
+# Save metrics for reuse
+git add experiments/out/*/gen_metrics.json
+```
+
+### 2. Environment Documentation
+Document your exact setup:
+```bash
+go version
+echo $OPENAI_API_KEY | cut -c1-10  # Print first 10 chars
+golangci-lint version
+gocyclo -version
+```
+
+### 3. Clean Reproducible Run
+```bash
+# Start fresh
+make clean
+
+# Run all experiments (captures all metrics)
+make all-experiments
+
+# Export results
+cp experiments/logs/results.md results_${DATE}.md
+cp -r experiments/out/ backup_${DATE}/
+```
+
+### 4. Sharing Results
+Include in your appendix:
+- `experiments/logs/results.md` (summary table)
+- `experiments/out/*/gen_metrics.json` (detailed metrics per experiment)
+- `experiments/logs/hlabgen.log` (execution logs)
+- Your environment setup (Go version, API model, etc.)
+
+### 5. Fixing Issues
+If experiments fail:
+```bash
+# Check logs
+tail -100 experiments/logs/hlabgen.log
+
+# View failed cases
+cat experiments/logs/failed_experiments.txt
+
+# Re-run one experiment with verbose output
+make experiment APP=FailedApp
+```
+
+---
+
+## Research Integration
+
+### For Academic Papers
+
+Include this setup in your methodology:
+
+> We conducted experiments using HLabGen, a hybrid AI-assisted code generation framework. All experiments were executed on [DATE] using GPT-4o-Mini with [N] JSON specifications. Code was validated using Go 1.23+ with linting (golangci-lint) and coverage analysis (go test -cover).
+
+### Key Research Questions Enabled
+
+- **Model Capability**: How often does GPT produce valid code on first attempt?
+- **Hybrid Effectiveness**: Does rule+ML combination improve test coverage?
+- **Resilience**: How many repairs are needed per experiment?
+- **Correlation**: Is generation time correlated with final build success?
+- **Quality**: How does generated code quality compare to hand-written benchmarks?
+
+### Data Analysis
+
+**Export metrics to CSV:**
+```bash
+# Using jq (if available)
+jq -r '.[] | [.App, .PrimarySuccess, .CoveragePct, .GenTimeSec] | @csv' \
+  experiments/out/*/gen_metrics.json > results.csv
+```
+
+**Suggested statistics to report:**
+- Success rate with confidence intervals
+- Mean and median generation time
+- Coverage distribution (box plots)
+- Correlation between repair attempts and final success
+
+### Citation
+
+If you use HLabGen in your research:
+
+```bibtex
+@inproceedings{hlabgen2025,
+  title={Hybrid AI-Driven Code Generation in Educational and Organizational Systems},
+  author={Gžegoževskė, L. and Gžegoževskis, M.},
+  booktitle={Proceedings of the International Conference on Applied Informatics and Automation},
+  year={2025}
 }
 ```
 
 ---
 
-## 🔍 Example Generated Output
+## Troubleshooting
 
-After running:
-```bash
-make experiment APP=LibraryAPI
-```
+### API Errors
 
-You’ll get:
-```
-experiments/out/LibraryAPI/
-├── main.go
-├── models/
-│   └── book.go
-├── handlers/
-│   └── books.go
-├── gen_metrics.json
-└── coverage.json
-```
+**Error**: `401 Unauthorized`
+- **Cause**: Missing or invalid OpenAI API key
+- **Fix**: `export OPENAI_API_KEY="sk-..."` and verify with `echo $OPENAI_API_KEY`
 
----
+**Error**: `Rate limit exceeded`
+- **Cause**: Too many concurrent API calls
+- **Fix**: Wait 60 seconds or reduce experiment count
 
-## 🧮 Example Report Snippet
+### Build Failures
 
-Generated at:
-```
-experiments/logs/results.md
-```
+**Error**: `go: package not found`
+- **Cause**: Missing dependencies
+- **Fix**: `go mod download` or `go mod tidy`
 
-Example:
-```markdown
-# Experimental Evaluation Results
+**Error**: `command not found: golangci-lint`
+- **Cause**: Optional linting tool not installed
+- **Fix**: Run `go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest` or skip with `make all-experiments SKIP_LINT=1`
 
-| App | Primary Success | Repair Attempts | Rule Fixes | Final Success | Build Success | Tests Pass | Coverage (%) | Duration (s) |
-|-----|-----------------|----------------|-------------|----------------|----------------|-------------|---------------|---------------|
-| LibraryAPI | true | 0 | 2 | true | true | true | 89.3 | 8.42 |
-| BlogAPI | true | 1 | 3 | true | true | true | 91.1 | 9.57 |
-| TaskManagerAPI | true | 0 | 4 | true | true | true | 88.7 | 7.93 |
+### No Results Generated
 
-✅ 3/3 experiments succeeded (100%)
-```
+**Issue**: `experiments/logs/results.md` not created
+- **Check**: `make list` shows experiments available?
+- **Check**: `echo $OPENAI_API_KEY` is set?
+- **Check**: `tail -50 experiments/logs/hlabgen.log` for errors
+
+### Partial Failures
+
+**Issue**: Some experiments passed, some failed
+- **Fix**: Check `experiments/logs/failed_experiments.txt` for details
+- **Fix**: Review specific error: `cat experiments/out/FailedApp/gen_metrics.json | jq '.ErrorMessage'`
 
 ---
 
-## 🧠 Suggested Research Questions
+## Next Steps
 
-You can analyze this dataset to answer questions like:
-- How often does GPT produce valid code on the first attempt?  
-- Does hybrid (rule + ML) generation improve coverage and test success?  
-- How do repairs affect complexity and maintainability?  
-- Is generation time correlated with final build success?
+1. **Read the docs**: Start with [docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md)
+2. **Add your experiments**: Place JSON specs in `experiments/input/`
+3. **Run**: `make all-experiments`
+4. **Analyze**: Open `experiments/logs/results.md`
+5. **Integrate**: Use results in your research or publication
+6. **Share**: Commit inputs and metrics to version control
 
----
+For questions or contributions, open an issue on GitHub.
 
-## 🧾 Example Academic Citation
-
-If you use this setup in your research, please cite:
-
-> Gžegoževskis, M., Gžegoževskė, L., & Vasaitienė, J. (2025).  
-> **Hybrid AI-Driven Code Generation in Educational and Organizational Systems.**  
-> In *Proceedings of the International Conference on Applied Informatics and Automation*, pp. XX–XX.
-
----
-
-## 🙌 Credits
-
-Developed by  
-**Marius Gžegoževskis**, ****, and ****  
-as part of the *HLabGen Project* on AI-driven software automation in higher education.
-
-
-# Prepare dependencies
-go mod tidy
-
-# Run one experiment
-make experiment APP=BlogAPI
-
-# Run all
-make all-experiments
-
-# Generate summary (if needed manually)
-make report
-
-# Check results
-cat experiments/logs/results.md
-
-# Clean up
-make clean
-
-
-
-# Basic workflow
-make list                    # See available experiments
-make experiment APP=LibraryAPI   # Run one experiment
-make all-experiments         # Run all experiments
-make report                  # Generate standard report
-
-# Academic workflow (recommended for papers)
-make academic-package        # Run everything + generate all reports
-
-# Individual reports
-make report-comparative      # Compare modes
-make report-statistics       # Statistical analysis
-make report-failures         # Failure analysis
-make report-latex           # LaTeX tables
-
-# Utilities
-make stats                  # Quick statistics
-make status                 # Check experiment status
-make verify-env             # Verify dependencies
-make disk-usage             # Check disk space
-make clean                  # Clean everything
-make archive                # Backup results
-
-# Development
-make watch APP=LibraryAPI   # Auto-rerun on changes
-
-
-
-# Quick test (3 apps)
-make quick-test
-
-# Full run (all apps)
-make all-experiments
-
-# Everything for paper
-make academic-package
-
-# Just regenerate reports (if you already ran experiments)
-make reports-all
-
-# Individual report types
-make report-comparative
-make report-statistics
-make report-failures
-make report-latex
-
-# View status
-make stats
-make status
-
-# Clean and start over
-make clean
-
-
-
-
-
-Daily Research Workflow:
-bash# 1. Run experiments
-make all-experiments
-
-# 2. Generate reports
-make reports-all
-
-# 3. Safe clean (preserves metrics for later analysis)
-make clean-safe
-
-# 4. Or archive before cleaning
-make clean-archive
-Before Cleaning (Recommended):
-bash# See what will be deleted
-make clean-dry-run
-
-# Archive metrics before cleaning
-make archive-metrics
-
-# Now safe to clean
-make clean
-Paper Submission Workflow:
-bash# 1. Generate complete academic package
-make academic-package
-
-# 2. Create backup for submission
-make backup
-
-# 3. Check all reports are ready
-make status
-
-# 4. View statistics
-make stats
-Recovery Workflow:
-bash# If you accidentally cleaned, restore from archive
-make restore-latest
-
-# Regenerate reports from archived metrics
-make reports-all
-```
-
-## 📁 Directory Structure After Running:
-```
-hlabgen/
-├── experiments/
-│   ├── input/              # Your JSON configs (never deleted)
-│   ├── out/
-│   │   ├── LibraryAPI/
-│   │   │   ├── gen_metrics.json     ✅ Preserved by clean-safe
-│   │   │   ├── coverage.json        ✅ Preserved by clean-safe
-│   │   │   ├── internal/            ❌ Deleted by clean-safe
-│   │   │   ├── cmd/                 ❌ Deleted by clean-safe
-│   │   │   └── go.mod               ❌ Deleted by clean-safe
-│   │   └── ...
-│   ├── logs/
-│   │   ├── results.md
-│   │   ├── statistics.md
-│   │   ├── comparative.md
-│   │   ├── failures.md
-│   │   ├── tables.tex
-│   │   ├── coverage.csv
-│   │   └── summary.csv
-│   └── archives/            # Created by archive commands
-│       ├── metrics_20251019_140320/
-│       │   ├── gen_metrics.json (all apps)
-│       │   ├── coverage.json (all apps)
-│       │   ├── coverage.csv
-│       │   └── *.md, *.tex
-│       └── metrics_20251019_153045/
-└── hlabgen_backup_20251019_140320.tar.gz  # Created by backup
-🎓 Best Practices for Research:
-1. Before Major Changes:
-   bashmake backup
-# or
-make archive-metrics
-2. Regular Workflow:
-   bash# Run experiments
-   make all-experiments
-
-# Generate all reports
-make reports-all
-
-# Archive results
-make archive-metrics
-
-# Clean code but keep metrics
-make clean-code
-3. For Paper Revisions:
-   bash# Restore old metrics
-   make restore-latest
-
-# Or manually:
-cp experiments/archives/metrics_20251019_140320/* experiments/out/
-
-# Regenerate reports
-make reports-all
-4. Before Submission:
-   bash# Create final backup
-   make backup
-
-# Verify everything
-make status
-make stats
-```
-
-## 🔍 What Each Clean Command Does:
-
-### `make clean`
-```
-❌ Deletes: experiments/out/* (all)
-❌ Deletes: experiments/logs/* (all)
-✅ Keeps: experiments/input/*
-⚠️  WARNING: Deletes metrics!
-```
-
-### `make clean-safe`
-```
-❌ Deletes: Generated code (.go files, go.mod, etc.)
-✅ Keeps: *metrics*.json files
-✅ Keeps: coverage.json files
-✅ Keeps: experiments/input/*
-```
-
-### `make clean-code`
-```
-❌ Deletes: internal/, cmd/, go.mod, go.sum, tasks.md
-✅ Keeps: ALL .json files
-✅ Keeps: All metrics and coverage data
-✅ Keeps: experiments/logs/*
-```
-
-### `make clean-logs`
-```
-❌ Deletes: experiments/logs/*
-✅ Keeps: experiments/out/* (all generated code and metrics)
-```
-
-### `make clean-archive`
-```
-1. Archives all metrics to experiments/archives/metrics_TIMESTAMP/
-2. Then runs make clean
-   ✅ Safe: All metrics backed up before deletion
-```
-
-### `make clean-all`
-```
-1. Creates full backup: hlabgen_backup_TIMESTAMP.tar.gz
-2. Then deletes everything
-   ✅ Safe: Complete backup created first
-```
-
-## 📊 Archive Structure:
-
-When you run `make archive-metrics`, it creates:
-```
-experiments/archives/metrics_20251019_153045/
-├── gen_metrics.json          # From LibraryAPI
-├── gen_metrics.json          # From BlogAPI  
-├── gen_metrics.json          # From TaskManagerAPI
-├── coverage.json             # From each app
-├── coverage.csv              # Summary
-├── summary.csv               # Summary
-├── results.md                # Reports
-├── statistics.md
-├── comparative.md
-├── failures.md
-└── tables.tex
-🚀 Quick Command Reference:
-Development:
-bashmake quick-test              # Test with 3 apps
-make experiment APP=X        # Single experiment
-make all-experiments         # All experiments
-Reports:
-bashmake report                  # Standard report
-make reports-all             # All report types
-make report-statistics       # Just statistics
-Cleaning:
-bashmake clean-dry-run          # Preview what will be deleted
-make clean-safe             # Clean but keep metrics
-make clean-code             # Clean only code
-make clean-archive          # Archive then clean (SAFEST)
-Backup:
-bashmake archive-metrics        # Quick metrics archive
-make backup                 # Full backup
-make list-archives          # View archives
-make restore-latest         # Restore from latest
-Utilities:
-bashmake status                 # Check status
-make stats                  # Quick statistics
-make list                   # List experiments
-make disk-usage             # Check disk space
-make verify-env             # Check setup
-💡 Recommended Workflow for Your Paper:
-bash# Day 1: Initial run
-make academic-package        # Run everything
-make archive-metrics         # Backup results
-
-# Day 2-X: Continue experiments
-make all-experiments         # Add more experiments
-make reports-all             # Update reports
-make archive-metrics         # Backup again
-
-# Before paper submission:
-make backup                  # Create final backup
-make status                  # Verify everything
-make stats                   # Check final numbers
-
-# Copy reports to paper:
-cp experiments/logs/tables.tex ~/paper/results/
-cp experiments/logs/statistics.md ~/paper/appendix/
-🎯 Your Next Steps:
-Since your quick-test succeeded, here's what to do:
-bash# 1. Check current status
-make status
-
-# 2. View your metrics (they're already there!)
-cat experiments/logs/coverage.csv
-cat experiments/logs/summary.csv
-
-# 3. Create your first archive
-make archive-metrics
-
-# 4. If you have more experiments, run them all
-make all-experiments
-
-# 5. Generate comprehensive reports
-make reports-all
-
-# 6. Create final backup
-make backup
-📈 View Your Real Results Now:
-bash# View coverage data
-column -t -s, experiments/logs/coverage.csv
-
-# View full summary
-column -t -s, experiments/logs/summary.csv
-
-# View reports
-cat experiments/logs/statistics.md
-cat experiments/logs/comparative.md
+**Happy experimenting!** 🚀
