@@ -1,6 +1,10 @@
 # HLabGen: Hybrid AI-Assisted Code Generation Framework
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17450623.svg)](https://doi.org/10.5281/zenodo.17450623)
 
-A research automation framework for reproducible experiments on hybrid AI-assisted Go code generation. HLabGen combines rule-based scaffolding with GPT-based code synthesis to automate testing, validation, and metric collection for scientific evaluation.
+> Hybrid AI-assisted framework for empirical research on REST API code generation using rule-based, machine learning, and hybrid methods.
+
+A research automation framework for reproducible experiments on hybrid AI-assisted Go code generation.  
+HLabGen combines rule-based scaffolding with GPT-based code synthesis to automate testing, validation, and metric collection for scientific evaluation.
 
 ## 📖 Table of Contents
 
@@ -375,6 +379,27 @@ If you use HLabGen in your research:
   year={2025}
 }
 ```
+
+---
+
+## 📖 Citation
+
+If you use **HLabGen** in your research, please cite it as:
+
+> Gžegoževskė, L., & Gžegoževskis, M. (2025). *HlabGen: Hybrid Code Generation Framework for REST API Automation* (Version 1.0.0) [Computer software]. Faculty of Informatics, Vilniaus Kolegija / University of Applied Sciences, Lithuania. Zenodo. https://doi.org/10.5281/zenodo.17450623
+
+Or in **BibTeX** format:
+
+```bibtex
+@software{hlabgen2025,
+  author = {Gžegoževskė, Laura and Gžegoževskis, Marius},
+  title = {HlabGen: Hybrid Code Generation Framework for REST API Automation},
+  year = {2025},
+  publisher = {Faculty of Informatics, Vilniaus Kolegija / University of Applied Sciences, Lithuania},
+  version = {1.0.0},
+  doi = {10.5281/zenodo.17450623},
+  url = {https://doi.org/10.5281/zenodo.17450623}
+}
 
 ---
 
