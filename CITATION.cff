@@ -1,28 +1,49 @@
 cff-version: 1.2.0
 message: "If you use this software in your research, please cite it as below."
 type: software
+
+title: "Hybrid Code Generation Framework (HlabGen)"
+version: 1.0.0
+date-released: 2025-10-25
+license: "MIT"
+
 authors:
   - family-names: "Gžegoževskė"
     given-names: "Laura"
-    orcid: "https://orcid.org/0009-0004-8918-7402"
+    orcid: "https://orcid.org/0009-0007-5526-7377"
     affiliation: "Faculty of Informatics, Vilniaus Kolegija / University of Applied Sciences, Lithuania"
   - family-names: "Gžegoževskis"
     given-names: "Marius"
+    orcid: "https://orcid.org/0009-0000-XXXX-XXXX"
     affiliation: "Faculty of Informatics, Vilniaus Kolegija / University of Applied Sciences, Lithuania"
-title: "Hybrid AI-Assisted Code Generation: An Empirical Comparison of Rule-Based, Machine Learning, and Hybrid Approaches for REST API Automation"
-version: 1.0.0
-date-released: 2024-10-25
+
 repository-code: "https://github.com/eif-courses/hlabgen"
-repository: "https://zenodo.org/record/XXXXXXX"
 license: "MIT"
+url: "https://eif-courses.github.io/hlabgen"
+
 keywords:
-  - "code generation"
+  - "hybrid code generation"
+  - "software automation"
   - "machine learning"
-  - "REST API"
-  - "hybrid approaches"
+  - "REST API automation"
   - "empirical evaluation"
+
 abstract: "Experimental framework, datasets, and code for empirical evaluation of hybrid AI-assisted code generation approaches for REST API automation across rule-based, ML-based, and hybrid methods."
+
 contact:
   - family-names: "Gžegoževskė"
     given-names: "Laura"
     email: "l.gzegozevske@eif.viko.lt"
+
+preferred-citation:
+  type: article
+  title: "Hybrid AI-Assisted Code Generation: An Empirical Comparison of Rule-Based, Machine Learning, and Hybrid Approaches for REST API Automation"
+  authors:
+    - family-names: "Gžegoževskė"
+      given-names: "Laura"
+    - family-names: "Gžegoževskis"
+      given-names: "Marius"
+  journal: "Automated Software Engineering (in preparation)"
+  publisher: "Springer"
+  year: 2025
+  notes: "Planned submission to Automated Software Engineering Journal; associated with the HlabGen software package."
