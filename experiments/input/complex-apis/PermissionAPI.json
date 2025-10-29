@@ -1,0 +1,45 @@
+{
+  "appName": "PermissionAPI",
+  "description": "Role-based access control system with permission inheritance, resource-level permissions, and hierarchical roles",
+  "database": "postgres",
+  "apiPattern": "RESTful",
+  "difficulty": "complex",
+  "entities": [
+    {
+      "name": "Role",
+      "fields": [
+        {"name": "id", "type": "string", "primaryKey": true},
+        {"name": "name", "type": "string", "required": true, "unique": true},
+        {"name": "permissions", "type": "[]string"},
+        {"name": "inheritsFrom", "type": "string"},
+        {"name": "createdAt", "type": "time.Time"}
+      ]
+    },
+    {
+      "name": "UserRole",
+      "fields": [
+        {"name": "userId", "type": "string", "required": true},
+        {"name": "roleId", "type": "string", "required": true},
+        {"name": "resourceId", "type": "string"},
+        {"name": "assignedAt", "type": "time.Time"}
+      ]
+    }
+  ],
+  "features": [
+    "POST /roles - Create role with permissions",
+    "Business rule: Permissions format 'resource:action' (e.g., 'documents:read')",
+    "Business rule: Role can inherit from parent role",
+    "GET /users/:id/permissions - Compute effective permissions (own + inherited)",
+    "POST /check-permission - Check if user has specific permission",
+    "Business rule: Resource-level permissions override global permissions",
+    "Business rule: Admin role has wildcard permissions (*:*)",
+    "DELETE /roles/:id - Cannot delete if users are assigned to it"
+  ],
+  "objectives": [
+    "Validate permission inheritance logic",
+    "Test resource-level permission override",
+    "Verify effective permissions calculation",
+    "Ensure wildcard permissions work",
+    "Test permission checking with nested roles"
+  ]
+}

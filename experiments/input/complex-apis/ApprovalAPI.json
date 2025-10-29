@@ -1,0 +1,50 @@
+{
+  "appName": "ApprovalAPI",
+  "description": "Multi-level approval system with hierarchical approvers, escalation logic, and deadline tracking",
+  "database": "postgres",
+  "apiPattern": "RESTful",
+  "difficulty": "complex",
+  "entities": [
+    {
+      "name": "ApprovalRequest",
+      "fields": [
+        {"name": "id", "type": "string", "primaryKey": true},
+        {"name": "requesterId", "type": "string", "required": true},
+        {"name": "title", "type": "string", "required": true},
+        {"name": "amount", "type": "float64", "required": true},
+        {"name": "currentLevel", "type": "int", "default": 1},
+        {"name": "requiredLevels", "type": "int", "required": true},
+        {"name": "status", "type": "string", "default": "pending"},
+        {"name": "approvals", "type": "[]Approval"},
+        {"name": "deadline", "type": "time.Time"},
+        {"name": "createdAt", "type": "time.Time"}
+      ]
+    },
+    {
+      "name": "Approval",
+      "fields": [
+        {"name": "level", "type": "int"},
+        {"name": "approverId", "type": "string"},
+        {"name": "decision", "type": "string"},
+        {"name": "timestamp", "type": "time.Time"}
+      ]
+    }
+  ],
+  "features": [
+    "POST /approvals - Create approval request",
+    "Business rule: amount < $1000 requires 1 level, $1000-$10000 requires 2 levels, >$10000 requires 3 levels",
+    "POST /approvals/:id/approve - Approve at current level",
+    "Business rule: Can only approve if currentLevel matches approver's level",
+    "Business rule: Advance to next level after approval, mark complete after all levels",
+    "POST /approvals/:id/reject - Reject immediately marks as rejected",
+    "Business rule: Cannot approve/reject after deadline expires",
+    "GET /approvals/pending - Filter by deadline approaching (< 24 hours)"
+  ],
+  "objectives": [
+    "Validate level-based approval logic",
+    "Test hierarchical progression",
+    "Verify deadline enforcement",
+    "Ensure rejection stops workflow",
+    "Test amount-based level determination"
+  ]
+}

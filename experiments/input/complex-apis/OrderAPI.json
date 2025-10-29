@@ -1,0 +1,44 @@
+{
+  "appName": "OrderAPI",
+  "description": "Order management system with complex business logic including discount calculation, tax computation, inventory validation, and multi-step order processing",
+  "database": "postgres",
+  "apiPattern": "RESTful",
+  "difficulty": "complex",
+  "entities": [
+    {
+      "name": "Order",
+      "fields": [
+        {"name": "id", "type": "string", "primaryKey": true},
+        {"name": "customerId", "type": "string", "required": true},
+        {"name": "items", "type": "[]OrderItem", "required": true},
+        {"name": "subtotal", "type": "float64", "computed": true},
+        {"name": "discount", "type": "float64", "computed": true},
+        {"name": "tax", "type": "float64", "computed": true},
+        {"name": "total", "type": "float64", "computed": true},
+        {"name": "status", "type": "string", "default": "pending"},
+        {"name": "createdAt", "type": "time.Time"}
+      ]
+    },
+    {
+      "name": "OrderItem",
+      "fields": [
+        {"name": "productId", "type": "string", "required": true},
+        {"name": "quantity", "type": "int", "required": true, "min": 1},
+        {"name": "price", "type": "float64", "required": true}
+      ]
+    }
+  ],
+  "features": [
+    "Business rule: 10% discount if subtotal > $100 AND customer is premium",
+    "Business rule: 5% discount if subtotal > $200 regardless of customer status",
+    "Calculate tax = (subtotal - discount) * 0.08",
+    "Validate inventory before accepting order",
+    "State transition validation for order status"
+  ],
+  "objectives": [
+    "Validate complex discount calculation logic",
+    "Test multi-condition business rules",
+    "Verify inventory validation",
+    "Ensure correct tax computation"
+  ]
+}

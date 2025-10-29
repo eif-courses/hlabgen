@@ -1,0 +1,40 @@
+{
+  "appName": "SearchAPI",
+  "description": "Advanced search system with complex filtering, multi-field sorting, pagination, and query optimization",
+  "database": "postgres",
+  "apiPattern": "RESTful",
+  "difficulty": "complex",
+  "entities": [
+    {
+      "name": "Product",
+      "fields": [
+        {"name": "id", "type": "string", "primaryKey": true},
+        {"name": "name", "type": "string", "required": true},
+        {"name": "description", "type": "string"},
+        {"name": "price", "type": "float64", "required": true},
+        {"name": "category", "type": "string", "required": true},
+        {"name": "tags", "type": "[]string"},
+        {"name": "inStock", "type": "bool", "default": true},
+        {"name": "rating", "type": "float64"},
+        {"name": "createdAt", "type": "time.Time"}
+      ]
+    }
+  ],
+  "features": [
+    "GET /products/search - Complex query with multiple filters",
+    "Filter by: price range (min/max), category, tags (ANY/ALL), inStock, rating > threshold",
+    "Sort by: price, rating, createdAt (asc/desc)",
+    "Pagination: page, pageSize with total count",
+    "Business rule: pageSize max 100 items",
+    "Business rule: Combine filters with AND logic",
+    "Business rule: Return 400 if invalid price range (min > max)",
+    "Full-text search on name and description"
+  ],
+  "objectives": [
+    "Validate complex WHERE clause construction",
+    "Test multi-field filtering",
+    "Verify pagination logic with total count",
+    "Ensure sorting works correctly",
+    "Test edge cases (empty results, invalid params)"
+  ]
+}

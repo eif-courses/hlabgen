@@ -1,0 +1,41 @@
+{
+  "appName": "NotificationAPI",
+  "description": "Asynchronous notification system with webhook delivery, retry logic with exponential backoff, and delivery status tracking",
+  "database": "postgres",
+  "apiPattern": "RESTful",
+  "difficulty": "complex",
+  "entities": [
+    {
+      "name": "Notification",
+      "fields": [
+        {"name": "id", "type": "string", "primaryKey": true},
+        {"name": "recipientId", "type": "string", "required": true},
+        {"name": "message", "type": "string", "required": true},
+        {"name": "type", "type": "string", "required": true},
+        {"name": "webhookUrl", "type": "string"},
+        {"name": "status", "type": "string", "default": "pending"},
+        {"name": "retryCount", "type": "int", "default": 0},
+        {"name": "lastAttemptAt", "type": "time.Time"},
+        {"name": "deliveredAt", "type": "time.Time"},
+        {"name": "createdAt", "type": "time.Time"}
+      ]
+    }
+  ],
+  "features": [
+    "POST /notifications - Queue notification for async delivery",
+    "Async processing: Deliver webhook in background",
+    "Retry logic: Exponential backoff (1s, 4s, 16s, 64s, 256s)",
+    "Max retry: 5 attempts, then mark as failed",
+    "Status tracking: pending -> sending -> delivered/failed",
+    "GET /notifications/:id/status - Check delivery status",
+    "POST /notifications/:id/retry - Manual retry",
+    "Webhook validation: Return 400 if webhookUrl is invalid"
+  ],
+  "objectives": [
+    "Validate async job queueing",
+    "Test exponential backoff retry logic",
+    "Verify status transitions",
+    "Ensure retry count is incremented",
+    "Test max retry limit enforcement"
+  ]
+}

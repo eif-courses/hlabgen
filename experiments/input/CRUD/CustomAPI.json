@@ -1,0 +1,21 @@
+{
+  "app_name": "AuctionAPI",
+  "entities": [
+    "Auction",
+    "Bid",
+    "User"
+  ],
+  "features": [
+    "CRUD",
+    "auth",
+    "filtering"
+  ],
+  "database": "SQLite",
+  "difficulty": "Beginner",
+  "objectives": [
+    "Implement basic REST CRUD operations",
+    "Add simple search functionality",
+    "Write unit tests for handlers"
+  ],
+  "api_pattern": "REST"
+}

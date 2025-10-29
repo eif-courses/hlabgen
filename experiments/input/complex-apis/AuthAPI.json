@@ -1,0 +1,48 @@
+{
+  "appName": "AuthAPI",
+  "description": "Authentication and authorization system with JWT tokens, role-based access control (RBAC), password validation, and session management",
+  "database": "postgres",
+  "apiPattern": "RESTful",
+  "difficulty": "complex",
+  "entities": [
+    {
+      "name": "User",
+      "fields": [
+        {"name": "id", "type": "string", "primaryKey": true},
+        {"name": "email", "type": "string", "required": true, "unique": true},
+        {"name": "passwordHash", "type": "string", "required": true},
+        {"name": "role", "type": "string", "default": "user"},
+        {"name": "isActive", "type": "bool", "default": true},
+        {"name": "failedLoginAttempts", "type": "int", "default": 0},
+        {"name": "lastLoginAt", "type": "time.Time"},
+        {"name": "createdAt", "type": "time.Time"}
+      ]
+    },
+    {
+      "name": "Session",
+      "fields": [
+        {"name": "id", "type": "string", "primaryKey": true},
+        {"name": "userId", "type": "string", "required": true},
+        {"name": "token", "type": "string", "required": true},
+        {"name": "expiresAt", "type": "time.Time", "required": true},
+        {"name": "createdAt", "type": "time.Time"}
+      ]
+    }
+  ],
+  "features": [
+    "POST /register - Password validation: min 8 chars, 1 uppercase, 1 number",
+    "POST /login - Lock account after 5 failed attempts",
+    "POST /login - Generate JWT token with 1-hour expiration",
+    "GET /protected - Require valid JWT token in Authorization header",
+    "GET /admin - Require role=admin AND valid token",
+    "POST /logout - Invalidate session token",
+    "Rate limiting: Max 5 login attempts per minute per IP"
+  ],
+  "objectives": [
+    "Validate password strength requirements",
+    "Test JWT token generation and validation",
+    "Verify RBAC enforcement (user vs admin)",
+    "Ensure account lockout after failed attempts",
+    "Test session expiration handling"
+  ]
+}

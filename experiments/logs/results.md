@@ -7,6 +7,7 @@
 | CarRentalAPI | hybrid | false | false | 70.2% | 0 | 0 | true | 0 | 11 | 0.03 |
 | ClinicAPI | hybrid | false | false | 70.2% | 0 | 0 | true | 0 | 11 | 0.03 |
 | CourseAPI | hybrid | false | false | 70.2% | 0 | 0 | true | 0 | 11 | 0.03 |
+| CustomAPI | ml | false | false | 0.0% | 0 | 0 | false | 0 | 0 | 0.10 |
 | EcommerceAPI | hybrid | false | false | 70.2% | 0 | 0 | true | 0 | 14 | 0.03 |
 | FinanceAPI | hybrid | false | false | 70.2% | 0 | 0 | true | 0 | 11 | 0.03 |
 | FitnessAPI | hybrid | false | false | 70.2% | 0 | 0 | true | 0 | 14 | 0.02 |
@@ -35,9 +36,9 @@
 
 ## Summary Statistics
 
-- **Total Experiments**: 30
-- **Build Success Rate**: 0.0% (0/30)
-- **Test Success Rate**: 0.0% (0/30)
+- **Total Experiments**: 31
+- **Build Success Rate**: 0.0% (0/31)
+- **Test Success Rate**: 0.0% (0/31)
 - **Average Coverage**: 70.3%
 - **Total Lint Warnings**: 0 (avg: 0.0 per app)
 - **Total Vet Warnings**: 0 (avg: 0.0 per app)
@@ -46,11 +47,12 @@
 
 ## Code Quality Analysis
 
-- **Apps with Lint Warnings**: 0/30
-- **Apps with Vet Warnings**: 0/30
+- **Apps with Lint Warnings**: 0/31
+- **Apps with Vet Warnings**: 0/31
 
 ## Performance by Mode
 
 | Mode | Apps | Build Success | Test Success | Avg Coverage | Avg Lint | Avg Vet | Avg Duration |
 |------|------|---------------|--------------|--------------|----------|---------|---------------|
 | hybrid | 30 | 0.0% | 0.0% | 70.3% | 0.0 | 0.0 | 0.03s |
+| ml | 1 | 0.0% | 0.0% | 0.0% | 0.0 | 0.0 | 0.10s |

@@ -1,0 +1,46 @@
+{
+  "appName": "WorkflowAPI",
+  "description": "Workflow management system with state machine logic for approval processes, status transitions, and multi-step workflows",
+  "database": "postgres",
+  "apiPattern": "RESTful",
+  "difficulty": "complex",
+  "entities": [
+    {
+      "name": "Workflow",
+      "fields": [
+        {"name": "id", "type": "string", "primaryKey": true},
+        {"name": "title", "type": "string", "required": true},
+        {"name": "description", "type": "string"},
+        {"name": "status", "type": "string", "default": "draft"},
+        {"name": "submittedBy", "type": "string"},
+        {"name": "currentApprover", "type": "string"},
+        {"name": "approvalHistory", "type": "[]ApprovalRecord"},
+        {"name": "createdAt", "type": "time.Time"},
+        {"name": "updatedAt", "type": "time.Time"}
+      ]
+    },
+    {
+      "name": "ApprovalRecord",
+      "fields": [
+        {"name": "approver", "type": "string"},
+        {"name": "action", "type": "string"},
+        {"name": "timestamp", "type": "time.Time"},
+        {"name": "comment", "type": "string"}
+      ]
+    }
+  ],
+  "features": [
+    "State machine: draft -> submitted -> under_review -> approved/rejected",
+    "Business rule: Cannot skip states (e.g., draft cannot go directly to approved)",
+    "Business rule: Only current approver can approve/reject",
+    "Business rule: Once rejected, can only transition back to draft",
+    "Business rule: Approved workflows cannot be edited",
+    "Track approval history with timestamps"
+  ],
+  "objectives": [
+    "Validate state machine transitions",
+    "Test authorization rules (only current approver can act)",
+    "Verify invalid transition rejection",
+    "Ensure approval history is correctly recorded"
+  ]
+}

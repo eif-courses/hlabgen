@@ -1,0 +1,50 @@
+{
+  "appName": "SchedulerAPI",
+  "description": "Job scheduling system with cron-like syntax, recurring tasks, conflict detection, and execution history tracking",
+  "database": "postgres",
+  "apiPattern": "RESTful",
+  "difficulty": "complex",
+  "entities": [
+    {
+      "name": "ScheduledJob",
+      "fields": [
+        {"name": "id", "type": "string", "primaryKey": true},
+        {"name": "name", "type": "string", "required": true},
+        {"name": "cronExpression", "type": "string", "required": true},
+        {"name": "resourceId", "type": "string"},
+        {"name": "isRecurring", "type": "bool", "default": true},
+        {"name": "enabled", "type": "bool", "default": true},
+        {"name": "nextRun", "type": "time.Time"},
+        {"name": "lastRun", "type": "time.Time"},
+        {"name": "executionCount", "type": "int", "default": 0}
+      ]
+    },
+    {
+      "name": "ExecutionLog",
+      "fields": [
+        {"name": "jobId", "type": "string"},
+        {"name": "startedAt", "type": "time.Time"},
+        {"name": "completedAt", "type": "time.Time"},
+        {"name": "status", "type": "string"},
+        {"name": "error", "type": "string"}
+      ]
+    }
+  ],
+  "features": [
+    "POST /jobs - Create scheduled job",
+    "Business rule: Validate cron expression format",
+    "Business rule: Detect conflicts (same resource at same time)",
+    "Business rule: Calculate next run time from cron expression",
+    "POST /jobs/:id/execute - Manually trigger job",
+    "Business rule: Cannot execute if another instance is running",
+    "GET /jobs/upcoming - List jobs scheduled in next 24 hours",
+    "Background: Auto-execute jobs when nextRun <= now"
+  ],
+  "objectives": [
+    "Validate cron expression parsing",
+    "Test conflict detection logic",
+    "Verify next run calculation",
+    "Ensure execution locking",
+    "Test recurring vs one-time jobs"
+  ]
+}

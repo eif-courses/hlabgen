@@ -1,0 +1,11 @@
+{
+  "StartTime": "2025-10-28T23:19:22.627287161+02:00",
+  "EndTime": "2025-10-28T23:19:22.627387373+02:00",
+  "Duration": 100212,
+  "PrimarySuccess": false,
+  "RepairAttempts": 0,
+  "FinalSuccess": false,
+  "ErrorMessage": "this model has beta-limitations, temperature, top_p and n are fixed at 1, while presence_penalty and frequency_penalty are fixed at 0",
+  "RuleFixes": 0,
+  "Mode": "ml"
+}

@@ -1,0 +1,40 @@
+{
+  "appName": "PaymentAPI",
+  "description": "Payment processing system with transaction management, refund logic, idempotency, and fraud detection",
+  "database": "postgres",
+  "apiPattern": "RESTful",
+  "difficulty": "complex",
+  "entities": [
+    {
+      "name": "Payment",
+      "fields": [
+        {"name": "id", "type": "string", "primaryKey": true},
+        {"name": "orderId", "type": "string", "required": true},
+        {"name": "amount", "type": "float64", "required": true},
+        {"name": "currency", "type": "string", "default": "USD"},
+        {"name": "status", "type": "string", "default": "pending"},
+        {"name": "paymentMethod", "type": "string", "required": true},
+        {"name": "idempotencyKey", "type": "string", "unique": true},
+        {"name": "refundedAmount", "type": "float64", "default": 0},
+        {"name": "createdAt", "type": "time.Time"}
+      ]
+    }
+  ],
+  "features": [
+    "POST /payments - Process payment with idempotency key",
+    "Business rule: Same idempotency key returns existing payment (prevents duplicate charges)",
+    "Business rule: Amount must be >= 0.50 and <= 999999.99",
+    "Business rule: Validate payment method (card, bank, wallet)",
+    "POST /payments/:id/refund - Partial or full refund",
+    "Business rule: Refund amount cannot exceed (payment.amount - refundedAmount)",
+    "Business rule: Cannot refund a pending payment",
+    "Status transitions: pending -> processing -> completed/failed"
+  ],
+  "objectives": [
+    "Validate idempotency key handling",
+    "Test transaction atomicity",
+    "Verify refund calculation logic",
+    "Ensure amount validation",
+    "Test duplicate payment prevention"
+  ]
+}

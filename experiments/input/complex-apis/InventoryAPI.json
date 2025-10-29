@@ -1,0 +1,49 @@
+{
+  "appName": "InventoryAPI",
+  "description": "Inventory management with stock tracking, reservation system, and automatic reordering based on thresholds",
+  "database": "postgres",
+  "apiPattern": "RESTful",
+  "difficulty": "complex",
+  "entities": [
+    {
+      "name": "InventoryItem",
+      "fields": [
+        {"name": "id", "type": "string", "primaryKey": true},
+        {"name": "productId", "type": "string", "required": true, "unique": true},
+        {"name": "quantity", "type": "int", "required": true},
+        {"name": "reserved", "type": "int", "default": 0},
+        {"name": "available", "type": "int", "computed": true},
+        {"name": "reorderThreshold", "type": "int", "default": 10},
+        {"name": "reorderQuantity", "type": "int", "default": 50},
+        {"name": "lastRestockedAt", "type": "time.Time"}
+      ]
+    },
+    {
+      "name": "Reservation",
+      "fields": [
+        {"name": "id", "type": "string", "primaryKey": true},
+        {"name": "productId", "type": "string", "required": true},
+        {"name": "quantity", "type": "int", "required": true},
+        {"name": "expiresAt", "type": "time.Time", "required": true},
+        {"name": "status", "type": "string", "default": "active"}
+      ]
+    }
+  ],
+  "features": [
+    "POST /inventory/reserve - Reserve stock for 15 minutes",
+    "Business rule: available = quantity - reserved",
+    "Business rule: Cannot reserve more than available",
+    "POST /inventory/release - Release reservation",
+    "POST /inventory/confirm - Confirm reservation, decrement quantity",
+    "Background job: Auto-release expired reservations",
+    "Business rule: Auto-reorder if available < reorderThreshold",
+    "GET /inventory/:productId - Show quantity, reserved, available"
+  ],
+  "objectives": [
+    "Validate reservation expiration logic",
+    "Test concurrency (multiple simultaneous reservations)",
+    "Verify available quantity calculation",
+    "Ensure reorder threshold triggers correctly",
+    "Test reservation release and confirm"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "app_name": "AuctionAPI",
+  "duration_sec": 0,
+  "end_time": "0001-01-01T00:00:00Z",
+  "error_message": "this model has beta-limitations, temperature, top_p and n are fixed at 1, while presence_penalty and frequency_penalty are fixed at 0",
+  "final_success": false,
+  "mode": "",
+  "primary_success": false,
+  "repair_attempts": 0,
+  "rule_fixes": 0,
+  "start_time": "2025-10-28T23:19:22+02:00"
+}
