@@ -92,40 +92,40 @@ Project Requirements: %s
    func Register() {
    func RegisterRoutes(router *mux.Router) {
 
-4️⃣ TEST FUNCTION SIGNATURES (ABSOLUTELY MANDATORY):
-   ALL test functions MUST have EXACTLY this signature:
+ TEST FUNCTION SIGNATURES (ABSOLUTELY MANDATORY - READ CAREFULLY):
+   EVERY test function MUST have EXACTLY ONE parameter: t *testing.T
    
-   ✅ CORRECT:
-   package handlers_test
-   
-   import (
-       "bytes"
-       "encoding/json"
-       "net/http"
-       "net/http/httptest"
-       "testing"
-       "%s/internal/handlers"
-       "%s/internal/models"
-   )
-   
+   ✅ CORRECT - ONLY ONE PARAMETER:
    func TestCreateBook(t *testing.T) {
-       book := models.Book{
-           Title:  "Test Book",
-           Author: "Test Author",
-       }
-       body, _ := json.Marshal(book)
-       req := httptest.NewRequest("POST", "/books", bytes.NewBuffer(body))
+   func TestGetBooks(t *testing.T) {
+   func TestUpdateBook(t *testing.T) {
+   
+   ❌ WRONG - THESE WILL FAIL:
+   func TestCreateBook() {                                    // ❌ NO parameters
+   func TestCreateBook(t testing.T) {                         // ❌ Missing *
+   func TestCreateBook(w http.ResponseWriter, r *http.Request) { // ❌ Wrong parameters
+   func TestCreateBook(t *testing.T, w http.ResponseWriter) { // ❌ Extra parameters
+   func TestCreateBook(ctx context.Context, t *testing.T) {   // ❌ Extra parameters
+   
+   🚨 CRITICAL: Tests are NOT handlers!
+   • Handlers get: (w http.ResponseWriter, r *http.Request)
+   • Tests get: (t *testing.T) ONLY
+   
+   DO NOT confuse them. Tests create mock requests like this:
+   
+   func TestCreateBook(t *testing.T) {  // ← ONLY ONE PARAMETER
+       // Create mock request inside the test
+       req := httptest.NewRequest("POST", "/books", body)
        w := httptest.NewRecorder()
+       
+       // Call the handler (which has w, r parameters)
        handlers.CreateBook(w, req)
+       
+       // Assert results
        if w.Code != http.StatusCreated {
-           t.Errorf("Expected 201, got %%d", w.Code)
+           t.Errorf("Expected 201, got %d", w.Code)
        }
    }
-   
-   ❌ WRONG:
-   func TestCreateBook() {
-   func TestCreateBook(t testing.T) {
-   func TestCreateBook(t *testing.T, w http.ResponseWriter, r *http.Request) {
 
 5️⃣ STRUCT LITERAL SYNTAX (CRITICAL):
    Every field in multi-line struct literals MUST end with a comma:

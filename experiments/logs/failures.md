@@ -2,7 +2,7 @@
 
 ## Overview
 
-- **Total Experiments**: 30
+- **Total Experiments**: 10
 - **Failures**: 0
 - **Success Rate**: 100.0%
 

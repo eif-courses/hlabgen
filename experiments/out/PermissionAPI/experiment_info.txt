@@ -1,0 +1,10 @@
+App: PermissionAPI
+Mode: hybrid
+Timestamp: 2025-10-30T21:49:37+02:00
+OpenAI Model: gpt-4o
+BuildSuccess: false
+TestsPass: false
+Coverage: 0.0%
+Duration: 1m0.010549196s
+RepairAttempts: 1
+RuleFixes: 19

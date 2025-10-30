@@ -1,0 +1,10 @@
+App: SchedulerAPI
+Mode: hybrid
+Timestamp: 2025-10-30T21:50:35+02:00
+OpenAI Model: gpt-4o
+BuildSuccess: false
+TestsPass: false
+Coverage: 0.0%
+Duration: 53.343138145s
+RepairAttempts: 1
+RuleFixes: 14

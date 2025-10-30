@@ -178,6 +178,14 @@ func generateMLOnly(schema input.Schema, outDir string) mlinternal.GenerationMet
 	// Fix parseID type mismatches
 	fixParseIDTypeMismatch(outDir)
 
+	// 🆕 ADD THIS:
+	fmt.Println("🔧 Running rule-based auto-fix on ML-generated files...")
+	if err := assemble.FixAllGeneratedFiles(outDir); err != nil {
+		log.Printf("⚠️  Some auto-fixes failed: %v", err)
+	} else {
+		fmt.Println("✅ Rule-based fixes applied successfully")
+	}
+
 	fmt.Println("🔍 Validating Go syntax (ML-only)...")
 	syntaxErrors := validateGoSyntax(outDir)
 	if len(syntaxErrors) > 0 {
@@ -322,6 +330,9 @@ func generateHybrid(schema input.Schema, outDir string) mlinternal.GenerationMet
 // ============================================================================
 // ⚙️  GENERATION MODE: RULES-ONLY (Deterministic, no ML)
 // ============================================================================
+// Updated generateRulesOnly function for cmd/hlabgen/main.go
+// This replaces your existing generateRulesOnly function
+
 func generateRulesOnly(schema input.Schema, outDir string) mlinternal.GenerationMetrics {
 	log.Println("⚙️  Starting PURE RULE-based generation...")
 
@@ -332,18 +343,47 @@ func generateRulesOnly(schema input.Schema, outDir string) mlinternal.Generation
 
 	var files []assemble.File
 
+	// 🆕 Detect if this is a complex API (has features)
+	isComplexAPI := len(schema.Features) > 0
+
+	if isComplexAPI {
+		log.Println("🔍 Detected complex API with business logic features")
+		log.Printf("   Features: %v", schema.Features)
+	}
+
 	// Generate files for each entity
 	for _, entity := range schema.Entities {
-		files = append(files, assemble.File{
-			Filename: fmt.Sprintf("internal/models/%s.go", strings.ToLower(entity)),
-			Content:  rules.GenerateModel(entity),
-		})
+		// 🆕 Use complex templates if features are present
+		if isComplexAPI {
+			// Generate model with business logic fields
+			files = append(files, assemble.File{
+				Filename: fmt.Sprintf("internal/models/%s.go", strings.ToLower(entity)),
+				Content:  rules.GenerateComplexModel(entity, schema.Features),
+			})
 
-		files = append(files, assemble.File{
-			Filename: fmt.Sprintf("internal/handlers/%s.go", strings.ToLower(entity)),
-			Content:  rules.GenerateHandler(entity, schema.AppName),
-		})
+			// Generate handler with business logic
+			generator := rules.NewComplexHandler(entity, schema.AppName, schema.Features)
+			files = append(files, assemble.File{
+				Filename: fmt.Sprintf("internal/handlers/%s.go", strings.ToLower(entity)),
+				Content:  generator.GenerateComplexHandler(),
+			})
 
+			log.Printf("   ✅ Generated complex handler for %s (discount=%v, tax=%v, state=%v)",
+				entity, generator.HasDiscount, generator.HasTax, generator.HasState)
+		} else {
+			// Use simple templates for CRUD-only APIs
+			files = append(files, assemble.File{
+				Filename: fmt.Sprintf("internal/models/%s.go", strings.ToLower(entity)),
+				Content:  rules.GenerateModel(entity),
+			})
+
+			files = append(files, assemble.File{
+				Filename: fmt.Sprintf("internal/handlers/%s.go", strings.ToLower(entity)),
+				Content:  rules.GenerateHandler(entity, schema.AppName),
+			})
+		}
+
+		// Tests (always use existing generator)
 		files = append(files, assemble.File{
 			Filename: fmt.Sprintf("internal/handlers/%s_test.go", strings.ToLower(entity)),
 			Content:  rules.GenerateTest(entity, schema.AppName),
@@ -397,13 +437,16 @@ func generateRulesOnly(schema input.Schema, outDir string) mlinternal.Generation
 	tidyDependencies(outDir)
 
 	genMetrics.PrimarySuccess = true
-
 	genMetrics.FinalSuccess = true
 	genMetrics.RuleFixes = len(files)
 	genMetrics.EndTime = time.Now()
 	genMetrics.Duration = genMetrics.EndTime.Sub(genMetrics.StartTime)
 
-	fmt.Printf("✅ Rules-only generation completed (%.2fs)\n", genMetrics.Duration.Seconds())
+	if isComplexAPI {
+		fmt.Printf("✅ Rules-only generation with business logic completed (%.2fs)\n", genMetrics.Duration.Seconds())
+	} else {
+		fmt.Printf("✅ Rules-only generation completed (%.2fs)\n", genMetrics.Duration.Seconds())
+	}
 	fmt.Printf("✅ Generated %d files using rule-based templates\n", len(files))
 
 	return genMetrics

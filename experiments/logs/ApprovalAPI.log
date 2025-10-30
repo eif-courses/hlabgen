@@ -1,0 +1,113 @@
+
+🚀 Starting generation for app: ApprovalAPI (mode=hybrid)
+2025/10/30 21:38:53 🔀 Starting HYBRID generation (rules + ML + validation)...
+2025/10/30 21:38:53 📐 Step 1/3: Creating rule-based scaffold...
+go: finding module for package github.com/eif-courses/hlabgen/experiments/out/ApprovalAPI/internal/models
+go: finding module for package github.com/eif-courses/hlabgen/experiments/out/ApprovalAPI/internal/handlers
+go: downloading github.com/eif-courses/hlabgen v0.0.0-20251026202251-b89543cd5180
+go: ApprovalAPI/internal/handlers imports
+	github.com/eif-courses/hlabgen/experiments/out/ApprovalAPI/internal/models: module github.com/eif-courses/hlabgen@latest found (v0.0.0-20251026202251-b89543cd5180), but does not contain package github.com/eif-courses/hlabgen/experiments/out/ApprovalAPI/internal/models
+go: ApprovalAPI/internal/handlers tested by
+	ApprovalAPI/internal/handlers.test imports
+	github.com/eif-courses/hlabgen/experiments/out/ApprovalAPI/internal/handlers: module github.com/eif-courses/hlabgen@latest found (v0.0.0-20251026202251-b89543cd5180), but does not contain package github.com/eif-courses/hlabgen/experiments/out/ApprovalAPI/internal/handlers
+✅ Rule-based scaffold created (structure only)
+2025/10/30 21:38:57 🧠 Step 2/3: Using ML to enhance scaffold logic...
+🤖 Trying model: gpt-4o
+⏱️  Model call took 56.888932356s (model: gpt-4o, attempt: 1)
+✅ Parsed 7 files
+
+📊 Generation Summary:
+  • Duration: 56.889218887s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+✅ ApprovalAPI generation completed successfully
+🧾 Saved ML metrics → experiments/ApprovalAPI/gen_metrics.json
+2025/10/30 21:39:54 🔧 Step 3/3: Applying rule-based validation & fixes...
+📝 Processing: internal/models/approval_request.go
+✅ Written: experiments/out/ApprovalAPI/internal/models/approval_request.go
+📝 Processing: internal/models/approval.go
+✅ Written: experiments/out/ApprovalAPI/internal/models/approval.go
+📝 Processing: internal/handlers/approval_request.go
+🔧 Fixed handler signature for CreateApprovalRequest
+🔧 Fixed handler signature for GetPendingApprovalRequests
+✅ Written: experiments/out/ApprovalAPI/internal/handlers/approval_request.go
+📝 Processing: internal/handlers/approval_request_test.go
+🔧 Fixed test signature for TestCreateApprovalRequest
+🔧 Fixed test signature for TestApproveApprovalRequest
+🔧 Fixed test signature for TestRejectApprovalRequest
+🔧 Fixed test signature for TestGetPendingApprovalRequests
+✅ Auto-fixed test signatures in internal/handlers/approval_request_test.go
+✅ Written: experiments/out/ApprovalAPI/internal/handlers/approval_request_test.go
+📝 Processing: internal/routes/routes.go
+🔧 Fixed Register function parameter
+✅ Written: experiments/out/ApprovalAPI/internal/routes/routes.go
+📝 Processing: cmd/main.go
+✅ Written: experiments/out/ApprovalAPI/cmd/main.go
+📝 Processing: tasks.md
+⚠️  Syntax validation failed for tasks.md: temp.go:1:1: illegal character U+0023 '#'
+🔧 Attempting additional fixes...
+❌ Could not auto-fix syntax errors in tasks.md
+✅ Written: experiments/out/ApprovalAPI/tasks.md
+
+🔧 Total rule-based fixes applied: 12
+🔧 Running rule-based auto-fix on ML-generated files...
+
+🔧 Auto-fixing all files in: experiments/out/ApprovalAPI
+
+📝 Fixing test function signatures...
+  ✅ Fixed test signatures in approval_request_test.go
+
+📝 Fixing handler function signatures...
+
+📝 Fixing routes Register function...
+
+✅ Applied 1 auto-fixes
+✅ Rule-based fixes applied successfully
+🔧 Fixing parseID type mismatches...
+🔍 Validating Go syntax...
+✅ All generated files have valid Go syntax
+2025/10/30 21:39:54 🔧 Detected module name: ApprovalAPI — fixing imports...
+2025/10/30 21:39:54 ✅ No import fixes needed
+🔧 Running go mod tidy...
+go: finding module for package github.com/eif-courses/hlabgen/experiments/out/ApprovalAPI/internal/models
+go: finding module for package github.com/eif-courses/hlabgen/experiments/out/ApprovalAPI/internal/handlers
+go: ApprovalAPI/internal/handlers imports
+	github.com/eif-courses/hlabgen/experiments/out/ApprovalAPI/internal/models: module github.com/eif-courses/hlabgen@latest found (v0.0.0-20251026202251-b89543cd5180), but does not contain package github.com/eif-courses/hlabgen/experiments/out/ApprovalAPI/internal/models
+go: ApprovalAPI/internal/handlers tested by
+	ApprovalAPI/internal/handlers.test imports
+	github.com/eif-courses/hlabgen/experiments/out/ApprovalAPI/internal/handlers: module github.com/eif-courses/hlabgen@latest found (v0.0.0-20251026202251-b89543cd5180), but does not contain package github.com/eif-courses/hlabgen/experiments/out/ApprovalAPI/internal/handlers
+2025/10/30 21:39:55 ⚠️  go mod tidy failed: exit status 1
+✅ Hybrid generation completed (57.37s) - rules + ML synergy applied
+🔧 Injected mux import → experiments/out/ApprovalAPI/internal/handlers/approval_request.go
+🔧 Verified mux dependency and tidied module
+📁 Saved per-package coverage → experiments/out/ApprovalAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/ApprovalAPI/internal/handlers ---
+# ApprovalAPI/internal/handlers
+approval.go:10:2: no required module provides package github.com/eif-courses/hlabgen/experiments/out/ApprovalAPI/internal/models; to add it:
+	go get github.com/eif-courses/hlabgen/experiments/out/ApprovalAPI/internal/models
+FAIL	ApprovalAPI/internal/handlers [setup failed]
+
+------------------------
+✅ Validation completed in 0.86s
+
+📊 Summary for ApprovalAPI (mode: hybrid):
+  • BuildSuccess = false
+  • LintWarnings = 22
+  • TestsPass    = false
+  • Coverage     = 0.0%
+  • Generation Duration = 57.373036051s
+  • Repair Attempts = 0
+  • Rule Fixes   = 13
+🧾 Wrote 10 unique experiments to experiments/logs/summary.csv
+
+🧾 Generating Markdown summary from JSON metrics...
+📊 Markdown results saved → experiments/logs/results.md
+✅ Summary successfully written to experiments/logs/results.md
+
+✅ Experiment complete..

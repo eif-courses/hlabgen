@@ -1,0 +1,107 @@
+
+🚀 Starting generation for app: NotificationAPI (mode=hybrid)
+2025/10/30 21:42:42 🔀 Starting HYBRID generation (rules + ML + validation)...
+2025/10/30 21:42:42 📐 Step 1/3: Creating rule-based scaffold...
+go: finding module for package github.com/eif-courses/hlabgen/experiments/out/NotificationAPI/internal/models
+go: finding module for package github.com/eif-courses/hlabgen/experiments/out/NotificationAPI/internal/handlers
+go: NotificationAPI/internal/handlers imports
+	github.com/eif-courses/hlabgen/experiments/out/NotificationAPI/internal/models: module github.com/eif-courses/hlabgen@latest found (v0.0.0-20251026202251-b89543cd5180), but does not contain package github.com/eif-courses/hlabgen/experiments/out/NotificationAPI/internal/models
+go: NotificationAPI/internal/handlers tested by
+	NotificationAPI/internal/handlers.test imports
+	github.com/eif-courses/hlabgen/experiments/out/NotificationAPI/internal/handlers: module github.com/eif-courses/hlabgen@latest found (v0.0.0-20251026202251-b89543cd5180), but does not contain package github.com/eif-courses/hlabgen/experiments/out/NotificationAPI/internal/handlers
+✅ Rule-based scaffold created (structure only)
+2025/10/30 21:42:44 🧠 Step 2/3: Using ML to enhance scaffold logic...
+🤖 Trying model: gpt-4o
+⏱️  Model call took 15.653103552s (model: gpt-4o, attempt: 1)
+✅ Parsed 6 files
+
+📊 Generation Summary:
+  • Duration: 15.653595996s
+  • Primary Success: true
+  • Repair Attempts: 0
+  • Final Success: true
+  • Error: 
+✅ NotificationAPI generation completed successfully
+🧾 Saved ML metrics → experiments/NotificationAPI/gen_metrics.json
+2025/10/30 21:43:00 🔧 Step 3/3: Applying rule-based validation & fixes...
+📝 Processing: internal/models/notification.go
+✅ Written: experiments/out/NotificationAPI/internal/models/notification.go
+📝 Processing: internal/handlers/notification.go
+🔧 Fixed handler signature for CreateNotification
+🔧 Fixed handler signature for GetNotificationStatus
+✅ Written: experiments/out/NotificationAPI/internal/handlers/notification.go
+📝 Processing: internal/handlers/notification_test.go
+🔧 Fixed test signature for TestCreateNotification
+🔧 Fixed test signature for TestGetNotificationStatus
+🔧 Fixed test signature for TestRetryNotification
+✅ Auto-fixed test signatures in internal/handlers/notification_test.go
+✅ Written: experiments/out/NotificationAPI/internal/handlers/notification_test.go
+📝 Processing: internal/routes/routes.go
+🔧 Fixed Register function parameter
+✅ Written: experiments/out/NotificationAPI/internal/routes/routes.go
+📝 Processing: cmd/main.go
+✅ Written: experiments/out/NotificationAPI/cmd/main.go
+📝 Processing: tasks.md
+⚠️  Syntax validation failed for tasks.md: temp.go:1:1: illegal character U+0023 '#'
+🔧 Attempting additional fixes...
+❌ Could not auto-fix syntax errors in tasks.md
+✅ Written: experiments/out/NotificationAPI/tasks.md
+
+🔧 Total rule-based fixes applied: 11
+🔧 Running rule-based auto-fix on ML-generated files...
+
+🔧 Auto-fixing all files in: experiments/out/NotificationAPI
+
+📝 Fixing test function signatures...
+  ✅ Fixed test signatures in notification_test.go
+
+📝 Fixing handler function signatures...
+
+📝 Fixing routes Register function...
+
+✅ Applied 1 auto-fixes
+✅ Rule-based fixes applied successfully
+🔧 Fixing parseID type mismatches...
+🔍 Validating Go syntax...
+✅ All generated files have valid Go syntax
+2025/10/30 21:43:00 🔧 Detected module name: NotificationAPI — fixing imports...
+2025/10/30 21:43:00 ✅ No import fixes needed
+🔧 Running go mod tidy...
+✅ Dependencies tidied
+✅ Hybrid generation completed (15.69s) - rules + ML synergy applied
+🔧 Injected mux import → experiments/out/NotificationAPI/internal/handlers/notification.go
+🔧 Verified mux dependency and tidied module
+📁 Saved per-package coverage → experiments/out/NotificationAPI/coverage.json
+🧾 Added summary row (with ML metrics) → experiments/logs/coverage.csv
+
+--- go test summary ---
+
+--- experiments/out/NotificationAPI/internal/handlers ---
+# NotificationAPI/internal/handlers [NotificationAPI/internal/handlers.test]
+./notification.go:63:19: undefined: r
+./notification.go:66:14: undefined: w
+./notification.go:75:5: undefined: w
+./notification.go:76:5: undefined: w
+./notification.go:77:21: undefined: w
+./notification.go:81:16: undefined: w
+./notification.go:88:13: undefined: w
+FAIL	NotificationAPI/internal/handlers [build failed]
+
+------------------------
+✅ Validation completed in 0.68s
+
+📊 Summary for NotificationAPI (mode: hybrid):
+  • BuildSuccess = false
+  • LintWarnings = 24
+  • TestsPass    = false
+  • Coverage     = 0.0%
+  • Generation Duration = 15.688033067s
+  • Repair Attempts = 0
+  • Rule Fixes   = 12
+🧾 Wrote 10 unique experiments to experiments/logs/summary.csv
+
+🧾 Generating Markdown summary from JSON metrics...
+📊 Markdown results saved → experiments/logs/results.md
+✅ Summary successfully written to experiments/logs/results.md
+
+✅ Experiment complete..
