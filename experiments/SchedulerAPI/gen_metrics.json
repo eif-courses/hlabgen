@@ -1,0 +1,12 @@
+{
+  "app_name": "SchedulerAPI",
+  "duration_sec": 53.196454326,
+  "end_time": "2025-10-30T21:50:34+02:00",
+  "error_message": "",
+  "final_success": true,
+  "mode": "",
+  "primary_success": false,
+  "repair_attempts": 1,
+  "rule_fixes": 0,
+  "start_time": "2025-10-30T21:49:41+02:00"
+}

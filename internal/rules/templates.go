@@ -37,6 +37,8 @@ func isVowel(b byte) bool {
 func GenerateModel(entityName string) string {
 	return fmt.Sprintf(`package models
 
+import "fmt"
+
 // %s represents a %s entity
 type %s struct {
 	ID          int    `+"`json:\"id\"`"+`
@@ -45,7 +47,15 @@ type %s struct {
 	CreatedAt   string `+"`json:\"created_at,omitempty\"`"+`
 	UpdatedAt   string `+"`json:\"updated_at,omitempty\"`"+`
 }
-`, entityName, strings.ToLower(entityName), entityName)
+
+// generate%sID generates a unique ID for %s
+func generate%sID() int {
+	return fmt.Sprintf("%%d", %sCounter)
+}
+
+var %sCounter = 1
+`, entityName, strings.ToLower(entityName), entityName,
+		entityName, entityName, entityName, entityName, entityName)
 }
 
 // GenerateHandler creates a basic CRUD handler for an entity

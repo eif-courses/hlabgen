@@ -376,7 +376,7 @@ func WriteMany(base string, files []File, metrics *ml.GenerationMetrics) error {
 
 			// Then apply other test fixes
 			content = rules.FixTestImports(content)
-			content = rules.FixTestBodies(content)
+			// content = rules.FixTestBodies(content)
 			content = CleanDuplicateImports(content)
 
 			// Ensure net/http import for httptest
@@ -467,7 +467,7 @@ func FixAllGeneratedFiles(projectDir string) error {
 
 	fixes := 0
 
-	// Fix 1: Test function signatures
+	// Fix 1: Test function signatures - ENHANCED VERSION
 	fmt.Println("\n📝 Fixing test function signatures...")
 	err := filepath.Walk(filepath.Join(projectDir, "internal", "handlers"), func(path string, info os.FileInfo, err error) error {
 		if err != nil || info.IsDir() || !strings.HasSuffix(path, "_test.go") {
@@ -482,9 +482,27 @@ func FixAllGeneratedFiles(projectDir string) error {
 		original := string(content)
 		fixed := original
 
-		// Fix: func TestXxx() { -> func TestXxx(t *testing.T) {
-		re := regexp.MustCompile(`func (Test\w+)\s*\(\s*\)\s*\{`)
-		fixed = re.ReplaceAllString(fixed, `func $1(t *testing.T) {`)
+		// 🆕 ENHANCED: Match ANY parameters, not just empty ()
+		// This catches: func TestXxx(), func TestXxx(w, r), func TestXxx(ctx context.Context), etc.
+		re := regexp.MustCompile(`func (Test\w+)\s*\([^)]*\)\s*\{`)
+
+		// Find all matches
+		matches := re.FindAllStringSubmatch(fixed, -1)
+		for _, match := range matches {
+			if len(match) >= 2 {
+				funcName := match[1]
+				fullMatch := match[0]
+
+				// Skip if already correct
+				if strings.Contains(fullMatch, "(t *testing.T)") {
+					continue
+				}
+
+				// Replace with correct signature
+				correctSig := fmt.Sprintf("func %s(t *testing.T) {", funcName)
+				fixed = strings.ReplaceAll(fixed, fullMatch, correctSig)
+			}
+		}
 
 		if fixed != original {
 			err = os.WriteFile(path, []byte(fixed), 0644)
@@ -546,86 +564,28 @@ func FixAllGeneratedFiles(projectDir string) error {
 		content, err := os.ReadFile(routesPath)
 		if err == nil {
 			original := string(content)
-			fixed := fixRegisterParameter(original)
+			fixed := original
+
+			// Fix: func Register() -> func Register(r *mux.Router)
+			re := regexp.MustCompile(`func Register\s*\(\s*\)\s*\{`)
+			fixed = re.ReplaceAllString(fixed, `func Register(r *mux.Router) {`)
 
 			if fixed != original {
 				err = os.WriteFile(routesPath, []byte(fixed), 0644)
 				if err == nil {
 					fixes++
-					fmt.Println("  ✅ Fixed Register function parameter")
+					fmt.Println("  ✅ Fixed Register function in routes.go")
 				}
 			}
 		}
 	}
 
-	// Fix 4: Missing commas in test files
-	fmt.Println("\n📝 Fixing missing commas in struct literals...")
-	err = filepath.Walk(filepath.Join(projectDir, "internal", "handlers"), func(path string, info os.FileInfo, err error) error {
-		if err != nil || info.IsDir() || !strings.HasSuffix(path, "_test.go") {
-			return nil
-		}
-
-		content, err := os.ReadFile(path)
-		if err != nil {
-			return err
-		}
-
-		original := string(content)
-		fixed, wasFixed := fixMissingCommas(original)
-
-		if wasFixed {
-			err = os.WriteFile(path, []byte(fixed), 0644)
-			if err == nil {
-				fixes++
-				fmt.Printf("  ✅ Fixed missing commas in %s\n", filepath.Base(path))
-			}
-		}
-		return nil
-	})
-	if err != nil {
-		return err
+	if fixes > 0 {
+		fmt.Printf("\n✅ Applied %d auto-fixes\n", fixes)
+	} else {
+		fmt.Println("\n✅ No fixes needed")
 	}
 
-	// Fix 5: Ensure all test files have required imports
-	fmt.Println("\n📝 Ensuring test file imports...")
-	err = filepath.Walk(filepath.Join(projectDir, "internal", "handlers"), func(path string, info os.FileInfo, err error) error {
-		if err != nil || info.IsDir() || !strings.HasSuffix(path, "_test.go") {
-			return nil
-		}
-
-		content, err := os.ReadFile(path)
-		if err != nil {
-			return err
-		}
-
-		original := string(content)
-		fixed := original
-
-		// Ensure required imports
-		if !strings.Contains(fixed, `"testing"`) {
-			fixed = ensureTestingImport(fixed)
-		}
-		if strings.Contains(fixed, "httptest.") && !strings.Contains(fixed, `"net/http/httptest"`) {
-			fixed = ensureHTTPTestImport(fixed)
-		}
-		if strings.Contains(fixed, "bytes.") && !strings.Contains(fixed, `"bytes"`) {
-			fixed = ensureBytesImport(fixed)
-		}
-
-		if fixed != original {
-			err = os.WriteFile(path, []byte(fixed), 0644)
-			if err == nil {
-				fixes++
-				fmt.Printf("  ✅ Fixed imports in %s\n", filepath.Base(path))
-			}
-		}
-		return nil
-	})
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("\n✅ Applied %d fixes total!\n", fixes)
 	return nil
 }
 

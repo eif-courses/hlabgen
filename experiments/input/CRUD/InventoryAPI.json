@@ -1,0 +1,21 @@
+{
+  "app_name": "InventoryAPI",
+  "entities": [
+    "Product",
+    "Order",
+    "Supplier"
+  ],
+  "features": [
+    "CRUD",
+    "notifications",
+    "analytics"
+  ],
+  "database": "MongoDB",
+  "difficulty": "Beginner",
+  "objectives": [
+    "Implement basic REST CRUD operations",
+    "Add simple search functionality",
+    "Write unit tests for handlers"
+  ],
+  "api_pattern": "REST"
+}

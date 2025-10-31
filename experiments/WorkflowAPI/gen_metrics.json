@@ -1,0 +1,12 @@
+{
+  "app_name": "WorkflowAPI",
+  "duration_sec": 29.297520995,
+  "end_time": "2025-10-30T21:51:41+02:00",
+  "error_message": "",
+  "final_success": true,
+  "mode": "",
+  "primary_success": true,
+  "repair_attempts": 0,
+  "rule_fixes": 0,
+  "start_time": "2025-10-30T21:51:11+02:00"
+}

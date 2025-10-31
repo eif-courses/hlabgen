@@ -18,6 +18,7 @@ import (
 
 // GenerationMetrics stores run information for analysis and paper results.
 type GenerationMetrics struct {
+	// Existing fields
 	StartTime      time.Time
 	EndTime        time.Time
 	Duration       time.Duration
@@ -26,7 +27,21 @@ type GenerationMetrics struct {
 	FinalSuccess   bool
 	ErrorMessage   string
 	RuleFixes      int
-	Mode           string // ADD THIS LINE
+	Mode           string
+
+	// NEW: Model tracking
+	Model        string // "gpt-4o", "gpt-4o-mini", "claude-3.7-sonnet"
+	ModelVersion string // API version or snapshot date
+
+	// NEW: Complexity tracking
+	APIComplexity string // "crud", "business-logic", "state-machine", "auth", "search", "async"
+	EndpointCount int    // Number of endpoints in spec
+
+	// NEW: Advanced metrics
+	TokensUsed       int     // From API response
+	CostUSD          float64 // Estimated cost
+	PromptTokens     int
+	CompletionTokens int
 }
 
 // Generate creates Go code scaffolds using ML and repairs malformed output automatically.
@@ -142,7 +157,7 @@ func Generate(s Schema) ([]GenFile, GenerationMetrics, error) {
 
 // callWithRetry attempts API call with exponential backoff and model fallback
 func callWithRetry(ctx context.Context, client *openai.Client, prompt string, temperature float32) (openai.ChatCompletionResponse, error) {
-	models := []string{openai.GPT4oMini, openai.GPT3Dot5Turbo, openai.GPT3Dot5Turbo16K}
+	models := []string{openai.GPT4o, openai.GPT4oMini}
 
 	maxRetries := 3
 
