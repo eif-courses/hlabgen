@@ -126,7 +126,6 @@ func generateMLOnly(schema input.Schema, outDir string) mlinternal.GenerationMet
 		Mode:      "ml",
 	}
 
-	// ML-only should generate everything from scratch
 	mlFiles, mlMetrics, err := mlinternal.Generate(mlinternal.Schema{
 		AppName:    schema.AppName,
 		Database:   schema.Database,
@@ -141,7 +140,6 @@ func generateMLOnly(schema input.Schema, outDir string) mlinternal.GenerationMet
 	genMetrics.Mode = "ml"
 	files := convertGenFiles(mlFiles)
 
-	// Retry logic
 	if err != nil {
 		log.Printf("⚠️  ML generation failed once: %v", err)
 		log.Println("🔁 Retrying with relaxed mode...")
@@ -170,15 +168,12 @@ func generateMLOnly(schema input.Schema, outDir string) mlinternal.GenerationMet
 		return genMetrics
 	}
 
-	// Write ML output
 	if err := assemble.WriteMany(outDir, files, &genMetrics); err != nil {
 		log.Fatalf("❌ Failed to write ML files: %v", err)
 	}
 
-	// Fix parseID type mismatches
 	fixParseIDTypeMismatch(outDir)
 
-	// 🆕 ADD THIS:
 	fmt.Println("🔧 Running rule-based auto-fix on ML-generated files...")
 	if err := assemble.FixAllGeneratedFiles(outDir); err != nil {
 		log.Printf("⚠️  Some auto-fixes failed: %v", err)
@@ -197,16 +192,11 @@ func generateMLOnly(schema input.Schema, outDir string) mlinternal.GenerationMet
 		fmt.Println("✅ All ML-generated files have valid Go syntax")
 	}
 
-	// Ensure go.mod exists FIRST
 	ensureGoMod(outDir, schema.AppName)
-
-	// Then fix imports
 	fixImportsToModule(outDir)
-
 	tidyDependencies(outDir)
 
 	genMetrics.FinalSuccess = true
-
 	genMetrics.EndTime = time.Now()
 	genMetrics.Duration = genMetrics.EndTime.Sub(genMetrics.StartTime)
 
@@ -215,25 +205,78 @@ func generateMLOnly(schema input.Schema, outDir string) mlinternal.GenerationMet
 }
 
 // ============================================================================
-// 🔀 GENERATION MODE: HYBRID (Rules + ML + Validation)
+// 🔀 GENERATION MODE: HYBRID (Intelligent Strategy Selection)
 // ============================================================================
 func generateHybrid(schema input.Schema, outDir string) mlinternal.GenerationMetrics {
-	log.Println("🔀 Starting HYBRID generation (rules + ML + validation)...")
+	log.Println("🔀 Starting INTELLIGENT HYBRID generation...")
 
 	genMetrics := mlinternal.GenerationMetrics{
 		StartTime: time.Now(),
 		Mode:      "hybrid",
 	}
 
+	// 🆕 STEP 0: Analyze complexity and select strategy
+	log.Println("📊 Step 0/4: Analyzing API complexity...")
+	complexity := rules.AnalyzeComplexity(schema.Features)
+	fmt.Println(complexity.DebugInfo())
+
+	strategy := complexity.GetStrategy()
+	log.Printf("🎯 Selected Strategy: %s\n", strategy)
+
+	// Execute appropriate strategy
+	switch strategy {
+	case "ML_PRIMARY":
+		genMetrics = generateMLPrimaryHybrid(schema, outDir, genMetrics)
+
+	case "HYBRID_BALANCED":
+		genMetrics = generateHybridBalancedStrategy(schema, outDir, genMetrics)
+
+	case "RULES_PRIMARY":
+		genMetrics = generateRulesPrimaryStrategy(schema, outDir, genMetrics)
+
+	default:
+		genMetrics.FinalSuccess = false
+		genMetrics.ErrorMessage = "unknown strategy: " + strategy
+	}
+
+	genMetrics.EndTime = time.Now()
+	genMetrics.Duration = genMetrics.EndTime.Sub(genMetrics.StartTime)
+	fmt.Printf("✅ Hybrid generation completed (%.2fs) - Strategy: %s\n", genMetrics.Duration.Seconds(), strategy)
+
+	return genMetrics
+}
+
+// 🆕 ML-PRIMARY Strategy Implementation
+func generateMLPrimaryHybrid(schema input.Schema, outDir string, genMetrics mlinternal.GenerationMetrics) mlinternal.GenerationMetrics {
+	log.Println("\n🤖 Executing ML-PRIMARY Strategy")
+	log.Println("  • ML generates business logic")
+	log.Println("  • Rules create structure & validation")
+
 	// Step 1: Create rule-based scaffold
-	log.Println("📐 Step 1/3: Creating rule-based scaffold...")
+	log.Println("📐 Step 1/4: Creating rule-based scaffold...")
 	if _, err := rules.Scaffold(outDir, schema.AppName); err != nil {
 		log.Fatalf("❌ Scaffold failed: %v", err)
 	}
-	fmt.Println("✅ Rule-based scaffold created (structure only)")
 
-	// Step 2: Generate ML content
-	log.Println("🧠 Step 2/3: Using ML to enhance scaffold logic...")
+	// Generate models and handlers with business logic placeholders
+	var files []assemble.File
+
+	for _, entity := range schema.Entities {
+		// Model
+		files = append(files, assemble.File{
+			Filename: fmt.Sprintf("internal/models/%s.go", strings.ToLower(entity)),
+			Content:  rules.GenerateMLPrimaryModel(entity, schema.Features),
+		})
+
+		// Handler with business logic placeholders
+		files = append(files, assemble.File{
+			Filename: fmt.Sprintf("internal/handlers/%s.go", strings.ToLower(entity)),
+			Content:  rules.GenerateMLPrimaryHandler(entity, schema.Features),
+		})
+	}
+
+	// Step 2: Generate ML business logic layer
+	log.Println("🧠 Step 2/4: Using ML to generate business logic...")
 	mlFiles, mlMetrics, err := mlinternal.Generate(mlinternal.Schema{
 		AppName:    schema.AppName,
 		Database:   schema.Database,
@@ -244,95 +287,186 @@ func generateHybrid(schema input.Schema, outDir string) mlinternal.GenerationMet
 		Objectives: schema.Objectives,
 	})
 
-	genMetrics = mlMetrics
-	genMetrics.Mode = "hybrid"
-	files := convertGenFiles(mlFiles)
-
-	// Retry if needed
 	if err != nil {
-		log.Printf("⚠️  ML enhancement failed: %v", err)
-		log.Println("🔁 Retrying with relaxed mode...")
+		log.Printf("⚠️  ML generation failed: %v", err)
 		genMetrics.RepairAttempts++
-
-		mlFiles, mlMetrics, err = mlinternal.GenerateRelaxed(mlinternal.Schema{
-			AppName:    schema.AppName,
-			Database:   schema.Database,
-			APIPattern: schema.APIPattern,
-			Difficulty: schema.Difficulty,
-			Entities:   schema.Entities,
-			Features:   schema.Features,
-			Objectives: schema.Objectives,
-		})
-
-		genMetrics = mlMetrics
-		genMetrics.Mode = "hybrid"
-		files = convertGenFiles(mlFiles)
-	}
-
-	if err != nil {
-		log.Printf("❌ ML generation failed, using rules-only fallback")
-		genMetrics.Mode = "hybrid"
 		genMetrics.FinalSuccess = false
-		genMetrics.EndTime = time.Now()
-		genMetrics.Duration = genMetrics.EndTime.Sub(genMetrics.StartTime)
-		return genMetrics
+	} else {
+		files = append(files, convertGenFiles(mlFiles)...)
+		genMetrics = mlMetrics
+		genMetrics.FinalSuccess = true
 	}
 
 	// Step 3: Apply rule-based validation & repair
-	log.Println("🔧 Step 3/3: Applying rule-based validation & fixes...")
+	log.Println("🔧 Step 3/4: Applying rule-based validation...")
 	if err := assemble.WriteMany(outDir, files, &genMetrics); err != nil {
-		log.Fatalf("❌ Failed to write hybrid files: %v", err)
+		log.Fatalf("❌ Failed to write files: %v", err)
 	}
 
-	// Apply rule-based fixes to ML output
-	fmt.Println("🔧 Running rule-based auto-fix on ML-generated files...")
 	if err := assemble.FixAllGeneratedFiles(outDir); err != nil {
 		log.Printf("⚠️  Some auto-fixes failed: %v", err)
-	} else {
-		fmt.Println("✅ Rule-based fixes applied successfully")
-		genMetrics.RuleFixes++
 	}
 
-	// Fix parseID type mismatches
+	// Step 4: Finalization
+	log.Println("✅ Step 4/4: Finalizing...")
 	fixParseIDTypeMismatch(outDir)
-
-	// Ensure go.mod exists
-	//ensureGoMod(outDir, schema.AppName)
-
-	// Validate syntax
-	fmt.Println("🔍 Validating Go syntax...")
-	syntaxErrors := validateGoSyntax(outDir)
-	if len(syntaxErrors) > 0 {
-		fmt.Println("⚠️  Syntax errors found:")
-		for _, e := range syntaxErrors {
-			fmt.Printf("  - %s\n", e)
-		}
-	} else {
-		fmt.Println("✅ All generated files have valid Go syntax")
-	}
-
-	// Ensure go.mod exists FIRST
 	ensureGoMod(outDir, schema.AppName)
-
-	// Then fix imports
 	fixImportsToModule(outDir)
-
 	tidyDependencies(outDir)
 
 	genMetrics.FinalSuccess = true
-	genMetrics.EndTime = time.Now()
-	genMetrics.Duration = genMetrics.EndTime.Sub(genMetrics.StartTime)
+	return genMetrics
+}
 
-	fmt.Printf("✅ Hybrid generation completed (%.2fs) - rules + ML synergy applied\n", genMetrics.Duration.Seconds())
+// 🆕 HYBRID-BALANCED Strategy Implementation
+func generateHybridBalancedStrategy(schema input.Schema, outDir string, genMetrics mlinternal.GenerationMetrics) mlinternal.GenerationMetrics {
+	log.Println("\n⚖️  Executing HYBRID-BALANCED Strategy")
+	log.Println("  • Rules scaffold structure")
+	log.Println("  • ML fills business logic holes")
+
+	// Step 1: Create rule-based scaffold with business logic hooks
+	log.Println("📐 Step 1/4: Creating rule-based scaffold with hooks...")
+	if _, err := rules.Scaffold(outDir, schema.AppName); err != nil {
+		log.Fatalf("❌ Scaffold failed: %v", err)
+	}
+
+	var files []assemble.File
+
+	for _, entity := range schema.Entities {
+		// Model with business fields
+		files = append(files, assemble.File{
+			Filename: fmt.Sprintf("internal/models/%s.go", strings.ToLower(entity)),
+			Content:  rules.GenerateHybridBalancedModel(entity, schema.Features),
+		})
+
+		// Handler with ML customization hooks
+		files = append(files, assemble.File{
+			Filename: fmt.Sprintf("internal/handlers/%s.go", strings.ToLower(entity)),
+			Content:  rules.GenerateHybridBalancedHandler(entity, schema.Features),
+		})
+
+		// Test
+		files = append(files, assemble.File{
+			Filename: fmt.Sprintf("internal/handlers/%s_test.go", strings.ToLower(entity)),
+			Content:  rules.GenerateRulesPrimaryTest(entity, schema.AppName),
+		})
+	}
+
+	// Step 2: ML fills in the business logic
+	log.Println("🧠 Step 2/4: Using ML to fill business logic...")
+	mlFiles, mlMetrics, err := mlinternal.Generate(mlinternal.Schema{
+		AppName:    schema.AppName,
+		Database:   schema.Database,
+		APIPattern: schema.APIPattern,
+		Difficulty: schema.Difficulty,
+		Entities:   schema.Entities,
+		Features:   schema.Features,
+		Objectives: schema.Objectives,
+	})
+
+	if err != nil {
+		log.Printf("⚠️  ML generation failed: %v", err)
+		genMetrics.RepairAttempts++
+		genMetrics.FinalSuccess = false
+	} else {
+		files = append(files, convertGenFiles(mlFiles)...)
+		genMetrics = mlMetrics
+		genMetrics.FinalSuccess = true
+	}
+
+	// Step 3: Apply rule-based validation
+	log.Println("🔧 Step 3/4: Applying rule-based validation...")
+	if err := assemble.WriteMany(outDir, files, &genMetrics); err != nil {
+		log.Fatalf("❌ Failed to write files: %v", err)
+	}
+
+	if err := assemble.FixAllGeneratedFiles(outDir); err != nil {
+		log.Printf("⚠️  Some auto-fixes failed: %v", err)
+	}
+
+	// Step 4: Finalization
+	log.Println("✅ Step 4/4: Finalizing...")
+	fixParseIDTypeMismatch(outDir)
+	ensureGoMod(outDir, schema.AppName)
+	fixImportsToModule(outDir)
+	tidyDependencies(outDir)
+
+	genMetrics.FinalSuccess = true
+	return genMetrics
+}
+
+// 🆕 RULES-PRIMARY Strategy Implementation
+func generateRulesPrimaryStrategy(schema input.Schema, outDir string, genMetrics mlinternal.GenerationMetrics) mlinternal.GenerationMetrics {
+	log.Println("\n⚙️  Executing RULES-PRIMARY Strategy")
+	log.Println("  • 100% rule-based generation")
+	log.Println("  • No ML needed for simple CRUD")
+
+	// Step 1: Create complete rule-based scaffold
+	log.Println("📐 Step 1/3: Creating complete rule-based scaffold...")
+	if _, err := rules.Scaffold(outDir, schema.AppName); err != nil {
+		log.Fatalf("❌ Scaffold failed: %v", err)
+	}
+
+	var files []assemble.File
+
+	for _, entity := range schema.Entities {
+		// Model (simple, no business logic)
+		files = append(files, assemble.File{
+			Filename: fmt.Sprintf("internal/models/%s.go", strings.ToLower(entity)),
+			Content:  rules.GenerateRulesPrimaryModel(entity),
+		})
+
+		// Handler (pure CRUD, no business logic)
+		files = append(files, assemble.File{
+			Filename: fmt.Sprintf("internal/handlers/%s.go", strings.ToLower(entity)),
+			Content:  rules.GenerateRulesPrimaryHandler(entity, schema.AppName),
+		})
+
+		// Test
+		files = append(files, assemble.File{
+			Filename: fmt.Sprintf("internal/handlers/%s_test.go", strings.ToLower(entity)),
+			Content:  rules.GenerateRulesPrimaryTest(entity, schema.AppName),
+		})
+	}
+
+	// Routes
+	files = append(files, assemble.File{
+		Filename: "internal/routes/routes.go",
+		Content:  rules.GenerateRoutes(schema.Entities, schema.AppName),
+	})
+
+	// Tasks
+	files = append(files, assemble.File{
+		Filename: "tasks.md",
+		Content:  rules.GenerateTasksMarkdown(schema.Entities),
+	})
+
+	// Step 2: Write files with rule-based fixes
+	log.Println("🔧 Step 2/3: Writing files with rule-based validation...")
+	if err := assemble.WriteMany(outDir, files, &genMetrics); err != nil {
+		log.Fatalf("❌ Failed to write files: %v", err)
+	}
+
+	if err := assemble.FixAllGeneratedFiles(outDir); err != nil {
+		log.Printf("⚠️  Some auto-fixes failed: %v", err)
+	}
+
+	// Step 3: Finalization
+	log.Println("✅ Step 3/3: Finalizing...")
+	ensureGoMod(outDir, schema.AppName)
+	fixImportsToModule(outDir)
+	tidyDependencies(outDir)
+
+	genMetrics.PrimarySuccess = true
+	genMetrics.FinalSuccess = true
+	genMetrics.RuleFixes = len(files)
+
 	return genMetrics
 }
 
 // ============================================================================
 // ⚙️  GENERATION MODE: RULES-ONLY (Deterministic, no ML)
 // ============================================================================
-// Updated generateRulesOnly function for cmd/hlabgen/main.go
-// This replaces your existing generateRulesOnly function
-
 func generateRulesOnly(schema input.Schema, outDir string) mlinternal.GenerationMetrics {
 	log.Println("⚙️  Starting PURE RULE-based generation...")
 
@@ -343,7 +477,7 @@ func generateRulesOnly(schema input.Schema, outDir string) mlinternal.Generation
 
 	var files []assemble.File
 
-	// 🆕 Detect if this is a complex API (has features)
+	// Detect if this is a complex API (has features)
 	isComplexAPI := len(schema.Features) > 0
 
 	if isComplexAPI {
@@ -353,15 +487,12 @@ func generateRulesOnly(schema input.Schema, outDir string) mlinternal.Generation
 
 	// Generate files for each entity
 	for _, entity := range schema.Entities {
-		// 🆕 Use complex templates if features are present
 		if isComplexAPI {
-			// Generate model with business logic fields
 			files = append(files, assemble.File{
 				Filename: fmt.Sprintf("internal/models/%s.go", strings.ToLower(entity)),
 				Content:  rules.GenerateComplexModel(entity, schema.Features),
 			})
 
-			// Generate handler with business logic
 			generator := rules.NewComplexHandler(entity, schema.AppName, schema.Features)
 			files = append(files, assemble.File{
 				Filename: fmt.Sprintf("internal/handlers/%s.go", strings.ToLower(entity)),
@@ -371,7 +502,6 @@ func generateRulesOnly(schema input.Schema, outDir string) mlinternal.Generation
 			log.Printf("   ✅ Generated complex handler for %s (discount=%v, tax=%v, state=%v)",
 				entity, generator.HasDiscount, generator.HasTax, generator.HasState)
 		} else {
-			// Use simple templates for CRUD-only APIs
 			files = append(files, assemble.File{
 				Filename: fmt.Sprintf("internal/models/%s.go", strings.ToLower(entity)),
 				Content:  rules.GenerateModel(entity),
@@ -383,7 +513,6 @@ func generateRulesOnly(schema input.Schema, outDir string) mlinternal.Generation
 			})
 		}
 
-		// Tests (always use existing generator)
 		files = append(files, assemble.File{
 			Filename: fmt.Sprintf("internal/handlers/%s_test.go", strings.ToLower(entity)),
 			Content:  rules.GenerateTest(entity, schema.AppName),
@@ -428,12 +557,8 @@ func generateRulesOnly(schema input.Schema, outDir string) mlinternal.Generation
 		fmt.Println("✅ All rule-generated files have valid Go syntax")
 	}
 
-	// Ensure go.mod exists FIRST
 	ensureGoMod(outDir, schema.AppName)
-
-	// Then fix imports
 	fixImportsToModule(outDir)
-
 	tidyDependencies(outDir)
 
 	genMetrics.PrimarySuccess = true
@@ -464,7 +589,6 @@ func convertGenFiles(in []mlinternal.GenFile) []assemble.File {
 	return out
 }
 
-// ensureGoMod creates go.mod if it doesn't exist
 func ensureGoMod(projectDir string, appName string) {
 	goModPath := filepath.Join(projectDir, "go.mod")
 
@@ -472,7 +596,6 @@ func ensureGoMod(projectDir string, appName string) {
 		return
 	}
 
-	// Use full path to avoid import confusion
 	goMod := []byte(fmt.Sprintf(`module github.com/eif-courses/hlabgen/experiments/out/%s
 
 go 1.25
@@ -589,12 +712,10 @@ func fixImportsToModule(projectDir string) {
 		parts := strings.Split(moduleName, "/")
 		appName := parts[len(parts)-1]
 
-		// ✅ NEW: Fix bare app name imports
 		newContent = strings.ReplaceAll(newContent,
 			fmt.Sprintf(`"%s/internal/`, appName),
 			fmt.Sprintf(`"%s/internal/`, moduleName))
 
-		// Fix all other wrong import patterns
 		wrongPatterns := []string{
 			`"github.com/eif-courses/hlabgen/internal/`,
 			`"github.com/yourusername/` + appName + `/internal/`,
