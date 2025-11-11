@@ -208,7 +208,6 @@ func Delete%s(w http.ResponseWriter, r *http.Request) {
 
 // GenerateSimpleTest creates basic CRUD tests without business logic
 func GenerateSimpleTest(entityName string, moduleName string) string {
-	entityLower := strings.ToLower(entityName)
 	entityPlural := pluralize(entityName)
 
 	return fmt.Sprintf(`package handlers_test

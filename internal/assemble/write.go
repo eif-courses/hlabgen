@@ -377,7 +377,7 @@ func WriteMany(base string, files []File, metrics *ml.GenerationMetrics) error {
 			// Then apply other test fixes
 			content = rules.FixTestImports(content)
 			// content = rules.FixTestBodies(content)
-			content = CleanDuplicateImports(content)
+			content = rules.CleanDuplicateImports(content)
 
 			// Ensure net/http import for httptest
 			if !strings.Contains(content, `"net/http"`) && strings.Contains(content, "httptest") {
@@ -420,7 +420,7 @@ func WriteMany(base string, files []File, metrics *ml.GenerationMetrics) error {
 
 		// ✅ Final deduplication and brace fixes
 		before := content
-		content = CleanDuplicateImports(content)
+		content = rules.CleanDuplicateImports(content)
 		if content != before {
 			metrics.RuleFixes++
 		}
@@ -662,40 +662,6 @@ func detectModule(base string) (string, error) {
 
 // CleanDuplicateImports removes duplicate import lines (even if spacing differs)
 // and ensures the file ends with balanced braces.
-func CleanDuplicateImports(code string) string {
-	lines := strings.Split(code, "\n")
-	seen := make(map[string]bool)
-	result := []string{}
-
-	inImport := false
-	for _, line := range lines {
-		trimmed := strings.TrimSpace(line)
-
-		// Track when we enter/exit import blocks
-		if strings.HasPrefix(trimmed, "import (") {
-			inImport = true
-			result = append(result, line)
-			continue
-		}
-		if inImport && trimmed == ")" {
-			inImport = false
-			result = append(result, line)
-			continue
-		}
-
-		// Deduplicate import statements
-		if inImport && trimmed != "" {
-			if seen[trimmed] {
-				continue // Skip duplicate
-			}
-			seen[trimmed] = true
-		}
-
-		result = append(result, line)
-	}
-
-	return strings.Join(result, "\n")
-}
 
 // removeUnusedModelsImport removes "/internal/models" import if it's not used
 func removeUnusedModelsImport(code string) string {

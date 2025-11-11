@@ -13,8 +13,6 @@ import (
 
 // GenerateMLPrimaryHandler creates handler structure for ML to implement
 func GenerateMLPrimaryHandler(entity string, features []string) string {
-	entityLower := strings.ToLower(entity)
-
 	return fmt.Sprintf(`package handlers
 
 import (

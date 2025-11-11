@@ -16,7 +16,7 @@ func EnsureImport(code, importPath string) string {
 	var result []string
 	added := false
 
-	for i, line := range lines {
+	for _, line := range lines {
 		result = append(result, line)
 
 		// Add to existing import block
@@ -109,8 +109,7 @@ func CleanDuplicateImports(code string) string {
 	inImportBlock := false
 	seenImports := make(map[string]bool)
 
-	for i := 0; i < len(lines); i++ {
-		line := lines[i]
+	for _, line := range lines {
 		trim := strings.TrimSpace(line)
 
 		// Detect import block start

@@ -330,19 +330,6 @@ func TestCreate%s(t *testing.T) {
 `, moduleName, entityName, strings.ToLower(entityName), entityName)
 }
 
-// Helper function that may be defined elsewhere but included for completeness
-func pluralize(s string) string {
-	l := strings.ToLower(s)
-	switch {
-	case strings.HasSuffix(l, "s") || strings.HasSuffix(l, "x") || strings.HasSuffix(l, "z"):
-		return l + "es"
-	case strings.HasSuffix(l, "y") && len(l) > 1:
-		return l[:len(l)-1] + "ies"
-	default:
-		return l + "s"
-	}
-}
-
 // FixTestFunctions is imported from syntax_fixer but included here for reference
 func FixTestFunctions(code string) (string, bool) {
 	// Implementation moved to internal/validate/syntax_fixer.go
@@ -350,3 +337,6 @@ func FixTestFunctions(code string) (string, bool) {
 	// In actual code, import from: "github.com/eif-courses/hlabgen/internal/validate"
 	return code, false
 }
+
+// NOTE: pluralize() function removed - use the one from generator_rules.go instead
+// This eliminates the redeclaration error
