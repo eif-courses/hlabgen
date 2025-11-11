@@ -1,48 +1,114 @@
 package ml
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
+	"strings"
+	"text/template"
 )
 
 type Schema struct {
-	AppName    string
-	Database   string
-	APIPattern string
-	Difficulty string
-	Entities   []string
-	Features   []string
-	Objectives []string
+	AppName           string   `json:"appName"`
+	Database          string   `json:"database"`
+	APIPattern        string   `json:"apiPattern"`
+	Difficulty        string   `json:"difficulty"`
+	Entities          []string `json:"entities"`
+	Features          []string `json:"features"`
+	Objectives        []string `json:"objectives"`
+	AllowMuxInHandler bool     `json:"allowMuxInHandler"` // set true to allow mux in handlers
 }
 
-func BuildPrompt(s Schema) string {
-	var buf bytes.Buffer
-	b, _ := json.Marshal(s)
+func (s Schema) Validate() error {
+	if strings.TrimSpace(s.AppName) == "" {
+		return fmt.Errorf("AppName is required")
+	}
+	return nil
+}
 
-	// Build prompt with proper argument count
-	promptText := `You are a Go code generator. Generate ONLY valid, compilable Go code for a REST API with COMPLETE, PRODUCTION-READY implementations.
+func BuildPrompt(s Schema) (string, error) {
+	if err := s.Validate(); err != nil {
+		return "", err
+	}
 
-Project Requirements: %s
+	reqJSON, err := json.MarshalIndent(s, "", "  ")
+	if err != nil {
+		return "", fmt.Errorf("marshal schema: %w", err)
+	}
+
+	importBase := fmt.Sprintf("%s/internal", s.AppName)
+	bt := "`"   // for struct tags like `json:"id"`
+	cf := "```" // for markdown code-fences injected at render time
+
+	// Handler GetByID example + optional mux import bits
+	handlerMuxImportRule := "• DO NOT import \"github.com/gorilla/mux\" in handlers"
+	handlerMuxImportList := "• Handlers: \"encoding/json\", \"net/http\", \"strconv\""
+	handlerMuxVarBlock := `
+func GetBook(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+	for _, book := range books {
+		if book.ID == id {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(book)
+			return
+		}
+	}
+	http.Error(w, "Book not found", http.StatusNotFound)
+}`
+	handlerMuxImport := `	"github.com/gorilla/mux"`
+
+	if !s.AllowMuxInHandler {
+		handlerMuxImportRule = "• Prefer not to import \"github.com/gorilla/mux\" in handlers; extract the \"id\" path variable via the router, or set AllowMuxInHandler=true to permit mux.Vars."
+		handlerMuxImport = ""
+		handlerMuxVarBlock = `
+func GetBook(w http.ResponseWriter, r *http.Request) {
+	// NOTE: If using gorilla/mux, set AllowMuxInHandler=true to use mux.Vars.
+	// Otherwise, ensure the router passes the "id" with request context or use a consistent path parser.
+	// For safety in a template, we demonstrate a simple fallback that expects /books/{id}.
+	path := strings.TrimPrefix(r.URL.Path, "/books/")
+	id, err := strconv.Atoi(path)
+	if err != nil || path == "" {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+	for _, book := range books {
+		if book.ID == id {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(book)
+			return
+		}
+	}
+	http.Error(w, "Book not found", http.StatusNotFound)
+}`
+	}
+
+	const promptTmpl = `
+You are a Go code generator. Generate ONLY valid, compilable Go code for a REST API with COMPLETE, PRODUCTION-READY implementations.
+
+Project Requirements: {{.Requirements}}
 
 ═══════════════════════════════════════════════════════════════
 🚨 CRITICAL RULES - FOLLOW EXACTLY OR CODE WILL NOT COMPILE 🚨
 ═══════════════════════════════════════════════════════════════
 
 1️⃣ MODULE AND IMPORT PATHS (ZERO TOLERANCE):
-   • Module name is EXACTLY: %s
-   • ALL imports MUST use: "%s/internal/..."
+   • Module name is EXACTLY: {{.AppName}}
+   • ALL imports MUST use: "{{.AppName}}/internal/..."
    • DO NOT use "github.com/yourusername/..."
    • DO NOT use "github.com/eif-courses/..."
    • DO NOT use "yourapp/..." or "your_project/..."
    
    ✅ CORRECT:
-   import "%s/internal/models"
-   import "%s/internal/handlers"
-   import "%s/internal/routes"
+   import "{{.ImportBase}}/models"
+   import "{{.ImportBase}}/handlers"
+   import "{{.ImportBase}}/routes"
    
    ❌ WRONG:
-   import "github.com/yourusername/%s/internal/models"
+   import "github.com/yourusername/{{.AppName}}/internal/models"
    import "yourapp/internal/models"
    import "your_project/internal/handlers"
 
@@ -77,7 +143,7 @@ Project Requirements: %s
    
    import (
        "github.com/gorilla/mux"
-       "%s/internal/handlers"
+       "{{.ImportBase}}/handlers"
    )
    
    func Register(r *mux.Router) {
@@ -92,7 +158,7 @@ Project Requirements: %s
    func Register() {
    func RegisterRoutes(router *mux.Router) {
 
- TEST FUNCTION SIGNATURES (ABSOLUTELY MANDATORY - READ CAREFULLY):
+4️⃣ TEST FUNCTION SIGNATURES (ABSOLUTELY MANDATORY - READ CAREFULLY):
    EVERY test function MUST have EXACTLY ONE parameter: t *testing.T
    
    ✅ CORRECT - ONLY ONE PARAMETER:
@@ -162,10 +228,10 @@ Project Requirements: %s
    }
 
 6️⃣ IMPORT REQUIREMENTS:
-   • Handlers: "encoding/json", "net/http", "strconv"
+   {{.HandlerImportList}}
    • Tests: "bytes", "encoding/json", "net/http", "net/http/httptest", "testing"
    • Routes: "github.com/gorilla/mux"
-   • DO NOT import "github.com/gorilla/mux" in handlers
+   {{.HandlerMuxRule}}
    • DO NOT import gin or any other frameworks
 
 7️⃣ PACKAGE NAMES:
@@ -201,23 +267,7 @@ Project Requirements: %s
        w.WriteHeader(http.StatusOK)
    }
    
-   ✅ CORRECT (complete):
-   func GetBook(w http.ResponseWriter, r *http.Request) {
-       vars := mux.Vars(r)
-       id, err := strconv.Atoi(vars["id"])
-       if err != nil {
-           http.Error(w, "Invalid ID", http.StatusBadRequest)
-           return
-       }
-       for _, book := range books {
-           if book.ID == id {
-               w.Header().Set("Content-Type", "application/json")
-               json.NewEncoder(w).Encode(book)
-               return
-           }
-       }
-       http.Error(w, "Book not found", http.StatusNotFound)
-   }
+   ✅ CORRECT (complete):{{.HandlerGetByID}}
 
 ═══════════════════════════════════════════════════════════════
 📋 COMPLETE FILE EXAMPLES (FULL IMPLEMENTATIONS)
@@ -228,10 +278,10 @@ EXAMPLE: internal/models/book.go
 package models
 
 type Book struct {
-	ID     int    ` + "`json:\"id\"`" + `
-	Title  string ` + "`json:\"title\"`" + `
-	Author string ` + "`json:\"author\"`" + `
-	ISBN   string ` + "`json:\"isbn\"`" + `
+	ID     int    {{.BT}}json:"id"{{.BT}}
+	Title  string {{.BT}}json:"title"{{.BT}}
+	Author string {{.BT}}json:"author"{{.BT}}
+	ISBN   string {{.BT}}json:"isbn"{{.BT}}
 }
 
 EXAMPLE: internal/handlers/book.go (COMPLETE IMPLEMENTATION)
@@ -241,9 +291,11 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
-	"github.com/gorilla/mux"
-	"%s/internal/models"
+	"strconv"{{.HandlerMuxImport}}
+	"{{.ImportBase}}/models"
+{{- if not .AllowMuxInHandler}}
+	"strings"
+{{- end}}
 )
 
 var books []models.Book
@@ -272,26 +324,16 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(books)
 }
 
-func GetBook(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
-		return
-	}
-	for _, book := range books {
-		if book.ID == id {
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(book)
-			return
-		}
-	}
-	http.Error(w, "Book not found", http.StatusNotFound)
-}
+{{.HandlerGetByID}}
 
 func UpdateBook(w http.ResponseWriter, r *http.Request) {
+{{- if .AllowMuxInHandler}}
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
+{{- else}}
+	path := strings.TrimPrefix(r.URL.Path, "/books/")
+	id, err := strconv.Atoi(path)
+{{- end}}
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
 		return
@@ -318,8 +360,13 @@ func UpdateBook(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteBook(w http.ResponseWriter, r *http.Request) {
+{{- if .AllowMuxInHandler}}
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
+{{- else}}
+	path := strings.TrimPrefix(r.URL.Path, "/books/")
+	id, err := strconv.Atoi(path)
+{{- end}}
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
 		return
@@ -345,8 +392,8 @@ import (
 	"net/http/httptest"
 	"testing"
 	"github.com/gorilla/mux"
-	"%s/internal/handlers"
-	"%s/internal/models"
+	"{{.ImportBase}}/handlers"
+	"{{.ImportBase}}/models"
 )
 
 func TestCreateBook(t *testing.T) {
@@ -361,7 +408,7 @@ func TestCreateBook(t *testing.T) {
 	w := httptest.NewRecorder()
 	handlers.CreateBook(w, req)
 	if w.Code != http.StatusCreated {
-		t.Errorf("Expected 201, got %%d", w.Code)
+		t.Errorf("Expected 201, got %d", w.Code)
 	}
 }
 
@@ -370,7 +417,7 @@ func TestGetBooks(t *testing.T) {
 	w := httptest.NewRecorder()
 	handlers.GetBooks(w, req)
 	if w.Code != http.StatusOK {
-		t.Errorf("Expected 200, got %%d", w.Code)
+		t.Errorf("Expected 200, got %d", w.Code)
 	}
 }
 
@@ -380,7 +427,7 @@ func TestGetBook(t *testing.T) {
 	w := httptest.NewRecorder()
 	handlers.GetBook(w, req)
 	if w.Code != http.StatusOK && w.Code != http.StatusNotFound {
-		t.Errorf("Expected 200 or 404, got %%d", w.Code)
+		t.Errorf("Expected 200 or 404, got %d", w.Code)
 	}
 }
 
@@ -397,7 +444,7 @@ func TestUpdateBook(t *testing.T) {
 	w := httptest.NewRecorder()
 	handlers.UpdateBook(w, req)
 	if w.Code != http.StatusOK && w.Code != http.StatusNotFound {
-		t.Errorf("Expected 200 or 404, got %%d", w.Code)
+		t.Errorf("Expected 200 or 404, got %d", w.Code)
 	}
 }
 
@@ -407,7 +454,7 @@ func TestDeleteBook(t *testing.T) {
 	w := httptest.NewRecorder()
 	handlers.DeleteBook(w, req)
 	if w.Code != http.StatusNoContent && w.Code != http.StatusNotFound {
-		t.Errorf("Expected 204 or 404, got %%d", w.Code)
+		t.Errorf("Expected 204 or 404, got %d", w.Code)
 	}
 }
 
@@ -417,7 +464,7 @@ package routes
 
 import (
 	"github.com/gorilla/mux"
-	"%s/internal/handlers"
+	"{{.ImportBase}}/handlers"
 )
 
 func Register(r *mux.Router) {
@@ -437,7 +484,7 @@ import (
 	"log"
 	"net/http"
 	"github.com/gorilla/mux"
-	"%s/internal/routes"
+	"{{.ImportBase}}/routes"
 )
 
 func main() {
@@ -486,9 +533,9 @@ Your response MUST be ONLY a JSON array. No explanations, no markdown, no text.
 
 ❌ WRONG OUTPUT:
 Here is the generated code:
-` + "```json" + `
+{{.CF}}json
 [...]
-` + "```" + `
+{{.CF}}
 
 The response must START with [ and END with ]
 
@@ -499,12 +546,11 @@ The response must START with [ and END with ]
 Before generating output, verify:
 ☐ ALL handlers have COMPLETE implementations (no placeholders!)
 ☐ ALL CRUD operations are FULLY functional (Create, GetAll, GetByID, Update, Delete)
-☐ ALL test functions test the complete functionality
 ☐ All handlers have (w http.ResponseWriter, r *http.Request)
 ☐ Register function has (r *mux.Router) parameter
 ☐ All test functions have (t *testing.T) parameter
 ☐ All multi-line struct literals have trailing commas
-☐ All imports use "%s/internal/..." format
+☐ All imports use "{{.AppName}}/internal/..." format
 ☐ Test package is "handlers_test" not "handlers"
 ☐ No gin imports or gin.Context usage
 ☐ Output is pure JSON array starting with [
@@ -512,27 +558,30 @@ Before generating output, verify:
 ☐ All handlers check r.Body == nil before decoding
 ☐ GetByID, Update, Delete handlers extract and validate ID from URL
 
-Generate the complete REST API code now with FULL IMPLEMENTATIONS. Return ONLY the JSON array.`
+Generate the complete REST API code now with FULL IMPLEMENTATIONS. Return ONLY the JSON array.
+`
 
-	// Apply the format with correct number of arguments
-	formattedPrompt := fmt.Sprintf(promptText,
-		string(b), // %s - Requirements JSON
-		s.AppName, // %s - Module name EXACTLY
-		s.AppName, // %s - ALL imports path
-		s.AppName, // %s - import models
-		s.AppName, // %s - import handlers
-		s.AppName, // %s - import routes
-		s.AppName, // %s - wrong github import example
-		s.AppName, // %s - routes Register import handlers
-		s.AppName, // %s - test import handlers
-		s.AppName, // %s - test import models
-		s.AppName, // %s - handlers book example (complete)
-		s.AppName, // %s - test book example (handlers import)
-		s.AppName, // %s - test book example (models import)
-		s.AppName, // %s - routes example
-		s.AppName, // %s - main example
-		s.AppName) // %s - final checklist
+	data := map[string]any{
+		"AppName":           s.AppName,
+		"ImportBase":        importBase,
+		"Requirements":      string(reqJSON),
+		"BT":                bt,
+		"CF":                cf,
+		"AllowMuxInHandler": s.AllowMuxInHandler,
+		"HandlerMuxImport":  handlerMuxImport,
+		"HandlerMuxRule":    handlerMuxImportRule,
+		"HandlerImportList": handlerMuxImportList,
+		"HandlerGetByID":    handlerMuxVarBlock,
+	}
 
-	buf.WriteString(formattedPrompt)
-	return buf.String()
+	tmpl, err := template.New("prompt").Parse(promptTmpl)
+	if err != nil {
+		return "", fmt.Errorf("parse template: %w", err)
+	}
+
+	var b strings.Builder
+	if err := tmpl.Execute(&b, data); err != nil {
+		return "", fmt.Errorf("execute template: %w", err)
+	}
+	return b.String(), nil
 }

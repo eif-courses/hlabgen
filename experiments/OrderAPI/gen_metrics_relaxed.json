@@ -1,12 +1,12 @@
 {
   "app_name": "OrderAPI",
-  "duration_sec": 35.929730729,
-  "end_time": "2025-10-30T21:46:05+02:00",
-  "error_message": "",
-  "final_success": true,
+  "duration_sec": 0.000051019,
+  "end_time": "2025-11-11T21:12:54+02:00",
+  "error_message": "parse template: template: prompt:139: function \"ID\" not defined",
+  "final_success": false,
   "mode": "",
-  "primary_success": true,
+  "primary_success": false,
   "repair_attempts": 0,
   "rule_fixes": 0,
-  "start_time": "2025-10-30T21:45:29+02:00"
+  "start_time": "2025-11-11T21:12:54+02:00"
 }

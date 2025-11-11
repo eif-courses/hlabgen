@@ -1,10 +1,10 @@
 App: OrderAPI
 Mode: hybrid
-Timestamp: 2025-10-30T21:46:06+02:00
+Timestamp: 2025-11-11T21:13:13+02:00
 OpenAI Model: gpt-4o
-BuildSuccess: true
-TestsPass: true
-Coverage: 73.5%
-Duration: 35.951287295s
-RepairAttempts: 0
-RuleFixes: 12
+BuildSuccess: false
+TestsPass: false
+Coverage: 0.0%
+Duration: 2.030270364s
+RepairAttempts: 1
+RuleFixes: 8

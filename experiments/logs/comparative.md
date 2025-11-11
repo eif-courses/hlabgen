@@ -11,9 +11,9 @@
 
 | Mode | Experiments | Success Rate | Avg Coverage | Avg Duration (s) | Avg Repairs |
 |------|-------------|--------------|--------------|------------------|-------------|
-| Hybrid | 10 | 100.0% | 73.5% | 30.07 | 0.0 |
+| Hybrid | 10 | 100.0% | 65.8% | 0.02 | 0.0 |
 
 ## Key Findings
 
-- Average rule fixes applied: 12.3 per experiment
+- Average rule fixes applied: 7.1 per experiment
 - Overall success rate: **100.0%**

@@ -1,12 +1,12 @@
 {
   "app_name": "InventoryAPI",
-  "duration_sec": 38.187893747,
-  "end_time": "2025-10-30T21:42:41+02:00",
-  "error_message": "",
-  "final_success": true,
+  "duration_sec": 0.000114169,
+  "end_time": "2025-11-11T21:13:06+02:00",
+  "error_message": "build prompt: parse template: template: prompt:139: function \"ID\" not defined",
+  "final_success": false,
   "mode": "",
-  "primary_success": true,
+  "primary_success": false,
   "repair_attempts": 0,
   "rule_fixes": 0,
-  "start_time": "2025-10-30T21:42:03+02:00"
+  "start_time": "2025-11-11T21:13:06+02:00"
 }

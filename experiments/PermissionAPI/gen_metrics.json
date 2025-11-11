@@ -1,12 +1,12 @@
 {
   "app_name": "PermissionAPI",
-  "duration_sec": 59.495575413,
-  "end_time": "2025-10-30T21:49:36+02:00",
-  "error_message": "",
-  "final_success": true,
+  "duration_sec": 0.000203684,
+  "end_time": "2025-11-11T21:13:18+02:00",
+  "error_message": "build prompt: parse template: template: prompt:139: function \"ID\" not defined",
+  "final_success": false,
   "mode": "",
   "primary_success": false,
-  "repair_attempts": 1,
+  "repair_attempts": 0,
   "rule_fixes": 0,
-  "start_time": "2025-10-30T21:48:36+02:00"
+  "start_time": "2025-11-11T21:13:18+02:00"
 }

@@ -66,7 +66,14 @@ func Generate(s Schema) ([]GenFile, GenerationMetrics, error) {
 	}
 
 	client := openai.NewClientWithConfig(config)
-	prompt := BuildPrompt(s)
+	prompt, err := BuildPrompt(s)
+	if err != nil {
+		metrics.ErrorMessage = fmt.Sprintf("build prompt: %v", err)
+		metrics.EndTime = time.Now()
+		metrics.Duration = metrics.EndTime.Sub(metrics.StartTime)
+		saveMetrics(s.AppName, metrics, filepath.Join("experiments", s.AppName, "gen_metrics.json"))
+		return nil, metrics, err
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 180*time.Second)
 	defer cancel()

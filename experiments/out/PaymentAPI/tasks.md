@@ -1,16 +1,45 @@
-# Lab Tasks - Advanced Features
+# Lab Tasks
 
-## Completed Implementation
-✅ All CRUD operations are fully implemented
-✅ Complete test suite for all handlers
-✅ Proper error handling and status codes
+## Overview
 
-## Optional Enhancements (Student Tasks)
-1. Add database persistence using PostgreSQL
-2. Implement authentication and authorization middleware
-3. Add request validation using a validation library
-4. Implement pagination for GetPayments endpoint
-5. Add filtering and sorting capabilities
-6. Create OpenAPI/Swagger documentation
-7. Implement rate limiting middleware
-8. Add logging middleware for all requests
+This project implements a REST API with the following entities:
+
+- Payment
+
+## Tasks to Complete
+
+1. Test all CRUD operations for Payment
+2. Add validation for payment fields
+3. Implement database persistence (currently using in-memory storage)
+4. Add authentication middleware
+5. Implement pagination for list endpoints
+6. Add error handling and logging
+7. Write integration tests
+8. Add API documentation (Swagger/OpenAPI)
+
+## Running the Application
+
+```bash
+# Install dependencies
+go mod tidy
+
+# Run the server
+go run cmd/main.go
+
+# Run tests
+go test ./...
+
+# Check coverage
+go test -cover ./...
+```
+
+## API Endpoints
+
+### Payment
+
+- `POST /payments` - Create a new payment
+- `GET /payments` - Get all payments
+- `GET /payments/{id}` - Get a specific payment
+- `PUT /payments/{id}` - Update a payment
+- `DELETE /payments/{id}` - Delete a payment
+
