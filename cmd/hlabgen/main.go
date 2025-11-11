@@ -345,10 +345,11 @@ func generateHybridBalancedStrategy(schema input.Schema, outDir string, genMetri
 			Content:  rules.GenerateHybridBalancedHandler(entity, schema.Features),
 		})
 
+		// ✅ FIXED: Line 351 - GenerateRulesPrimaryTest → GenerateSimpleTest
 		// Test
 		files = append(files, assemble.File{
 			Filename: fmt.Sprintf("internal/handlers/%s_test.go", strings.ToLower(entity)),
-			Content:  rules.GenerateRulesPrimaryTest(entity, schema.AppName),
+			Content:  rules.GenerateSimpleTest(entity, schema.AppName),
 		})
 	}
 
@@ -410,22 +411,25 @@ func generateRulesPrimaryStrategy(schema input.Schema, outDir string, genMetrics
 	var files []assemble.File
 
 	for _, entity := range schema.Entities {
+		// ✅ FIXED: Line 416 - GenerateRulesPrimaryModel → GenerateSimpleModel
 		// Model (simple, no business logic)
 		files = append(files, assemble.File{
 			Filename: fmt.Sprintf("internal/models/%s.go", strings.ToLower(entity)),
-			Content:  rules.GenerateRulesPrimaryModel(entity),
+			Content:  rules.GenerateSimpleModel(entity),
 		})
 
+		// ✅ FIXED: Line 422 - GenerateRulesPrimaryHandler → GenerateSimpleHandler
 		// Handler (pure CRUD, no business logic)
 		files = append(files, assemble.File{
 			Filename: fmt.Sprintf("internal/handlers/%s.go", strings.ToLower(entity)),
-			Content:  rules.GenerateRulesPrimaryHandler(entity, schema.AppName),
+			Content:  rules.GenerateSimpleHandler(entity, schema.AppName),
 		})
 
+		// ✅ FIXED: Line 428 - GenerateRulesPrimaryTest → GenerateSimpleTest
 		// Test
 		files = append(files, assemble.File{
 			Filename: fmt.Sprintf("internal/handlers/%s_test.go", strings.ToLower(entity)),
-			Content:  rules.GenerateRulesPrimaryTest(entity, schema.AppName),
+			Content:  rules.GenerateSimpleTest(entity, schema.AppName),
 		})
 	}
 
@@ -502,20 +506,23 @@ func generateRulesOnly(schema input.Schema, outDir string) mlinternal.Generation
 			log.Printf("   ✅ Generated complex handler for %s (discount=%v, tax=%v, state=%v)",
 				entity, generator.HasDiscount, generator.HasTax, generator.HasState)
 		} else {
+			// ✅ FIXED: Line 507 - GenerateModel → GenerateSimpleModel
 			files = append(files, assemble.File{
 				Filename: fmt.Sprintf("internal/models/%s.go", strings.ToLower(entity)),
-				Content:  rules.GenerateModel(entity),
+				Content:  rules.GenerateSimpleModel(entity),
 			})
 
+			// ✅ FIXED: Line 512 - GenerateHandler → GenerateSimpleHandler
 			files = append(files, assemble.File{
 				Filename: fmt.Sprintf("internal/handlers/%s.go", strings.ToLower(entity)),
-				Content:  rules.GenerateHandler(entity, schema.AppName),
+				Content:  rules.GenerateSimpleHandler(entity, schema.AppName),
 			})
 		}
 
+		// ✅ FIXED: Line 518 - GenerateTest → GenerateSimpleTest
 		files = append(files, assemble.File{
 			Filename: fmt.Sprintf("internal/handlers/%s_test.go", strings.ToLower(entity)),
-			Content:  rules.GenerateTest(entity, schema.AppName),
+			Content:  rules.GenerateSimpleTest(entity, schema.AppName),
 		})
 	}
 
