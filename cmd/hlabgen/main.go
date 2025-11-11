@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -673,6 +674,7 @@ func tidyDependencies(projectDir string) {
 	}
 }
 
+// ✅ FIX 3: Enhanced fixImportsToModule with smart module detection
 func fixImportsToModule(projectDir string) {
 	goMod := filepath.Join(projectDir, "go.mod")
 	f, err := os.Open(goMod)
@@ -715,10 +717,14 @@ func fixImportsToModule(projectDir string) {
 		original := string(content)
 		newContent := original
 
+		// ✅ FIX: Replace MODULENAME placeholder with actual module name
+		newContent = strings.ReplaceAll(newContent, "MODULENAME", moduleName)
+
 		// Get app name from module (last part after /)
 		parts := strings.Split(moduleName, "/")
 		appName := parts[len(parts)-1]
 
+		// Fix various import patterns
 		newContent = strings.ReplaceAll(newContent,
 			fmt.Sprintf(`"%s/internal/`, appName),
 			fmt.Sprintf(`"%s/internal/`, moduleName))
@@ -738,6 +744,12 @@ func fixImportsToModule(projectDir string) {
 			} else {
 				newContent = strings.ReplaceAll(newContent, wrongPattern, fmt.Sprintf(`"%s/`, moduleName))
 			}
+		}
+
+		// ✅ Fix remaining placeholder imports using regex
+		re := regexp.MustCompile(`"[a-zA-Z_]+/internal/`)
+		if re.MatchString(newContent) && !strings.Contains(newContent, moduleName+"/internal/") {
+			newContent = re.ReplaceAllString(newContent, fmt.Sprintf(`"%s/internal/`, moduleName))
 		}
 
 		if newContent != original {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"text/template"
+	"unicode"
 )
 
 type Schema struct {
@@ -23,6 +24,40 @@ func (s Schema) Validate() error {
 		return fmt.Errorf("AppName is required")
 	}
 	return nil
+}
+
+// ✅ FIX 1: Helper functions for template
+func toTitle(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+	return strings.ToUpper(s[:1]) + strings.ToLower(s[1:])
+}
+
+func toLower(s string) string {
+	return strings.ToLower(s)
+}
+
+func pluralizeWord(s string) string {
+	lower := strings.ToLower(s)
+	switch {
+	case strings.HasSuffix(lower, "s") || strings.HasSuffix(lower, "x") || strings.HasSuffix(lower, "z") ||
+		strings.HasSuffix(lower, "ch") || strings.HasSuffix(lower, "sh"):
+		return lower + "es"
+	case strings.HasSuffix(lower, "y") && len(lower) > 1 && !isVowel(lower[len(lower)-2]):
+		return lower[:len(lower)-1] + "ies"
+	default:
+		return lower + "s"
+	}
+}
+
+func isVowel(b byte) bool {
+	switch b {
+	case 'a', 'e', 'i', 'o', 'u':
+		return true
+	default:
+		return false
+	}
 }
 
 func BuildPrompt(s Schema) (string, error) {
@@ -574,7 +609,14 @@ Generate the complete REST API code now with FULL IMPLEMENTATIONS. Return ONLY t
 		"HandlerGetByID":    handlerMuxVarBlock,
 	}
 
-	tmpl, err := template.New("prompt").Parse(promptTmpl)
+	// ✅ FIX 2: Add FuncMap with helper functions
+	funcMap := template.FuncMap{
+		"toTitle":   toTitle,
+		"toLower":   toLower,
+		"pluralize": pluralizeWord,
+	}
+
+	tmpl, err := template.New("prompt").Funcs(funcMap).Parse(promptTmpl)
 	if err != nil {
 		return "", fmt.Errorf("parse template: %w", err)
 	}
