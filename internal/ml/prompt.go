@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 	"text/template"
-	"unicode"
 )
 
 type Schema struct {
