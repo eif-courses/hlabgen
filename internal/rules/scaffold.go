@@ -105,9 +105,10 @@ func detectModulePath(outDir, appName string) string {
 	return appName
 }
 
-//
-// 🔧 Universal SafeDecode (no hardcoded entities)
-//
+// =============================================================================
+// CRITICAL RULE-BASED FIXES
+// These functions are called by assemble/scaffold.go's WriteMany() function
+// =============================================================================
 
 // SafeDecode replaces any `json.NewDecoder(r.Body).Decode(&X)` line
 // with a safe block that checks nil body and handles decode errors.
@@ -371,9 +372,10 @@ import (
 		}
 	}
 
-	// ✅ NEW: Remove unused imports from test files
+	// ✅ Remove unused imports from test files
 	fixed = removeUnusedImports(fixed)
 
+	// ✅ Use CleanDuplicateImports from import_manager.go
 	fixed = CleanDuplicateImports(fixed)
 	fixed = RemoveDuplicateHandlerImports(fixed)
 	return fixed
@@ -455,7 +457,11 @@ func RemoveAllDuplicateHandlerImports(code string) string {
 	return strings.Join(out, "\n")
 }
 
-// --- helpers used by test generation ---
+// =============================================================================
+// HELPER FUNCTIONS
+// =============================================================================
+
+// detectModuleName walks up the directory tree to find go.mod
 func detectModuleName() string {
 	dir, _ := os.Getwd()
 	for dir != "/" {
@@ -552,68 +558,6 @@ func TestCreateBook(t *testing.T) {
 	}
 
 	return nil
-}
-
-// CleanDuplicateImports removes duplicate import lines and normalizes spacing
-func CleanDuplicateImports(code string) string {
-	lines := strings.Split(code, "\n")
-	var out []string
-	inImportBlock := false
-	seenImports := make(map[string]struct{}) // Use struct{} instead of bool for memory efficiency
-
-	for i := 0; i < len(lines); i++ {
-		line := lines[i]
-		trim := strings.TrimSpace(line)
-
-		// Detect import block start
-		if strings.HasPrefix(trim, "import (") {
-			inImportBlock = true
-			seenImports = make(map[string]struct{}) // Reset for this block
-			out = append(out, line)
-			continue
-		}
-
-		// Detect import block end
-		if inImportBlock && trim == ")" {
-			inImportBlock = false
-			out = append(out, line)
-			continue
-		}
-
-		// Process imports inside the block
-		if inImportBlock {
-			// Skip empty lines in import block
-			if trim == "" {
-				continue
-			}
-
-			// Extract the import path for comparison (normalize it)
-			importKey := strings.TrimSpace(trim)
-
-			// Check if we've seen this exact import before
-			if _, exists := seenImports[importKey]; exists {
-				// Skip this duplicate import
-				continue
-			}
-			seenImports[importKey] = struct{}{}
-			out = append(out, line)
-			continue
-		}
-
-		// Not in import block
-		out = append(out, line)
-	}
-
-	code = strings.Join(out, "\n")
-
-	// ✅ Ensure balanced braces
-	openCount := strings.Count(code, "{")
-	closeCount := strings.Count(code, "}")
-	if openCount > closeCount {
-		code += strings.Repeat("\n}", openCount-closeCount)
-	}
-
-	return code
 }
 
 // RemoveDuplicateHandlerImports removes ALL duplicate handler imports

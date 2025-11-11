@@ -1,9 +1,15 @@
+// Package rules provides hybrid code generation
+// This generator balances rule-based structure with ML-implemented business logic
 package rules
 
 import (
 	"fmt"
 	"strings"
 )
+
+// =============================================================================
+// HYBRID BALANCED GENERATION (Rules structure + ML business logic)
+// =============================================================================
 
 // GenerateHybridBalancedHandler creates handler with business logic hooks for ML
 func GenerateHybridBalancedHandler(entity string, features []string) string {
@@ -35,7 +41,7 @@ func Create%s(w http.ResponseWriter, r *http.Request) {
 
 	var item models.%s
 	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
-		http.Error(w, "invalid JSON: " + err.Error(), http.StatusBadRequest)
+		http.Error(w, "invalid JSON: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -177,6 +183,92 @@ func applyBusinessLogic(item *models.%s) {
 		generateExampleImplementations(features))
 }
 
+// GenerateHybridBalancedModel creates model with business logic fields
+func GenerateHybridBalancedModel(entityName string, features []string) string {
+	var fields strings.Builder
+
+	fields.WriteString(fmt.Sprintf(`package models
+
+import "time"
+
+// %s represents the main entity with business logic fields
+type %s struct {
+	ID        int       `+"`json:\"id\"`"+`
+	Name      string    `+"`json:\"name\"`"+`
+	CreatedAt time.Time `+"`json:\"created_at\"`"+`
+	UpdatedAt time.Time `+"`json:\"updated_at\"`"+`
+`, entityName, entityName))
+
+	// Add business logic fields based on features
+	for _, f := range features {
+		lower := strings.ToLower(f)
+		if strings.Contains(lower, "discount") {
+			fields.WriteString(`	Subtotal     float64 ` + "`json:\"subtotal\"`" + `
+	Discount     float64 ` + "`json:\"discount\"`" + `
+	CustomerType string  ` + "`json:\"customer_type,omitempty\"`" + `
+`)
+		}
+		if strings.Contains(lower, "tax") {
+			fields.WriteString(`	Tax   float64 ` + "`json:\"tax\"`" + `
+	Total float64 ` + "`json:\"total\"`" + `
+`)
+		}
+		if strings.Contains(lower, "state") || strings.Contains(lower, "workflow") {
+			fields.WriteString(`	Status string ` + "`json:\"status\"`" + `
+`)
+		}
+		if strings.Contains(lower, "priority") {
+			fields.WriteString(`	Priority int ` + "`json:\"priority\"`" + `
+`)
+		}
+	}
+
+	fields.WriteString(`}
+`)
+
+	return fields.String()
+}
+
+// =============================================================================
+// ML PROMPT GENERATION
+// =============================================================================
+
+// GenerateHybridBalancedLogicPrompt creates prompt for ML to implement just the business logic function
+func GenerateHybridBalancedLogicPrompt(entityName string, features []string) string {
+	return fmt.Sprintf(`Implement ONLY the applyBusinessLogic function for this entity:
+
+Entity: %s
+Features: %v
+
+Generate the Go function body (NOT the function signature, just the body code):
+
+Current function signature:
+func applyBusinessLogic(item *models.%s) {
+    // YOUR CODE HERE
+}
+
+Requirements:
+1. Implement calculations: %s
+2. Use item.* fields to access data
+3. Modify item fields directly
+4. DO NOT return anything (void function)
+5. Handle nil/zero values gracefully
+6. NO imports or package declaration needed
+
+Example calculations:
+%s
+
+Return ONLY the function body code (everything between the braces).
+NO function signature, NO explanations, ONLY Go code.`,
+		entityName, features, entityName,
+		extractCalculations(features),
+		extractCalculationExamples(features))
+}
+
+// =============================================================================
+// HELPER FUNCTIONS
+// =============================================================================
+
 // generateExampleImplementations creates placeholder implementations for ML to replace
 func generateExampleImplementations(features []string) string {
 	var examples strings.Builder
@@ -232,84 +324,6 @@ func generateExampleImplementations(features []string) string {
 	}
 
 	return examples.String()
-}
-
-// GenerateHybridBalancedModel creates model with business logic fields
-func GenerateHybridBalancedModel(entityName string, features []string) string {
-	var fields strings.Builder
-
-	fields.WriteString(fmt.Sprintf(`package models
-
-import "time"
-
-// %s represents the main entity with business logic fields
-type %s struct {
-	ID        int       `+"`json:\"id\"`"+`
-	Name      string    `+"`json:\"name\"`"+`
-	CreatedAt time.Time `+"`json:\"created_at\"`"+`
-	UpdatedAt time.Time `+"`json:\"updated_at\"`"+`
-`, entityName, entityName))
-
-	// Add business logic fields based on features
-	for _, f := range features {
-		lower := strings.ToLower(f)
-		if strings.Contains(lower, "discount") {
-			fields.WriteString(`	Subtotal     float64 ` + "`json:\"subtotal\"`" + `
-	Discount     float64 ` + "`json:\"discount\"`" + `
-	CustomerType string  ` + "`json:\"customer_type,omitempty\"`" + `
-`)
-		}
-		if strings.Contains(lower, "tax") {
-			fields.WriteString(`	Tax   float64 ` + "`json:\"tax\"`" + `
-	Total float64 ` + "`json:\"total\"`" + `
-`)
-		}
-		if strings.Contains(lower, "state") || strings.Contains(lower, "workflow") {
-			fields.WriteString(`	Status string ` + "`json:\"status\"`" + `
-`)
-		}
-		if strings.Contains(lower, "priority") {
-			fields.WriteString(`	Priority int ` + "`json:\"priority\"`" + `
-`)
-		}
-	}
-
-	fields.WriteString(`}
-`)
-
-	return fields.String()
-}
-
-// GenerateHybridBalancedLogicPrompt creates prompt for ML to implement just the business logic function
-func GenerateHybridBalancedLogicPrompt(entityName string, features []string) string {
-	return fmt.Sprintf(`Implement ONLY the applyBusinessLogic function for this entity:
-
-Entity: %s
-Features: %v
-
-Generate the Go function body (NOT the function signature, just the body code):
-
-Current function signature:
-func applyBusinessLogic(item *models.%s) {
-    // YOUR CODE HERE
-}
-
-Requirements:
-1. Implement calculations: %s
-2. Use item.* fields to access data
-3. Modify item fields directly
-4. DO NOT return anything (void function)
-5. Handle nil/zero values gracefully
-6. NO imports or package declaration needed
-
-Example calculations:
-%s
-
-Return ONLY the function body code (everything between the braces).
-NO function signature, NO explanations, ONLY Go code.`,
-		entityName, features, entityName,
-		extractCalculations(features),
-		extractCalculationExamples(features))
 }
 
 // extractCalculations extracts what should be implemented
