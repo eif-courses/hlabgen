@@ -1,9 +1,15 @@
+// Package rules provides ML-focused code generation
+// This generator creates handler structures for ML to implement business logic
 package rules
 
 import (
 	"fmt"
 	"strings"
 )
+
+// =============================================================================
+// ML-PRIMARY GENERATION (ML implements business logic)
+// =============================================================================
 
 // GenerateMLPrimaryHandler creates handler structure for ML to implement
 func GenerateMLPrimaryHandler(entity string, features []string) string {
@@ -32,7 +38,7 @@ func Create%s(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid JSON: " + err.Error(), http.StatusBadRequest)
+		http.Error(w, "invalid JSON: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -148,90 +154,19 @@ func validate%s(req models.Create%sRequest) error {
 }
 `, entity, strings.ToLower(entity), entity, entity,
 		entity, entity,
+		entity, strings.ToLower(entity),
 		entity, entity,
 		entity, strings.ToLower(entity),
 		entity,
-		entity, strings.ToLower(entity),
-		entity, strings.ToLower(entity),
 		entity,
 		entity, strings.ToLower(entity),
 		entity,
+		entity,
+		entity,
+		entity, strings.ToLower(entity),
 		entity,
 		entity,
 		entity, entity)
-}
-
-// BuildBusinessLogicPrompt creates ML prompt for implementing business logic
-func BuildBusinessLogicPrompt(entityName string, features []string) string {
-	return fmt.Sprintf(`You are a Go backend specialist. Implement the business logic package for this API:
-
-Entity: %s
-Features: %v
-
-Generate COMPLETE, PRODUCTION-READY code for: internal/business/logic.go
-
-This package should contain these functions:
-1. Create%s(ctx context.Context, req models.Create%sRequest) (*models.%s, error)
-2. GetAll%s(ctx context.Context) ([]models.%s, error)
-3. Get%s(ctx context.Context, id int) (*models.%s, error)
-4. Update%s(ctx context.Context, id int, req models.Update%sRequest) (*models.%s, error)
-5. Delete%s(ctx context.Context, id int) error
-
-Business Logic Requirements:
-- Use context for cancellation and timeouts
-- Validate all inputs thoroughly
-- Return descriptive errors for invalid states
-- Handle edge cases properly
-- Implement any calculations (discount, tax, pricing) based on features: %v
-- Implement state transitions if workflow/status features exist
-- Use in-memory storage (slice) for now
-
-Calculations to Implement:
-%s
-
-Key Rules:
-- ALWAYS validate inputs before processing
-- Return proper error messages
-- Handle empty/nil cases gracefully
-- Use consistent error handling pattern
-
-Return ONLY the Go code for the business package. Start with 'package business' and include all imports.
-NO explanations, NO markdown blocks, ONLY valid Go code.`,
-		entityName, features,
-		entityName, entityName, entityName,
-		entityName, entityName,
-		entityName, entityName,
-		entityName, entityName, entityName,
-		entityName,
-		features,
-		extractCalculationRules(features))
-}
-
-// extractCalculationRules extracts specific rules from features
-func extractCalculationRules(features []string) string {
-	var rules []string
-
-	for _, f := range features {
-		lower := strings.ToLower(f)
-		if strings.Contains(lower, "discount") {
-			rules = append(rules, "- Apply discount based on customer type (premium: 10%, standard: 5%)")
-		}
-		if strings.Contains(lower, "tax") {
-			rules = append(rules, "- Calculate tax as 8% of subtotal minus discount")
-		}
-		if strings.Contains(lower, "pricing") {
-			rules = append(rules, "- Ensure price > 0, calculate total = base + tax - discount")
-		}
-		if strings.Contains(lower, "workflow") || strings.Contains(lower, "state") {
-			rules = append(rules, "- Validate state transitions: pending -> approved -> completed")
-		}
-	}
-
-	if len(rules) == 0 {
-		rules = append(rules, "- No special calculations, just CRUD operations")
-	}
-
-	return strings.Join(rules, "\n")
 }
 
 // GenerateMLPrimaryModel creates model with business logic fields
@@ -308,4 +243,81 @@ type Update` + entityName + `Request struct {
 `)
 
 	return fields.String()
+}
+
+// =============================================================================
+// ML PROMPT GENERATION
+// =============================================================================
+
+// BuildBusinessLogicPrompt creates ML prompt for implementing business logic
+func BuildBusinessLogicPrompt(entityName string, features []string) string {
+	return fmt.Sprintf(`You are a Go backend specialist. Implement the business logic package for this API:
+
+Entity: %s
+Features: %v
+
+Generate COMPLETE, PRODUCTION-READY code for: internal/business/logic.go
+
+This package should contain these functions:
+1. Create%s(ctx context.Context, req models.Create%sRequest) (*models.%s, error)
+2. GetAll%s(ctx context.Context) ([]models.%s, error)
+3. Get%s(ctx context.Context, id int) (*models.%s, error)
+4. Update%s(ctx context.Context, id int, req models.Update%sRequest) (*models.%s, error)
+5. Delete%s(ctx context.Context, id int) error
+
+Business Logic Requirements:
+- Use context for cancellation and timeouts
+- Validate all inputs thoroughly
+- Return descriptive errors for invalid states
+- Handle edge cases properly
+- Implement any calculations (discount, tax, pricing) based on features: %v
+- Implement state transitions if workflow/status features exist
+- Use in-memory storage (slice) for now
+
+Calculations to Implement:
+%s
+
+Key Rules:
+- ALWAYS validate inputs before processing
+- Return proper error messages
+- Handle empty/nil cases gracefully
+- Use consistent error handling pattern
+
+Return ONLY the Go code for the business package. Start with 'package business' and include all imports.
+NO explanations, NO markdown blocks, ONLY valid Go code.`,
+		entityName, features,
+		entityName, entityName, entityName,
+		entityName, entityName,
+		entityName, entityName,
+		entityName, entityName, entityName,
+		entityName,
+		features,
+		extractCalculationRules(features))
+}
+
+// extractCalculationRules extracts specific rules from features
+func extractCalculationRules(features []string) string {
+	var rules []string
+
+	for _, f := range features {
+		lower := strings.ToLower(f)
+		if strings.Contains(lower, "discount") {
+			rules = append(rules, "- Apply discount based on customer type (premium: 10%, standard: 5%)")
+		}
+		if strings.Contains(lower, "tax") {
+			rules = append(rules, "- Calculate tax as 8% of subtotal minus discount")
+		}
+		if strings.Contains(lower, "pricing") {
+			rules = append(rules, "- Ensure price > 0, calculate total = base + tax - discount")
+		}
+		if strings.Contains(lower, "workflow") || strings.Contains(lower, "state") {
+			rules = append(rules, "- Validate state transitions: pending -> approved -> completed")
+		}
+	}
+
+	if len(rules) == 0 {
+		rules = append(rules, "- No special calculations, just CRUD operations")
+	}
+
+	return strings.Join(rules, "\n")
 }
