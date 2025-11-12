@@ -1,12 +1,12 @@
 {
   "app_name": "SearchAPI",
-  "duration_sec": 0.000348926,
-  "end_time": "2025-11-11T21:13:24+02:00",
+  "duration_sec": 0.000109048,
+  "end_time": "2025-11-11T22:02:05+02:00",
   "error_message": "build prompt: parse template: template: prompt:139: function \"ID\" not defined",
   "final_success": false,
   "mode": "",
   "primary_success": false,
   "repair_attempts": 0,
   "rule_fixes": 0,
-  "start_time": "2025-11-11T21:13:24+02:00"
+  "start_time": "2025-11-11T22:02:05+02:00"
 }

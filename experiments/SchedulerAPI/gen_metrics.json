@@ -1,12 +1,12 @@
 {
   "app_name": "SchedulerAPI",
-  "duration_sec": 0.00053919,
-  "end_time": "2025-11-11T21:13:21+02:00",
+  "duration_sec": 0.000096944,
+  "end_time": "2025-11-11T22:02:04+02:00",
   "error_message": "build prompt: parse template: template: prompt:139: function \"ID\" not defined",
   "final_success": false,
   "mode": "",
   "primary_success": false,
   "repair_attempts": 0,
   "rule_fixes": 0,
-  "start_time": "2025-11-11T21:13:21+02:00"
+  "start_time": "2025-11-11T22:02:04+02:00"
 }

@@ -1,10 +1,10 @@
 App: ApprovalAPI
 Mode: hybrid
-Timestamp: 2025-11-11T21:13:01+02:00
+Timestamp: 2025-11-11T22:02:00+02:00
 OpenAI Model: gpt-4o
 BuildSuccess: false
 TestsPass: false
 Coverage: 0.0%
-Duration: 1.977748914s
+Duration: 26.450898ms
 RepairAttempts: 1
 RuleFixes: 8
