@@ -20,7 +20,7 @@ SchedulerAPI,,false,false,0.0,0.00,0
 SearchAPI,,false,false,0.0,0.00,0
 WorkflowAPI,,false,false,0.0,0.00,0
 ApprovalAPI,,false,false,0.0,0.00,0
-AuthAPI,,true,true,65.8,0.00,0
+AuthAPI,,false,false,0.0,0.00,0
 InventoryAPI,,false,false,0.0,0.00,0
 NotificationAPI,,false,false,0.0,0.00,0
 OrderAPI,,false,false,0.0,0.00,0

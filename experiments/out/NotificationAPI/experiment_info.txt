@@ -1,10 +1,10 @@
 App: NotificationAPI
 Mode: hybrid
-Timestamp: 2025-11-12T09:27:34+02:00
-OpenAI Model: gpt-4o
+Timestamp: 2025-11-12T13:11:24+02:00
+OpenAI Model: gpt-4o-mini
 BuildSuccess: false
 TestsPass: false
 Coverage: 0.0%
-Duration: 3.378352421s
+Duration: 3.1973737s
 RepairAttempts: 1
 RuleFixes: 7

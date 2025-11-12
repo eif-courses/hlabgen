@@ -1,0 +1,594 @@
+version: '3'
+
+# Windows-friendly Taskfile that mirrors your Makefile
+# Usage examples:
+#   task generate APP=LibraryAPI MODE=rules
+#   task experiment APP=BlogAPI
+#   task all-experiments MODE=hybrid
+#   task reports-all
+#   task clean
+
+vars:
+  MODE: '{{.MODE | default "hybrid"}}'
+  INPUT_DIR: '{{.INPUT_DIR | default "experiments/input"}}'
+  OUT_DIR: '{{.OUT_DIR | default "experiments/out"}}'
+  LOG_DIR: '{{.LOG_DIR | default "experiments/logs"}}'
+  ARCHIVE_DIR: '{{.ARCHIVE_DIR | default "experiments/archives"}}'
+  RESULTS_MD: '{{.LOG_DIR}}/results.md'
+
+# Helper: choose PowerShell on Windows, sh elsewhere
+# (go-task will select the right interpreter automatically)
+
+silent: true
+
+tasks:
+  default:
+    desc: "Help menu"
+    cmds:
+      - task --list
+
+  # =====================================================
+  # 🧬 Experiment Execution
+  # =====================================================
+
+  generate:
+    desc: "Generate one app: task generate APP=<name> MODE=<rules|ml|hybrid>"
+    vars:
+      APP: '{{.APP}}'
+    preconditions:
+      - sh: 'test -n "{{.APP}}"'
+        msg: 'Please specify APP=<AppName>'
+      - sh: 'test -f "{{.INPUT_DIR}}/{{.APP}}.json"'
+        msg: 'File {{.INPUT_DIR}}/{{.APP}}.json not found'
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        Write-Host \"🚀 Generating {{.APP}} in {{.MODE}} mode...\";
+        go run ./cmd/hlabgen -input '{{.INPUT_DIR}}/{{.APP}}.json' -mode '{{.MODE}}' -out '{{.OUT_DIR}}/{{.APP}}';
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        Write-Host \"✅ Finished generating {{.APP}}\""
+
+  validate:
+    desc: "Validate generated app: task validate APP=<name>"
+    vars:
+      APP: '{{.APP}}'
+    preconditions:
+      - sh: 'test -n "{{.APP}}"'
+        msg: 'Please specify APP=<AppName>'
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        Write-Host \"🔍 Validating {{.APP}}...\";
+        go run ./cmd/hlabgen -validate -out '{{.OUT_DIR}}/{{.APP}}';
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        Write-Host \"✅ Validation done for {{.APP}}\""
+
+  experiment:
+    desc: "Full pipeline for one app (generate + report)"
+    deps: [generate, report]
+
+  all-experiments:
+    desc: "Run ALL experiments in INPUT_DIR (mode: {{.MODE}})"
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        New-Item -ItemType Directory -Force -Path '{{.LOG_DIR}}' | Out-Null;
+        Remove-Item -Force -ErrorAction SilentlyContinue '{{.LOG_DIR}}/failed_experiments.txt';
+        $files = Get-ChildItem -Path '{{.INPUT_DIR}}' -Filter '*.json' -ErrorAction SilentlyContinue;
+        if (-not $files) { Write-Host 'No input files found.'; exit 0 }
+        $total = $files.Count; $current = 0; $failed = 0; $start = Get-Date;
+        foreach ($f in $files) {
+          $app = [System.IO.Path]::GetFileNameWithoutExtension($f.Name);
+          $current++;
+          Write-Host \"\n══════════════════════════════════════════════════════════════\";
+          Write-Host \"🚀 [$current/$total] $app (mode: {{.MODE}})\";
+          Write-Host \"══════════════════════════════════════════════════════════════\";
+          $log = Join-Path '{{.LOG_DIR}}' ("$app.log");
+          $proc = Start-Process -FilePath 'go' -ArgumentList @('run','./cmd/hlabgen','-input',$f.FullName,'-mode','{{.MODE}}','-out', (Join-Path '{{.OUT_DIR}}' $app)) -PassThru -RedirectStandardOutput $log -RedirectStandardError $log -NoNewWindow -Wait;
+          if ($proc.ExitCode -eq 0) { Write-Host \"✅ $app completed successfully\" }
+          else { $failed++; Write-Host \"❌ $app failed\"; Add-Content -Path '{{.LOG_DIR}}/failed_experiments.txt' -Value $app }
+        }
+        Write-Host ''; Write-Host '📊 Generating comprehensive reports...';
+        task reports-all;
+        $dur = [int]((Get-Date) - $start).TotalSeconds;
+        $ok = $total - $failed; $pct = [int](100*$ok/$total);
+        Write-Host \"✅ Completed $ok/$total experiments ($pct%)\";
+        if ($failed -gt 0) { Write-Host \"❌ Failed: $failed experiments\"; Write-Host \"📋 See {{.LOG_DIR}}/failed_experiments.txt\" }
+        Write-Host \"⏱️  Total duration: $dur seconds\";
+        Write-Host \"📁 Reports available in: {{.LOG_DIR}}\";"
+
+  quick-test:
+    desc: "Run a quick 3-app smoke test"
+    cmds:
+      - task: experiment
+        vars: { APP: 'LibraryAPI' }
+      - task: experiment
+        vars: { APP: 'BlogAPI' }
+      - task: experiment
+        vars: { APP: 'TaskManagerAPI' }
+
+  # =====================================================
+  # 🔬 Mode Comparison
+  # =====================================================
+
+  compare-modes:
+    desc: "Run experiments across rules, ml, hybrid and archive each"
+    cmds:
+      - task: all-experiments
+        vars: { MODE: 'rules' }
+      - task: archive-mode
+        vars: { MODE: 'rules' }
+      - task: clean-code
+      - task: all-experiments
+        vars: { MODE: 'ml' }
+      - task: archive-mode
+        vars: { MODE: 'ml' }
+      - task: clean-code
+      - task: all-experiments
+        vars: { MODE: 'hybrid' }
+      - task: archive-mode
+        vars: { MODE: 'hybrid' }
+
+  archive-mode:
+    internal: true
+    desc: "Helper to archive last mode run"
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        $ts = Get-Date -Format 'yyyyMMdd_HHmmss';
+        $archiveDir = Join-Path '{{.ARCHIVE_DIR}}' ('{{.MODE}}_' + $ts);
+        New-Item -ItemType Directory -Force -Path $archiveDir | Out-Null;
+        # Copy any json summaries from experiments/* (except infra dirs)
+        Get-ChildItem experiments -Directory | Where-Object { $_.Name -notin 'input','out','logs','archives' } | ForEach-Object {
+          $app = $_.Name;
+          Get-ChildItem $_ -Filter '*.json' -File -ErrorAction SilentlyContinue | ForEach-Object {
+            Copy-Item $_.FullName (Join-Path $archiveDir ("${app}_" + $_.Name)) -ErrorAction SilentlyContinue
+          }
+        }
+        if (Test-Path '{{.LOG_DIR}}') {
+          Copy-Item '{{.LOG_DIR}}/*.csv' $archiveDir -ErrorAction SilentlyContinue;
+          Copy-Item '{{.LOG_DIR}}/*.md' $archiveDir -ErrorAction SilentlyContinue;
+        }
+        Write-Host \"✅ {{.MODE}} mode completed and archived\";"
+
+  analyze-modes:
+    desc: "Analyze and compare results across modes"
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        if (-not (Test-Path '{{.ARCHIVE_DIR}}')) { Write-Host '❌ No archived runs found'; exit 1 }
+        Write-Host 'Mode   Success%  AvgDuration  AvgRepairs  AvgCoverage';
+        foreach ($mode in 'rules','ml','hybrid') {
+          $dir = Get-ChildItem '{{.ARCHIVE_DIR}}' -Directory -Name | Where-Object { $_ -like \"$mode_*\" } | Sort-Object -Descending | Select-Object -First 1;
+          if (-not $dir) { Write-Host \"$mode - No data\"; continue }
+          $path = Join-Path '{{.ARCHIVE_DIR}}' $dir;
+          $files = Get-ChildItem $path -Filter '*_gen_metrics.json' -File -ErrorAction SilentlyContinue;
+          if (-not $files) { Write-Host \"$mode - No metrics\"; continue }
+          $total=0; $succ=0; $dur=0; $rep=0;
+          foreach ($f in $files) {
+            $json = Get-Content $f.FullName -Raw | ConvertFrom-Json -ErrorAction SilentlyContinue;
+            if ($null -ne $json) {
+              $total++;
+              if ($json.final_success) { $succ++ }
+              $dur += [double]$json.duration_sec
+              $rep += [int]$json.repair_attempts
+            }
+          }
+          if ($total -gt 0) {
+            $rate = [math]::Round(100*$succ/$total,1);
+            $ad = [math]::Round($dur/$total,2);
+            $ar = [math]::Round($rep/$total,1);
+            Write-Host ("{0,-6} {1,-9} {2,-11} {3,-10} {4,-11}" -f $mode, ($rate.ToString()+'%'), ($ad.ToString()+'s'), $ar, '-')
+          }
+        }"
+
+  report-mode-comparison:
+    desc: "Generate mode comparison markdown into logs"
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        $out='{{.LOG_DIR}}/mode_comparison.md'; New-Item -ItemType Directory -Force -Path '{{.LOG_DIR}}' | Out-Null;
+        \"# Mode Comparison Report`n`nGenerated: $(Get-Date)`n\" | Out-File -Enc UTF8 $out;
+        \"| Mode | Success Rate | Avg Duration | Avg Repairs | Avg Coverage |`n|------|--------------|--------------|-------------|--------------|\" | Add-Content $out;
+        foreach ($mode in 'rules','ml','hybrid') {
+          $dir = Get-ChildItem '{{.ARCHIVE_DIR}}' -Directory -Name | Where-Object { $_ -like \"$mode_*\" } | Sort-Object -Descending | Select-Object -First 1;
+          if (-not $dir) { continue }
+          $path = Join-Path '{{.ARCHIVE_DIR}}' $dir;
+          $files = Get-ChildItem $path -Filter '*_gen_metrics.json' -File -ErrorAction SilentlyContinue;
+          $total=0; $succ=0; $dur=0; $rep=0;
+          foreach ($f in $files) { $json = Get-Content $f.FullName -Raw | ConvertFrom-Json -ErrorAction SilentlyContinue; if ($null -ne $json) { $total++; if ($json.final_success) { $succ++ }; $dur += [double]$json.duration_sec; $rep += [int]$json.repair_attempts } }
+          if ($total -gt 0) { $rate=[math]::Round(100*$succ/$total,1); $ad=[math]::Round($dur/$total,2); $ar=[math]::Round($rep/$total,1); \"| $mode | $rate% | ${ad}s | $ar | - |\" | Add-Content $out }
+        }
+        Write-Host \"✅ Report saved: $out\";"
+
+  multi-run-mode:
+    desc: "Run N iterations in a specific mode. Ex: task multi-run-mode MODE=ml RUNS=5"
+    vars:
+      RUNS: '{{.RUNS | default 5}}'
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        $runs = [int]'{{.RUNS}}';
+        for ($i=1; $i -le $runs; $i++) {
+          Write-Host \"🔬 {{.MODE}} mode - Iteration $i of $runs\";
+          task all-experiments MODE='{{.MODE}}';
+          $ts = Get-Date -Format 'yyyyMMdd_HHmmss';
+          $archiveDir = Join-Path '{{.ARCHIVE_DIR}}' ('{{.MODE}}_run' + $i + '_' + $ts);
+          New-Item -ItemType Directory -Force -Path $archiveDir | Out-Null;
+          Get-ChildItem experiments -Directory | Where-Object { $_.Name -notin 'input','out','logs','archives' } | ForEach-Object {
+            $app = $_.Name;
+            Get-ChildItem $_ -Filter '*.json' -File -ErrorAction SilentlyContinue | ForEach-Object { Copy-Item $_.FullName (Join-Path $archiveDir ("${app}_" + $_.Name)) -ErrorAction SilentlyContinue }
+          }
+          if (Test-Path '{{.LOG_DIR}}') { Copy-Item '{{.LOG_DIR}}/*.csv' $archiveDir -ErrorAction SilentlyContinue }
+          if ($i -lt $runs) { task clean-code }
+        }
+        Write-Host \"✅ Completed $runs runs in {{.MODE}} mode\";"
+
+  multi-run:
+    desc: "Run N iterations (mode: {{.MODE}}). Ex: task multi-run RUNS=5"
+    vars:
+      RUNS: '{{.RUNS | default 5}}'
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        $runs = [int]'{{.RUNS}}';
+        for ($i=1; $i -le $runs; $i++) {
+          Write-Host \"🔬 Iteration $i of $runs (mode: {{.MODE}})\";
+          task all-experiments MODE='{{.MODE}}';
+          task archive-metrics;
+          if ($i -lt $runs) { task clean-code }
+        }
+        task list-archives;"
+
+  # =====================================================
+  # 📊 Reports
+  # =====================================================
+
+  report:
+    desc: "Generate standard Markdown report"
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        Write-Host '📊 Generating standard Markdown report...';
+        go run ./cmd/report; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        Write-Host '✅ Report ready: {{.RESULTS_MD}}'"
+
+  reports-all:
+    desc: "Generate ALL report types"
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        Write-Host '📊 Generating ALL report types...';
+        go run ./cmd/report -mode all; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        Write-Host '✅ All reports generated successfully!';
+        Write-Host '📁 Reports available in {{.LOG_DIR}}'"
+
+  report-comparative:
+    desc: "Comparative analysis"
+    cmds:
+      - pwsh -NoProfile -Command "go run ./cmd/report -mode comparative"
+
+  report-statistics:
+    desc: "Statistical analysis"
+    cmds:
+      - pwsh -NoProfile -Command "go run ./cmd/report -mode statistics"
+
+  report-failures:
+    desc: "Failure analysis"
+    cmds:
+      - pwsh -NoProfile -Command "go run ./cmd/report -mode failures"
+
+  report-latex:
+    desc: "LaTeX tables for papers"
+    cmds:
+      - pwsh -NoProfile -Command "go run ./cmd/report -mode latex"
+
+  academic-package:
+    desc: "Complete academic report package (experiments + all reports)"
+    deps: [all-experiments, reports-all]
+
+  # =====================================================
+  # 🧹 Cleaning
+  # =====================================================
+
+  clean:
+    desc: "Clean all outputs and logs (DANGEROUS)"
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        Write-Host '🧹 Cleaning all outputs and logs...';
+        if (Test-Path '{{.OUT_DIR}}') { Remove-Item -Recurse -Force '{{.OUT_DIR}}'; New-Item -ItemType Directory -Force -Path '{{.OUT_DIR}}' | Out-Null }
+        if (Test-Path '{{.LOG_DIR}}') { Remove-Item -Recurse -Force '{{.LOG_DIR}}'; New-Item -ItemType Directory -Force -Path '{{.LOG_DIR}}' | Out-Null }
+        Get-ChildItem 'experiments' -Directory | Where-Object { $_.Name -notin 'input','out','logs','archives' } | ForEach-Object { Remove-Item -Recurse -Force $_.FullName }
+        Write-Host '✅ Cleaned'"
+
+  clean-safe:
+    desc: "Clean outputs but preserve metrics"
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        if (Test-Path '{{.OUT_DIR}}') {
+          Get-ChildItem '{{.OUT_DIR}}' -Directory | ForEach-Object {
+            Get-ChildItem $_ -Recurse -File | Where-Object { $_.Name -notmatch 'metrics|coverage' } | Remove-Item -Force
+          }
+          Get-ChildItem '{{.OUT_DIR}}' -Directory | Where-Object { (Get-ChildItem $_ -Recurse -Force | Measure-Object).Count -eq 0 } | Remove-Item -Recurse -Force
+        }
+        Get-ChildItem 'experiments' -Directory | Where-Object { $_.Name -notin 'input','out','logs','archives' } | ForEach-Object {
+          Get-ChildItem $_ -Recurse -File | Where-Object { $_.Name -notmatch 'metrics|coverage' } | Remove-Item -Force
+        }
+        Write-Host '✅ Cleaned (metrics preserved)'"
+
+  clean-code:
+    desc: "Clean only generated code, keep metrics"
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        if (Test-Path '{{.OUT_DIR}}') {
+          Get-ChildItem '{{.OUT_DIR}}' -Directory | ForEach-Object {
+            $p = $_.FullName; Remove-Item -Recurse -Force -ErrorAction SilentlyContinue (Join-Path $p 'cmd');
+            Remove-Item -Recurse -Force -ErrorAction SilentlyContinue (Join-Path $p 'internal');
+            Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $p 'go.mod');
+            Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $p 'go.sum');
+            Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $p 'tasks.md');
+          }
+          Get-ChildItem '{{.OUT_DIR}}' -Directory | Where-Object { (Get-ChildItem $_ -Recurse -Force | Measure-Object).Count -eq 0 } | Remove-Item -Recurse -Force
+        }
+        Write-Host '✅ Code cleaned'"
+
+  clean-logs:
+    desc: "Clean only logs"
+    cmds:
+      - pwsh -NoProfile -Command "if (Test-Path '{{.LOG_DIR}}') { Remove-Item -Recurse -Force '{{.LOG_DIR}}' }; New-Item -ItemType Directory -Force -Path '{{.LOG_DIR}}' | Out-Null; Write-Host '✅ Logs cleaned'"
+
+  clean-archive:
+    desc: "Archive metrics then clean (safest)"
+    deps: [archive-metrics, clean]
+
+  clean-all:
+    desc: "Complete clean with automatic backup"
+    deps: [backup]
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        if (Test-Path '{{.OUT_DIR}}') { Remove-Item -Recurse -Force '{{.OUT_DIR}}' }
+        if (Test-Path '{{.LOG_DIR}}') { Remove-Item -Recurse -Force '{{.LOG_DIR}}' }
+        if (Test-Path '{{.ARCHIVE_DIR}}') { Remove-Item -Recurse -Force '{{.ARCHIVE_DIR}}' }
+        Get-ChildItem 'experiments' -Directory | Where-Object { $_.Name -ne 'input' } | ForEach-Object { Remove-Item -Recurse -Force $_.FullName }
+        New-Item -ItemType Directory -Force -Path '{{.OUT_DIR}}','{{.LOG_DIR}}' | Out-Null;
+        Write-Host '✅ Complete clean (backup saved)'"
+
+  clean-dry-run:
+    desc: "Show what would be deleted by clean"
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        Write-Host '🔍 Files/directories that would be deleted by clean';
+        Get-ChildItem 'experiments' -Directory | Where-Object { $_.Name -notin 'input','out','logs','archives' } | ForEach-Object {
+          $size = (Get-ChildItem $_ -Recurse -Force | Measure-Object Length -Sum).Sum; $count = (Get-ChildItem $_ -Recurse -Force | Measure-Object).Count;
+          Write-Host (\"  ❌ {0} ({1} files)\" -f $_.Name, $count)
+        }
+        if (Test-Path '{{.OUT_DIR}}') { $c=(Get-ChildItem '{{.OUT_DIR}}' -Recurse -Force | Measure-Object).Count; Write-Host \"  ❌ All contents of {{.OUT_DIR}} ($c files)\" } else { Write-Host '  (no out dir)' }
+        if (Test-Path '{{.LOG_DIR}}') { $c=(Get-ChildItem '{{.LOG_DIR}}' -Recurse -Force | Measure-Object).Count; Write-Host \"  ❌ All contents of {{.LOG_DIR}} ($c files)\" } else { Write-Host '  (no logs dir)' }
+        Write-Host '⚠️  Metrics files that would be LOST:'; Get-ChildItem 'experiments' -Recurse -Include '*metrics*.json','coverage.json' -ErrorAction SilentlyContinue | ForEach-Object { Write-Host ('  ' + $_.FullName) }"
+
+  clean-force:
+    desc: "Nuclear option (removes everything)"
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        Remove-Item -Recurse -Force -ErrorAction SilentlyContinue '{{.OUT_DIR}}','{{.LOG_DIR}}','{{.ARCHIVE_DIR}}';
+        Get-ChildItem 'experiments' -Directory | Where-Object { $_.Name -notin 'input' } | ForEach-Object { Remove-Item -Recurse -Force $_.FullName }
+        New-Item -ItemType Directory -Force -Path '{{.OUT_DIR}}','{{.LOG_DIR}}' | Out-Null;
+        Write-Host '✅ Force clean complete'"
+
+  # =====================================================
+  # 💾 Backup & Archive
+  # =====================================================
+
+  archive-metrics:
+    desc: "Archive only metrics files with timestamp"
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        $ts = Get-Date -Format 'yyyyMMdd_HHmmss'; $archiveDir = Join-Path '{{.ARCHIVE_DIR}}' ("metrics_" + $ts);
+        New-Item -ItemType Directory -Force -Path $archiveDir | Out-Null; $count = 0;
+        Get-ChildItem 'experiments' -Directory | Where-Object { $_.Name -notin 'input','out','logs','archives' } | ForEach-Object {
+          $app = $_.Name;
+          Get-ChildItem $_ -File -Include 'gen_metrics.json','coverage.json','*metrics*.json' -ErrorAction SilentlyContinue | ForEach-Object {
+            Copy-Item $_.FullName (Join-Path $archiveDir ("${app}_" + $_.Name)); $count++
+          }
+        }
+        if (Test-Path '{{.OUT_DIR}}') {
+          Get-ChildItem '{{.OUT_DIR}}' -Recurse -File -Include '*metrics*.json','coverage.json' -ErrorAction SilentlyContinue | ForEach-Object {
+            $app = Split-Path $_.DirectoryName -Leaf; Copy-Item $_.FullName (Join-Path $archiveDir ("out_${app}_" + $_.Name)); $count++
+          }
+        }
+        if (Test-Path '{{.LOG_DIR}}') { Get-ChildItem '{{.LOG_DIR}}' -File -Include *.csv,*.md,*.tex -ErrorAction SilentlyContinue | Copy-Item -Destination $archiveDir -ErrorAction SilentlyContinue; }
+        if ($count -eq 0) { Write-Host '⚠️  No files to archive'; Remove-Item -Force $archiveDir }
+        else { Write-Host \"✅ Archived $count files to $archiveDir\" }"
+
+  archive:
+    desc: "Create compressed archive of OUT_DIR and LOG_DIR"
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        $ts = Get-Date -Format 'yyyyMMdd_HHmmss'; $name = \"hlabgen_results_${ts}.zip\";
+        if (Test-Path $name) { Remove-Item -Force $name }
+        Compress-Archive -Path '{{.OUT_DIR}}','{{.LOG_DIR}}' -DestinationPath $name -Force;
+        Write-Host \"✅ Archive created: $name\""
+
+  backup:
+    desc: "Full backup of experiments/"
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        $ts = Get-Date -Format 'yyyyMMdd_HHmmss'; $name = \"hlabgen_backup_${ts}.zip\";
+        if (Test-Path $name) { Remove-Item -Force $name }
+        Compress-Archive -Path 'experiments' -DestinationPath $name -Force;
+        Write-Host \"✅ Backup created: $name\"; Write-Host '💡 To restore: Expand-Archive -Path <file> -DestinationPath .'"
+
+  list-archives:
+    desc: "List archives in ARCHIVE_DIR and backup zips"
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        Write-Host '📂 Available Archives:'; if (Test-Path '{{.ARCHIVE_DIR}}') {
+          Get-ChildItem '{{.ARCHIVE_DIR}}' -Directory | ForEach-Object {
+            $count = (Get-ChildItem $_ -Recurse -File | Measure-Object).Count; $size = ([math]::Round(((Get-ChildItem $_ -Recurse -Force | Measure-Object Length -Sum).Sum)/1MB,2)).ToString()+'MB';
+            Write-Host (\"  📁 {0} - {1} files ({2})\" -f $_.Name, $count, $size)
+          }
+        } else { Write-Host '  (no archives directory)' }
+        Write-Host ''; Write-Host '📦 Backup Files:';
+        Get-ChildItem -File -Name 'hlabgen_backup_*.zip','hlabgen_results_*.zip' -ErrorAction SilentlyContinue | ForEach-Object { Write-Host ('  ' + $_) }"
+
+  restore-latest:
+    desc: "Restore from latest metrics archive into OUT_DIR/ and LOG_DIR/"
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        $latest = Get-ChildItem '{{.ARCHIVE_DIR}}' -Directory -Name | Where-Object { $_ -like 'metrics_*' } | Sort-Object -Descending | Select-Object -First 1;
+        if (-not $latest) { Write-Host '❌ No archives found'; exit 1 }
+        $dir = Join-Path '{{.ARCHIVE_DIR}}' $latest; $restored=0;
+        Get-ChildItem $dir -File | ForEach-Object {
+          $name = $_.Name;
+          if ($name -match '_') {
+            $app = $name.Split('_')[0]; $metric = $name.Substring($name.IndexOf('_')+1);
+            $target = Join-Path '{{.OUT_DIR}}' $app; New-Item -ItemType Directory -Force -Path $target | Out-Null; Copy-Item $_.FullName (Join-Path $target $metric); $restored++
+          } else { Copy-Item $_.FullName '{{.LOG_DIR}}'; $restored++ }
+        }
+        Write-Host \"✅ Restored $restored files from archive\"; Write-Host '💡 Run task reports-all to regenerate reports'"
+
+  # =====================================================
+  # 🔧 Utilities
+  # =====================================================
+
+  list:
+    desc: "List available experiments with details"
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        Write-Host '📂 Available experiment configurations:';
+        $files = Get-ChildItem '{{.INPUT_DIR}}' -Filter '*.json' -File -ErrorAction SilentlyContinue;
+        '{0,-25} {1,-15} {2,-10}' -f 'NAME','DIFFICULTY','ENTITIES';
+        foreach ($f in $files) {
+          $app = [System.IO.Path]::GetFileNameWithoutExtension($f.Name);
+          $text = Get-Content $f.FullName -Raw;
+          $diff = ($text | Select-String -Pattern '"difficulty"\s*:\s*"([^"]*)"' -AllMatches).Matches.Value | ForEach-Object { ($_ -split '"')[3] } | Select-Object -First 1;
+          if (-not $diff) { $diff = 'unknown' }
+          $entities = (($text | Select-String -Pattern '"entities"\s*:\s*\[[^\]]*\]' -AllMatches).Matches.Value | Select-String -Pattern '"[^"]*"' -AllMatches).Matches.Count;
+          '{0,-25} {1,-15} {2,-10}' -f $app,$diff,$entities
+        }"
+
+  stats:
+    desc: "Quick statistics summary"
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        Write-Host '📊 Quick Statistics Summary';
+        $csv='{{.LOG_DIR}}/summary.csv'; if (Test-Path $csv) {
+          $rows = Import-Csv $csv; $total = $rows.Count; $success = ($rows | Where-Object { $_.success -eq 'true' }).Count;
+          Write-Host \"  • Total experiments: $total\"; Write-Host \"  • Successful builds: $success\";
+          if ($total -gt 0) { $rate = [int](100*$success/$total); Write-Host \"  • Success rate: $rate%\" }
+        } else { Write-Host 'No summary.csv found. Run experiments first.' }
+        $cov='{{.LOG_DIR}}/coverage.csv'; if (Test-Path $cov) { $rows = Import-Csv $cov; if ($rows) { $avg = [math]::Round(($rows | Measure-Object -Property coverage -Average).Average,1); Write-Host \"  • Average coverage: $avg%\" } }
+        Write-Host 'Reports:'; Get-ChildItem '{{.LOG_DIR}}' -Filter '*.md' -File -ErrorAction SilentlyContinue | ForEach-Object { Write-Host ('  • ' + $_.Name) }"
+
+  status:
+    desc: "Show experiment status"
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        $inputs = (Get-ChildItem '{{.INPUT_DIR}}' -Filter '*.json' -File -ErrorAction SilentlyContinue).Count;
+        $gen = (Get-ChildItem 'experiments' -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -notin 'input','out','logs','archives' }).Count;
+        $genOut = (Test-Path '{{.OUT_DIR}}') ? ((Get-ChildItem '{{.OUT_DIR}}' -Directory -ErrorAction SilentlyContinue).Count) : 0;
+        $metrics = (Get-ChildItem 'experiments' -Recurse -Include '*metrics*.json' -ErrorAction SilentlyContinue | Measure-Object).Count;
+        $logs = (Get-ChildItem '{{.LOG_DIR}}' -Filter '*.log' -ErrorAction SilentlyContinue | Measure-Object).Count;
+        Write-Host \"Input configurations: $inputs\";
+        Write-Host \"Generated apps (experiments/): $gen\";
+        Write-Host \"Generated apps (experiments/out/): $genOut\";
+        Write-Host \"Metrics files (all): $metrics\";
+        Write-Host \"Log files: $logs\";
+        if (Test-Path '{{.LOG_DIR}}/failed_experiments.txt') { $c = (Get-Content '{{.LOG_DIR}}/failed_experiments.txt' | Measure-Object).Count; Write-Host \"Failed experiments: $c\" }
+        if (Test-Path '{{.LOG_DIR}}/results.md') { Write-Host '✅ Reports generated' } else { Write-Host '⚠️  No reports yet (run: task report)' }
+        if (Test-Path '{{.ARCHIVE_DIR}}') { $ac = (Get-ChildItem '{{.ARCHIVE_DIR}}' -Directory -ErrorAction SilentlyContinue | Measure-Object).Count; if ($ac -gt 0) { Write-Host \"Archives: $ac\" } }"
+
+  verify-env:
+    desc: "Verify environment and dependencies"
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        Write-Host '🔍 Verifying environment...';
+        try { & go version } catch { Write-Host '❌ Go not found' }
+        if ($env:OPENAI_API_KEY) { Write-Host \"OPENAI_API_KEY: ✅ Set (length: $($env:OPENAI_API_KEY.Length))\" } else { Write-Host 'OPENAI_API_KEY: ❌ Not set' }
+        if (Get-Command golangci-lint -ErrorAction SilentlyContinue) { golangci-lint version | Select-Object -First 1 } else { Write-Host 'golangci-lint: ⚠️  Not installed (optional)' }
+        if (Get-Command gocyclo -ErrorAction SilentlyContinue) { Write-Host 'gocyclo: ✅ Installed' } else { Write-Host 'gocyclo: ⚠️  Not installed (optional)' }"
+
+  disk-usage:
+    desc: "Show disk usage summary"
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        function SizeMB($p){ if (Test-Path $p) { return ([math]::Round(((Get-ChildItem $p -Recurse -Force | Measure-Object Length -Sum).Sum)/1MB,2)) } else { return 0 } }
+        Write-Host '💾 Disk Usage Summary';
+        Write-Host (\"Output dir: {0} MB\" -f (SizeMB '{{.OUT_DIR}}'));
+        Write-Host (\"Logs dir:   {0} MB\" -f (SizeMB '{{.LOG_DIR}}'));
+        Write-Host (\"Archives:   {0} MB\" -f (SizeMB '{{.ARCHIVE_DIR}}'));
+        if (Test-Path '{{.OUT_DIR}}') { Get-ChildItem '{{.OUT_DIR}}' -Directory | ForEach-Object { $s = SizeMB $_.FullName; } | Out-Null }
+        $total = SizeMB 'experiments'; Write-Host (\"Total experiment data: {0} MB\" -f $total)"
+
+  count-loc:
+    desc: "Count lines of Go code in generated projects"
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        $total = 0; if (Test-Path '{{.OUT_DIR}}') {
+          Get-ChildItem '{{.OUT_DIR}}' -Directory | ForEach-Object {
+            $app = $_.Name; $loc = (Get-ChildItem $_ -Recurse -Include *.go -File -ErrorAction SilentlyContinue | Get-Content | Measure-Object -Line).Lines;
+            if ($loc -gt 0) { Write-Host (\"  {0,-25} {1} LOC\" -f $app, $loc); $total += $loc }
+          }
+        }
+        Write-Host \"TOTAL: $total LOC\""
+
+  activity:
+    desc: "Show recent activity"
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        Write-Host '📈 Recent Activity';
+        Write-Host 'Recently modified experiments (last 7 days):';
+        if (Test-Path '{{.OUT_DIR}}') { Get-ChildItem '{{.OUT_DIR}}' -Recurse -Filter 'gen_metrics.json' -File -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -gt (Get-Date).AddDays(-7) } | Select-Object -First 10 | ForEach-Object { Write-Host ('  ' + (Split-Path $_.DirectoryName -Leaf)) } }
+        Write-Host ''; Write-Host 'Recent reports:'; Get-ChildItem '{{.LOG_DIR}}' -Filter '*.md' -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 5 | ForEach-Object { Write-Host ('  ' + $_.Name) }
+        Write-Host ''; Write-Host 'Recent archives:'; if (Test-Path '{{.ARCHIVE_DIR}}') { Get-ChildItem '{{.ARCHIVE_DIR}}' -Directory | Sort-Object LastWriteTime -Descending | Select-Object -First 3 | ForEach-Object { Write-Host ('  ' + $_.Name) } }"
+
+  compare:
+    desc: "Compare two experiments: task compare APP1=<name> APP2=<name>"
+    vars:
+      APP1: '{{.APP1}}'
+      APP2: '{{.APP2}}'
+    preconditions:
+      - sh: 'test -n "{{.APP1}}"'
+        msg: 'Please specify APP1=<name>'
+      - sh: 'test -n "{{.APP2}}"'
+        msg: 'Please specify APP2=<name>'
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        $m1='{{.OUT_DIR}}/{{.APP1}}/gen_metrics.json'; $m2='{{.OUT_DIR}}/{{.APP2}}/gen_metrics.json';
+        if (-not (Test-Path $m1)) { Write-Host '❌ Metrics not found for {{.APP1}}'; exit 1 }
+        if (-not (Test-Path $m2)) { Write-Host '❌ Metrics not found for {{.APP2}}'; exit 1 }
+        Write-Host '🔍 Comparing {{.APP1}} vs {{.APP2}}';
+        Write-Host '{{.APP1}}:'; Get-Content $m1 | Select-String -Pattern 'duration|repair|success' | ForEach-Object { '  ' + $_.Line };
+        Write-Host ''; Write-Host '{{.APP2}}:'; Get-Content $m2 | Select-String -Pattern 'duration|repair|success' | ForEach-Object { '  ' + $_.Line }"
+
+  config:
+    desc: "Show current configuration"
+    cmds:
+      - |
+        pwsh -NoProfile -Command "
+        Write-Host '⚙️  Current Configuration';
+        Write-Host ('Mode:        {{.MODE}}');
+        Write-Host ('Input Dir:   {{.INPUT_DIR}}')task verify-env;
+        Write-Host ('Output Dir:  {{.OUT_DIR}}');
+        Write-Host ('Log Dir:     {{.LOG_DIR}}');
+        Write-Host ('Archive Dir: {{.ARCHIVE_DIR}}');
+        Write-Host 'Environment:'; if ($env:OPENAI_API_KEY) { Write-Host '  OPENAI_API_KEY: ✅ Set' } else { Write-Host '  OPENAI_API_KEY: ❌ Not set' }; if ($env:OPENAI_BASE_URL) { Write-Host ("  OPENAI_BASE_URL: $env:OPENAI_BASE_URL") } else { Write-Host '  OPENAI_BASE_URL: (default)' }"

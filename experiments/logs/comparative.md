@@ -11,7 +11,7 @@
 
 | Mode | Experiments | Success Rate | Avg Coverage | Avg Duration (s) | Avg Repairs |
 |------|-------------|--------------|--------------|------------------|-------------|
-| Hybrid | 10 | 100.0% | 65.8% | 0.02 | 0.0 |
+| Hybrid | 10 | 100.0% | 0.0% | 0.16 | 0.0 |
 
 ## Key Findings
 

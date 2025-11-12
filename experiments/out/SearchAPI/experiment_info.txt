@@ -1,10 +1,10 @@
 App: SearchAPI
 Mode: hybrid
-Timestamp: 2025-11-12T09:27:51+02:00
-OpenAI Model: gpt-4o
+Timestamp: 2025-11-12T13:11:45+02:00
+OpenAI Model: gpt-4o-mini
 BuildSuccess: false
 TestsPass: false
 Coverage: 0.0%
-Duration: 2.645528089s
+Duration: 4.0734288s
 RepairAttempts: 1
 RuleFixes: 4

@@ -1,10 +1,10 @@
 App: WorkflowAPI
 Mode: hybrid
-Timestamp: 2025-11-12T09:27:56+02:00
-OpenAI Model: gpt-4o
+Timestamp: 2025-11-12T13:11:49+02:00
+OpenAI Model: gpt-4o-mini
 BuildSuccess: false
 TestsPass: false
 Coverage: 0.0%
-Duration: 3.943296507s
+Duration: 2.1088123s
 RepairAttempts: 1
 RuleFixes: 8

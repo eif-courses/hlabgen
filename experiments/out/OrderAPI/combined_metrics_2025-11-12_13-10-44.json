@@ -1,0 +1,32 @@
+{
+  "timestamp": "2025-11-12T13:10:44+02:00",
+  "build": {
+    "build_success": false,
+    "vet_warnings": 5,
+    "lint_warnings": 0,
+    "tests_pass": false,
+    "coverage_pct": 0,
+    "cyclomatic_avg": 0,
+    "gen_time_sec": 2.058985,
+    "timestamp": "2025-11-12T13:10:44+02:00"
+  },
+  "generation": {
+    "StartTime": "2025-11-12T13:10:42.6095992+02:00",
+    "EndTime": "2025-11-12T13:10:42.6133891+02:00",
+    "Duration": 3790000,
+    "PrimarySuccess": false,
+    "RepairAttempts": 0,
+    "FinalSuccess": false,
+    "ErrorMessage": "parse template: template: prompt:139: function \"ID\" not defined",
+    "RuleFixes": 0,
+    "Mode": "ml",
+    "Model": "",
+    "ModelVersion": "",
+    "APIComplexity": "",
+    "EndpointCount": 0,
+    "TokensUsed": 0,
+    "CostUSD": 0,
+    "PromptTokens": 0,
+    "CompletionTokens": 0
+  }
+}

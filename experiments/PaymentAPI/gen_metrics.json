@@ -1,12 +1,12 @@
 {
   "app_name": "PaymentAPI",
-  "duration_sec": 0.000361953,
-  "end_time": "2025-11-12T09:27:39+02:00",
+  "duration_sec": 0,
+  "end_time": "2025-11-12T13:11:30+02:00",
   "error_message": "build prompt: parse template: template: prompt:139: function \"ID\" not defined",
   "final_success": false,
   "mode": "",
   "primary_success": false,
   "repair_attempts": 0,
   "rule_fixes": 0,
-  "start_time": "2025-11-12T09:27:39+02:00"
+  "start_time": "2025-11-12T13:11:30+02:00"
 }

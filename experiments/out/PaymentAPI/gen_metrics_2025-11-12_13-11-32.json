@@ -1,0 +1,19 @@
+{
+  "StartTime": "2025-11-12T13:11:28.521098+02:00",
+  "EndTime": "2025-11-12T13:11:30.6681872+02:00",
+  "Duration": 2147140500,
+  "PrimarySuccess": false,
+  "RepairAttempts": 1,
+  "FinalSuccess": true,
+  "ErrorMessage": "",
+  "RuleFixes": 4,
+  "Mode": "hybrid",
+  "Model": "",
+  "ModelVersion": "",
+  "APIComplexity": "",
+  "EndpointCount": 0,
+  "TokensUsed": 0,
+  "CostUSD": 0,
+  "PromptTokens": 0,
+  "CompletionTokens": 0
+}

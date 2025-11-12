@@ -2,19 +2,19 @@
 
 ## Generation Duration Statistics
 
-- **Mean**: 0.02 seconds
-- **Std Dev**: 0.00 seconds
-- **Min**: 0.01 seconds
-- **Max**: 0.03 seconds
-- **95% CI**: [0.02, 0.02] seconds
+- **Mean**: 0.16 seconds
+- **Std Dev**: 0.03 seconds
+- **Min**: 0.12 seconds
+- **Max**: 0.25 seconds
+- **95% CI**: [0.14, 0.19] seconds
 
 ## Code Coverage Statistics
 
-- **Mean**: 6.58 %
-- **Std Dev**: 19.74 %
+- **Mean**: 0.00 %
+- **Std Dev**: 0.00 %
 - **Min**: 0.00 %
-- **Max**: 65.80 %
-- **95% CI**: [-5.65, 18.81] %
+- **Max**: 0.00 %
+- **95% CI**: [0.00, 0.00] %
 
 ## Repair Attempts Statistics
 
@@ -36,9 +36,9 @@
 
 | Metric Pair | Correlation (r) | Interpretation |
 |-------------|-----------------|----------------|
-| Duration vs Coverage | 0.673 | moderate positive |
+| Duration vs Coverage | 0.000 | weak positive |
 | Repairs vs Coverage | 0.000 | weak positive |
-| Rule Fixes vs Coverage | 0.218 | weak positive |
+| Rule Fixes vs Coverage | 0.000 | weak positive |
 
 ## Success Rate Analysis
 

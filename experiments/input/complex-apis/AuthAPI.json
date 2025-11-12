@@ -1,1 +1,26 @@
-{"app_name":"AuthAPI","description":"Authentication and authorization system with JWT and RBAC","database":"postgres","api_pattern":"RESTful","difficulty":"complex","entities":["User","Session"],"features":["POST /register - Password validation: min 8 chars, 1 uppercase, 1 number","POST /login - Lock account after 5 failed attempts","POST /login - Generate JWT token with 1-hour expiration","GET /protected - Require valid JWT token","GET /admin - Require role=admin AND valid token","POST /logout - Invalidate session token","Rate limiting: Max 5 login attempts per minute"],"objectives":["Validate password strength requirements","Test JWT token generation and validation","Verify RBAC enforcement","Ensure account lockout after failed attempts"]}
+{
+  "app_name": "AuthAPI",
+  "description": "Authentication and authorization system with JWT and RBAC",
+  "database": "postgres",
+  "api_pattern": "RESTful",
+  "difficulty": "complex",
+  "entities": [
+    "User",
+    "Session"
+  ],
+  "features": [
+    "POST /register - Password validation: min 8 chars, 1 uppercase, 1 number",
+    "POST /login - Lock account after 5 failed attempts",
+    "POST /login - Generate JWT token with 1-hour expiration",
+    "GET /protected - Require valid JWT token",
+    "GET /admin - Require role=admin AND valid token",
+    "POST /logout - Invalidate session token",
+    "Rate limiting: Max 5 login attempts per minute"
+  ],
+  "objectives": [
+    "Validate password strength requirements",
+    "Test JWT token generation and validation",
+    "Verify RBAC enforcement",
+    "Ensure account lockout after failed attempts"
+  ]
+}
