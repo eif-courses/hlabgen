@@ -1,0 +1,12 @@
+{
+  "app_name": "ApprovalAPI",
+  "duration_sec": 0.000026683,
+  "end_time": "2025-11-12T09:27:14+02:00",
+  "error_message": "parse template: template: prompt:139: function \"ID\" not defined",
+  "final_success": false,
+  "mode": "",
+  "primary_success": false,
+  "repair_attempts": 0,
+  "rule_fixes": 0,
+  "start_time": "2025-11-12T09:27:14+02:00"
+}

@@ -1,0 +1,19 @@
+{
+  "StartTime": "2025-11-12T09:27:19.439288168+02:00",
+  "EndTime": "2025-11-12T09:27:19.439353499+02:00",
+  "Duration": 65330,
+  "PrimarySuccess": false,
+  "RepairAttempts": 0,
+  "FinalSuccess": false,
+  "ErrorMessage": "parse template: template: prompt:139: function \"ID\" not defined",
+  "RuleFixes": 0,
+  "Mode": "ml",
+  "Model": "",
+  "ModelVersion": "",
+  "APIComplexity": "",
+  "EndpointCount": 0,
+  "TokensUsed": 0,
+  "CostUSD": 0,
+  "PromptTokens": 0,
+  "CompletionTokens": 0
+}

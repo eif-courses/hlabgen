@@ -5,7 +5,7 @@
 - **Mean**: 0.02 seconds
 - **Std Dev**: 0.00 seconds
 - **Min**: 0.01 seconds
-- **Max**: 0.02 seconds
+- **Max**: 0.03 seconds
 - **95% CI**: [0.02, 0.02] seconds
 
 ## Code Coverage Statistics
@@ -36,7 +36,7 @@
 
 | Metric Pair | Correlation (r) | Interpretation |
 |-------------|-----------------|----------------|
-| Duration vs Coverage | -0.444 | moderate negative |
+| Duration vs Coverage | 0.673 | moderate positive |
 | Repairs vs Coverage | 0.000 | weak positive |
 | Rule Fixes vs Coverage | 0.218 | weak positive |
 

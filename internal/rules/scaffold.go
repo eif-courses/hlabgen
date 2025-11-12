@@ -1,17 +1,23 @@
-package main
+// Package rules provides rule-based code generation for REST APIs
+// This file: internal/rules/scaffold.go
+//
+// IMPROVED VERSION: Fixes module path detection issues in Hybrid mode
+// Key Changes:
+// - Always use simple module name (appName only)
+// - Remove detectModulePath() function (was causing errors)
+// - Consistent module naming across ML, Hybrid, and Rules modes
+
+package rules
 
 import (
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 )
-
-// ============================================================================
-// IMPROVED SCAFFOLD FOR CONSISTENT MODULE PATHS ACROSS ALL MODES
-// ============================================================================
 
 // File represents a file created by the rule-based scaffold.
 type File struct {
@@ -19,9 +25,11 @@ type File struct {
 	Code []byte
 }
 
-// ImprovedScaffold creates a minimal working Go REST API project structure
-// with CONSISTENT module naming across all generation modes
-func ImprovedScaffold(outDir string, appName string) ([]File, error) {
+// ============================================================================
+// ✅ IMPROVED: Scaffold creates a minimal working Go REST API project
+// ============================================================================
+func Scaffold(outDir string, appName string) ([]File, error) {
+	// Create directory structure
 	dirs := []string{
 		filepath.Join(outDir, "cmd"),
 		filepath.Join(outDir, "internal", "handlers"),
@@ -36,9 +44,10 @@ func ImprovedScaffold(outDir string, appName string) ([]File, error) {
 	}
 
 	// ✅ CRITICAL FIX: Always use simple module name
+	// DO NOT use GitHub paths like "github.com/eif-courses/hlabgen/experiments/out/AppName"
 	// This ensures consistency across ML, Hybrid, and Rules modes
-	modulePath := normalizeModuleName(appName)
-	fmt.Printf("📦 Using module name: %s\n", modulePath)
+	modulePath := appName
+	fmt.Printf("📦 Scaffold: Using module name: %s\n", modulePath)
 
 	// --- main.go ---
 	mainGo := []byte(fmt.Sprintf(`// Auto-generated scaffold for %s (%s)
@@ -73,10 +82,8 @@ func Register(r *mux.Router) {
 `)
 
 	// --- go.mod ---
-	// ✅ IMPORTANT: Keep go.mod simple with just the module name
-	// Do NOT use full GitHub paths like:
-	//   - github.com/eif-courses/hlabgen/experiments/out/AppName
-	//   - github.com/yourusername/AppName
+	// ✅ CRITICAL: Keep go.mod simple with just the module name
+	// Do NOT use full GitHub paths - this is what was breaking Hybrid mode!
 	goMod := []byte(fmt.Sprintf(`module %s
 
 go 1.25
@@ -84,28 +91,30 @@ go 1.25
 require github.com/gorilla/mux v1.8.1
 `, modulePath))
 
+	// Create files
 	files := []File{
 		{Name: filepath.Join(outDir, "cmd", "main.go"), Code: mainGo},
 		{Name: filepath.Join(outDir, "internal", "routes", "routes.go"), Code: routesGo},
 		{Name: filepath.Join(outDir, "go.mod"), Code: goMod},
 	}
 
+	// Write files to disk
 	for _, f := range files {
 		if err := os.WriteFile(f.Name, f.Code, 0o644); err != nil {
 			return nil, fmt.Errorf("failed to write file %s: %w", f.Name, err)
 		}
-		fmt.Printf("✅ Created: %s\n", filepath.Base(f.Name))
+		fmt.Printf("✅ Scaffold created: %s\n", filepath.Base(f.Name))
 	}
 
-	// ✅ Auto-run `go mod tidy` to resolve dependencies
+	// Auto-run `go mod tidy` to resolve dependencies
 	fmt.Println("🔧 Running go mod tidy...")
-	cmd := exec.Command("go", "mod", "tidy")
-	cmd.Dir = outDir
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		fmt.Printf("⚠️  go mod tidy had warnings (this is often OK): %v\n", err)
-		// Don't fail here - mod tidy can warn about missing packages initially
+	tidyCmd := exec.Command("go", "mod", "tidy")
+	tidyCmd.Dir = outDir
+	tidyCmd.Stdout = os.Stdout
+	tidyCmd.Stderr = os.Stderr
+	if err := tidyCmd.Run(); err != nil {
+		fmt.Printf("⚠️  go mod tidy had warnings (often OK initially): %v\n", err)
+		// Don't fail here - tidy can warn about missing packages initially
 	} else {
 		fmt.Println("✅ Dependencies tidied")
 	}
@@ -114,194 +123,584 @@ require github.com/gorilla/mux v1.8.1
 }
 
 // ============================================================================
-// CRITICAL: Module Name Normalization
+// ✅ REMOVED: detectModulePath() function
 // ============================================================================
-
-// normalizeModuleName converts various path formats to a clean module name
-// This is the KEY to consistency across all generation modes
-func normalizeModuleName(appName string) string {
-	// Step 1: Remove all path prefixes that might have been added
-	normalized := appName
-
-	// Remove GitHub paths
-	normalized = strings.TrimPrefix(normalized, "github.com/eif-courses/hlabgen/experiments/out/")
-	normalized = strings.TrimPrefix(normalized, "github.com/eif-courses/hlabgen/")
-	normalized = strings.TrimPrefix(normalized, "github.com/yourusername/")
-	normalized = strings.TrimPrefix(normalized, "github.com/")
-
-	// Remove local paths
-	normalized = strings.TrimPrefix(normalized, "experiments/out/")
-	normalized = strings.TrimPrefix(normalized, "experiments/")
-
-	// Remove any trailing slashes
-	normalized = strings.TrimSuffix(normalized, "/")
-
-	// Clean up whitespace
-	normalized = strings.TrimSpace(normalized)
-
-	// Step 2: Validation - ensure it's a valid Go module name
-	if normalized == "" {
-		return "unknown-app"
-	}
-
-	// Module names should be lowercase and simple
-	normalized = strings.ToLower(normalized)
-
-	// Replace spaces and underscores with hyphens
-	normalized = strings.ReplaceAll(normalized, " ", "-")
-	normalized = strings.ReplaceAll(normalized, "_", "-")
-
-	fmt.Printf("  📝 Normalized '%s' → '%s'\n", appName, normalized)
-
-	return normalized
-}
+// OLD PROBLEMATIC FUNCTION (DO NOT USE):
+//
+// func detectModulePath(outDir, appName string) string {
+//     if strings.Contains(outDir, "github.com/") || strings.Contains(outDir, "eif-courses") {
+//         return fmt.Sprintf("github.com/eif-courses/%s", appName)  // ❌ WRONG
+//     }
+//     return appName
+// }
+//
+// WHY IT WAS WRONG:
+// - Would generate: github.com/eif-courses/hlabgen/experiments/out/ApprovalAPI
+// - Then go mod tidy would fail with: "module ... does not contain package"
+// - Hybrid mode would break with import resolution errors
+//
+// NEW APPROACH:
+// - Always use simple appName (e.g., "ApprovalAPI")
+// - Consistent across all three modes (ML, Hybrid, Rules)
+// - No import path resolution issues
 
 // ============================================================================
-// HELPER: Module Detection for Import Path Fixing
+// REST OF FILE: Other helper functions (unchanged)
 // ============================================================================
 
-// DetectModuleNameFromGoMod reads go.mod and extracts the module name
-func DetectModuleNameFromGoMod(projectDir string) (string, error) {
-	goModPath := filepath.Join(projectDir, "go.mod")
-	data, err := os.ReadFile(goModPath)
-	if err != nil {
-		return "", fmt.Errorf("failed to read go.mod: %w", err)
-	}
+// SafeDecode replaces any `json.NewDecoder(r.Body).Decode(&X)` line
+// with a safe block that checks nil body and handles decode errors.
+func SafeDecode(code string) string {
+	lines := strings.Split(code, "\n")
+	var out []string
+	changed := false
 
-	for _, line := range strings.Split(string(data), "\n") {
-		line = strings.TrimSpace(line)
-		if strings.HasPrefix(line, "module ") {
-			moduleName := strings.TrimSpace(strings.TrimPrefix(line, "module "))
-			return moduleName, nil
-		}
-	}
+	for _, line := range lines {
+		trim := strings.TrimSpace(line)
 
-	return "", fmt.Errorf("module line not found in go.mod")
-}
-
-// ============================================================================
-// INTEGRATION: Use in cmd/hlabgen/main.go
-// ============================================================================
-
-/*
-INTEGRATION INSTRUCTIONS:
-
-In cmd/hlabgen/main.go, replace the old scaffold call:
-
-OLD:
-	rules.Scaffold(outDir, schema.AppName)
-
-NEW:
-	ImprovedScaffold(outDir, schema.AppName)
-
-And make sure to normalize the app name early in main():
-
-	// At the very start of main(), after loading schema:
-	schema.AppName = normalizeModuleName(schema.AppName)
-
-Then ALL subsequent code will use the consistent, normalized module name.
-*/
-
-// ============================================================================
-// VERIFICATION: Check that all imports match the module name
-// ============================================================================
-
-// VerifyImportConsistency checks that all imports use the correct module name
-func VerifyImportConsistency(projectDir, expectedModuleName string) ([]string, error) {
-	var issues []string
-
-	err := filepath.Walk(projectDir, func(path string, info os.FileInfo, err error) error {
-		if err != nil || info.IsDir() || !strings.HasSuffix(path, ".go") {
-			return nil
-		}
-
-		data, err := os.ReadFile(path)
-		if err != nil {
-			return nil
-		}
-
-		content := string(data)
-
-		// Check for known wrong patterns
-		wrongPatterns := []string{
-			"github.com/eif-courses/hlabgen/experiments/out/",
-			"github.com/yourusername/",
-			"experiments/out/",
-		}
-
-		for _, pattern := range wrongPatterns {
-			if strings.Contains(content, pattern) {
-				relPath, _ := filepath.Rel(projectDir, path)
-				issues = append(issues, fmt.Sprintf(
-					"%s: contains wrong import pattern '%s' (should be '%s')",
-					relPath, pattern, expectedModuleName,
-				))
-			}
-		}
-
-		// Check that internal imports use the correct module
-		if strings.Contains(content, "/internal/") && !strings.Contains(content, expectedModuleName+"/internal/") {
-			// This might be OK if it's just a comment or string
-			// But if it's in an import statement, it's a problem
-			lines := strings.Split(content, "\n")
-			for i, line := range lines {
-				if strings.Contains(line, "import") && strings.Contains(line, "/internal/") {
-					if !strings.Contains(line, expectedModuleName) {
-						relPath, _ := filepath.Rel(projectDir, path)
-						issues = append(issues, fmt.Sprintf(
-							"%s:%d: import statement uses wrong module name",
-							relPath, i+1,
-						))
+		if strings.Contains(trim, "json.NewDecoder(r.Body).Decode(&") && !strings.Contains(trim, ";") {
+			varName := "data"
+			if idx := strings.Index(trim, "Decode(&"); idx >= 0 {
+				rest := trim[idx+len("Decode(&"):]
+				if close := strings.Index(rest, ")"); close > 0 {
+					candidate := rest[:close]
+					for i := range candidate {
+						c := candidate[i]
+						if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_') {
+							candidate = candidate[:i]
+							break
+						}
+					}
+					if candidate != "" {
+						varName = candidate
 					}
 				}
 			}
+
+			block := fmt.Sprintf(`if r.Body == nil {
+		http.Error(w, "missing body", http.StatusBadRequest)
+		return
+	}
+	if err := json.NewDecoder(r.Body).Decode(&%s); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}`, varName)
+
+			out = append(out, block)
+			changed = true
+			continue
 		}
 
-		return nil
-	})
+		out = append(out, line)
+	}
 
-	return issues, err
+	fixed := strings.Join(out, "\n")
+
+	// Remove mux import from handlers if present
+	if strings.Contains(fixed, "package handlers") && strings.Contains(fixed, `"github.com/gorilla/mux"`) {
+		fixed = strings.ReplaceAll(fixed, "\n\t\"github.com/gorilla/mux\"", "")
+		fixed = strings.ReplaceAll(fixed, "\"github.com/gorilla/mux\"\n", "")
+	}
+
+	// Ensure imports if decode changed
+	if changed {
+		if !strings.Contains(fixed, "\nimport (") && !strings.Contains(fixed, "\nimport \"") {
+			fixed = strings.Replace(fixed, "package handlers",
+				"package handlers\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n)\n", 1)
+			return fixed
+		}
+		if !strings.Contains(fixed, `"encoding/json"`) {
+			fixed = strings.Replace(fixed, "import (", "import (\n\t\"encoding/json\"", 1)
+		}
+		if !strings.Contains(fixed, `"net/http"`) {
+			fixed = strings.Replace(fixed, "import (", "import (\n\t\"net/http\"", 1)
+		}
+	}
+
+	return fixed
 }
 
-// ============================================================================
-// EXAMPLE USAGE
-// ============================================================================
+// FixIDTypeMismatch removes the broken parseID function since strconv.Atoi already converts to int
+func FixIDTypeMismatch(code string) string {
+	// The issue: ML generates code that does:
+	//   id, err := strconv.Atoi(vars["id"])  // id is now int
+	//   if item.ID == parseID(id)            // but parseID expects string!
+	//
+	// Solution: Remove all parseID() calls since id is already an int from strconv.Atoi
 
-func example() {
-	// Example 1: Normalize various input formats
-	formats := []string{
-		"ApprovalAPI",
-		"github.com/eif-courses/hlabgen/experiments/out/ApprovalAPI",
-		"experiments/out/ApprovalAPI",
-		"github.com/yourusername/ApprovalAPI",
+	// Remove calls to parseID since id is already an int from strconv.Atoi
+	code = strings.ReplaceAll(code, "parseID(id)", "id")
+
+	// Remove the entire parseID function definition if it exists
+	parseIDFunc := `
+
+func parseID(s string) int {
+	id, _ := strconv.Atoi(s)
+	return id
+}`
+	code = strings.ReplaceAll(code, parseIDFunc, "")
+
+	// Also handle case where it might be on one line or with different whitespace
+	code = strings.ReplaceAll(code, "func parseID(s string) int { id, _ := strconv.Atoi(s); return id }", "")
+
+	// Remove any remaining parseID definitions (be thorough)
+	re := regexp.MustCompile(`\n\nfunc parseID\([^)]*\)[^{]*\{[^}]*\}`)
+	code = re.ReplaceAllString(code, "")
+
+	return code
+}
+
+// NormalizePath ensures all generated files are placed under /internal.
+func NormalizePath(filename string) string {
+	if strings.HasPrefix(filename, "handlers/") {
+		return filepath.Join("internal", filename)
+	}
+	if strings.HasPrefix(filename, "models/") {
+		return filepath.Join("internal", filename)
+	}
+	if strings.HasPrefix(filename, "routes/") {
+		return filepath.Join("internal", filename)
+	}
+	return filename
+}
+
+// FixRegisterFunction normalizes any route registration function
+// to a consistent name: func Register(r *mux.Router)
+func FixRegisterFunction(code string) string {
+	re := regexp.MustCompile(`func\s+\w*Routes\s*\(`)
+	if re.MatchString(code) {
+		code = re.ReplaceAllString(code, "func Register(")
+	}
+	return code
+}
+
+// FixRegisterParameter ensures Register function has the correct mux.Router parameter
+func FixRegisterParameter(code string) string {
+	// Fix Register() → Register(r *mux.Router)
+	registerPattern := regexp.MustCompile(`func\s+Register\s*\(\s*\)\s*{`)
+	if registerPattern.MatchString(code) {
+		code = registerPattern.ReplaceAllString(code, `func Register(r *mux.Router) {`)
+		fmt.Println("🔧 Fixed Register function signature (added r *mux.Router parameter)")
+	}
+	return code
+}
+
+// FixTestImports ensures generated test files include required imports like gorilla/mux.
+func FixTestImports(code string) string {
+	// Add strings import if strings.NewReader is used
+	if strings.Contains(code, "strings.NewReader") && !strings.Contains(code, `"strings"`) {
+		if strings.Contains(code, "import (") {
+			code = strings.Replace(code, "import (", "import (\n\t\"strings\"", 1)
+		}
 	}
 
-	for _, f := range formats {
-		normalized := normalizeModuleName(f)
-		fmt.Printf("  %s → %s\n", f, normalized)
+	if strings.Contains(code, "mux.NewRouter()") && !strings.Contains(code, `"github.com/gorilla/mux"`) {
+		if strings.Contains(code, "import (") {
+			code = strings.Replace(code, "import (", "import (\n\t\"github.com/gorilla/mux\"", 1)
+		}
 	}
 
-	// Example 2: Create scaffold
-	outDir := "/tmp/test-app"
-	files, err := ImprovedScaffold(outDir, "ApprovalAPI")
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return
+	if strings.Contains(code, "httptest.NewRecorder()") && !strings.Contains(code, `"net/http/httptest"`) {
+		if strings.Contains(code, "import (") {
+			code = strings.Replace(code, "import (", "import (\n\t\"net/http/httptest\"", 1)
+		}
 	}
-	fmt.Printf("Created %d files\n", len(files))
 
-	// Example 3: Verify imports
-	issues, err := VerifyImportConsistency(outDir, "ApprovalAPI")
-	if err != nil {
-		fmt.Printf("Verification error: %v\n", err)
-		return
+	if strings.Contains(code, "http.NewRequest(") && !strings.Contains(code, `"net/http"`) {
+		if strings.Contains(code, "import (") {
+			code = strings.Replace(code, "import (", "import (\n\t\"net/http\"", 1)
+		}
 	}
-	if len(issues) == 0 {
-		fmt.Println("✅ All imports are consistent!")
+
+	return code
+}
+
+// FixTestBodies ensures generated test files compile correctly with HTTP tests and proper JSON bodies.
+func FixTestBodies(code string) string {
+	lines := strings.Split(code, "\n")
+
+	// ✅ Force correct package name
+	if len(lines) > 0 && strings.HasPrefix(strings.TrimSpace(lines[0]), "package ") &&
+		!strings.HasPrefix(strings.TrimSpace(lines[0]), "package handlers_test") {
+		lines[0] = "package handlers_test"
+	}
+
+	var result []string
+	i := 0
+
+	for i < len(lines) {
+		line := lines[i]
+		trim := strings.TrimSpace(line)
+
+		// Detect test function start
+		if strings.HasPrefix(trim, "func Test") && strings.Contains(line, "(t *testing.T)") {
+			testName := extractTestName(line)
+			_, entity := splitVerbEntity(testName)
+			method := inferHTTPMethod(testName)
+			resource := pluralizeIfNeeded(entity)
+
+			body := "{}"
+			if method == "POST" || method == "PUT" {
+				body = `{"id":1}`
+			}
+
+			// Generate complete test function with Test prefix
+			testFunc := fmt.Sprintf(`func Test%s(t *testing.T) {
+	body := strings.NewReader(%q)
+	req, _ := http.NewRequest("%s", "/%s", body)
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	handlers.%s(rr, req)
+	if rr.Code != http.StatusCreated && rr.Code != http.StatusOK && rr.Code != http.StatusNoContent {
+		t.Errorf("handler returned wrong status code: got %%v", rr.Code)
+	}
+}`, testName, body, method, resource, testName)
+
+			result = append(result, testFunc)
+
+			// Skip until end of this test function
+			i++
+			braceCount := 1
+			for i < len(lines) && braceCount > 0 {
+				currentLine := strings.TrimSpace(lines[i])
+				if currentLine == "}" && !strings.HasPrefix(lines[i], "\t") && !strings.HasPrefix(lines[i], " ") {
+					braceCount--
+					if braceCount == 0 {
+						break
+					}
+				}
+				i++
+			}
+		} else {
+			result = append(result, line)
+		}
+		i++
+	}
+
+	fixed := strings.Join(result, "\n")
+
+	// Ensure required imports are present
+	if !strings.Contains(fixed, "import (") {
+		// No import block at all, create one
+		module := detectModuleNameFromGoMod()
+		importBlock := fmt.Sprintf(`
+
+import (
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+	"%s/internal/handlers"
+)`, module)
+		fixed = strings.Replace(fixed, "package handlers_test", "package handlers_test"+importBlock, 1)
 	} else {
-		fmt.Println("❌ Found import inconsistencies:")
-		for _, issue := range issues {
-			fmt.Printf("  - %s\n", issue)
+		// Add missing imports to existing block
+		if strings.Contains(fixed, "strings.NewReader") && !strings.Contains(fixed, `"strings"`) {
+			fixed = strings.Replace(fixed, "import (", "import (\n\t\"strings\"", 1)
+		}
+		if strings.Contains(fixed, "http.NewRequest") && !strings.Contains(fixed, `"net/http"`) {
+			fixed = strings.Replace(fixed, "import (", "import (\n\t\"net/http\"", 1)
+		}
+		if strings.Contains(fixed, "httptest.") && !strings.Contains(fixed, `"net/http/httptest"`) {
+			fixed = strings.Replace(fixed, "import (", "import (\n\t\"net/http/httptest\"", 1)
+		}
+		if !strings.Contains(fixed, `"testing"`) {
+			fixed = strings.Replace(fixed, "import (", "import (\n\t\"testing\"", 1)
 		}
 	}
+
+	// ✅ Remove unused imports from test files
+	fixed = removeUnusedImports(fixed)
+
+	// ✅ Use CleanDuplicateImports from import_manager.go
+	fixed = CleanDuplicateImports(fixed)
+	fixed = RemoveDuplicateHandlerImports(fixed)
+	return fixed
 }
+
+// PlaceTestsWithHandlers ensures that generated test files are stored next to their handlers.
+func PlaceTestsWithHandlers(filename, content string) (string, string) {
+	if strings.HasPrefix(filename, "tests/") {
+		base := filepath.Base(filename)
+		filename = filepath.Join("internal", "handlers", base)
+
+		// Change package name
+		lines := strings.Split(content, "\n")
+		if len(lines) > 0 && strings.HasPrefix(lines[0], "package ") {
+			lines[0] = "package handlers_test"
+		}
+		content = strings.Join(lines, "\n")
+
+		// Get module name
+		module := detectModuleNameFromGoMod()
+		handlerImport := fmt.Sprintf(`"%s/internal/handlers"`, module)
+
+		// Check if there's ALREADY an import block with handlers
+		hasHandlerImport := strings.Contains(content, "/internal/handlers\"")
+
+		// Only add if completely missing AND there's an import block
+		if !hasHandlerImport && strings.Contains(content, "import (") {
+			// Add to existing import block
+			content = strings.Replace(content, "import (", "import (\n\t"+handlerImport, 1)
+		} else if !hasHandlerImport && !strings.Contains(content, "import") {
+			// Create new import block
+			packageLine := "package handlers_test"
+			replacement := packageLine + "\n\nimport (\n\t" + handlerImport + "\n)\n"
+			content = strings.Replace(content, packageLine, replacement, 1)
+		}
+
+		// CRITICAL: Final aggressive cleanup
+		content = RemoveAllDuplicateHandlerImports(content)
+		content = CleanDuplicateImports(content)
+	}
+	return filename, content
+}
+
+// RemoveAllDuplicateHandlerImports - nuclear option, keeps only FIRST handler import
+func RemoveAllDuplicateHandlerImports(code string) string {
+	lines := strings.Split(code, "\n")
+	var out []string
+	handlerImportFound := false
+	inImport := false
+
+	for _, line := range lines {
+		trim := strings.TrimSpace(line)
+
+		if strings.HasPrefix(trim, "import (") {
+			inImport = true
+			out = append(out, line)
+			continue
+		}
+
+		if inImport && trim == ")" {
+			inImport = false
+			out = append(out, line)
+			continue
+		}
+
+		// Inside import block - check for handler import
+		if inImport && strings.Contains(trim, "/internal/handlers\"") {
+			if !handlerImportFound {
+				out = append(out, line)
+				handlerImportFound = true
+			}
+			// Skip all subsequent handler imports
+			continue
+		}
+
+		out = append(out, line)
+	}
+
+	return strings.Join(out, "\n")
+}
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+// detectModuleNameFromGoMod walks up the directory tree to find go.mod
+func detectModuleNameFromGoMod() string {
+	dir, _ := os.Getwd()
+	for dir != "/" {
+		modPath := filepath.Join(dir, "go.mod")
+		data, err := os.ReadFile(modPath)
+		if err == nil {
+			for _, line := range strings.Split(string(data), "\n") {
+				if strings.HasPrefix(line, "module ") {
+					return strings.TrimSpace(strings.TrimPrefix(line, "module "))
+				}
+			}
+		}
+		dir = filepath.Dir(dir)
+	}
+	return "yourapp"
+}
+
+func extractTestName(line string) string {
+	line = strings.TrimSpace(line)
+	name := strings.TrimPrefix(line, "func Test")
+	name = strings.Split(name, "(")[0]
+	return strings.TrimSpace(name)
+}
+
+func inferHTTPMethod(name string) string {
+	switch {
+	case strings.HasPrefix(name, "Create"):
+		return "POST"
+	case strings.HasPrefix(name, "Update"):
+		return "PUT"
+	case strings.HasPrefix(name, "Delete"):
+		return "DELETE"
+	default:
+		return "GET"
+	}
+}
+
+func splitVerbEntity(name string) (verb, entity string) {
+	name = strings.TrimSpace(name)
+	parts := []string{"Create", "Get", "Update", "Delete"}
+	for _, p := range parts {
+		if strings.HasPrefix(name, p) {
+			return p, strings.TrimPrefix(name, p)
+		}
+	}
+	return "Get", name
+}
+
+func pluralizeIfNeeded(entity string) string {
+	if entity == "" {
+		return "items"
+	}
+	el := strings.ToLower(entity)
+	if strings.HasSuffix(el, "s") {
+		return el
+	}
+	return el + "s"
+}
+
+// GenerateFallbackTests creates simple *_test.go files if test generation fails.
+func GenerateFallbackTests(outDir, appName string) error {
+	testTemplate := fmt.Sprintf(`package handlers_test
+
+import (
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+	"%s/internal/handlers"
+)
+
+func TestCreateBook(t *testing.T) {
+	body := strings.NewReader("{\"id\":1}")
+	req, _ := http.NewRequest("POST", "/books", body)
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	handlers.CreateBook(rr, req)
+	if rr.Code != http.StatusCreated && rr.Code != http.StatusOK && rr.Code != http.StatusNoContent {
+		t.Errorf("handler returned wrong status code: got %%v", rr.Code)
+	}
+}
+`, appName)
+
+	testDir := filepath.Join(outDir, "internal", "handlers")
+	if err := os.MkdirAll(testDir, 0o755); err != nil {
+		return err
+	}
+
+	testFile := filepath.Join(testDir, "book_test.go")
+	if _, err := os.Stat(testFile); os.IsNotExist(err) {
+		if err := os.WriteFile(testFile, []byte(testTemplate), 0o644); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// RemoveDuplicateHandlerImports removes ALL duplicate handler imports
+func RemoveDuplicateHandlerImports(code string) string {
+	lines := strings.Split(code, "\n")
+	var out []string
+	inImportBlock := false
+	handlerImportSeen := false
+
+	for _, line := range lines {
+		trim := strings.TrimSpace(line)
+
+		// Track import block
+		if strings.HasPrefix(trim, "import (") {
+			inImportBlock = true
+			handlerImportSeen = false
+			out = append(out, line)
+			continue
+		}
+
+		if inImportBlock && trim == ")" {
+			inImportBlock = false
+			out = append(out, line)
+			continue
+		}
+
+		// Inside import block - check for ANY handler import
+		if inImportBlock && strings.Contains(trim, "/handlers\"") {
+			if handlerImportSeen {
+				// Skip this duplicate
+				continue
+			}
+			handlerImportSeen = true
+			out = append(out, line)
+			continue
+		}
+
+		out = append(out, line)
+	}
+
+	return strings.Join(out, "\n")
+}
+
+// removeUnusedImports strips imports that aren't used in the code (safe version)
+func removeUnusedImports(code string) string {
+	lines := strings.Split(code, "\n")
+	var result []string
+	inImportBlock := false
+
+	for _, line := range lines {
+		trim := strings.TrimSpace(line)
+
+		// Track import block start
+		if strings.HasPrefix(trim, "import (") {
+			inImportBlock = true
+			result = append(result, line)
+			continue
+		}
+
+		// Track import block end - ALWAYS KEEP IT
+		if inImportBlock && trim == ")" {
+			inImportBlock = false
+			result = append(result, line)
+			continue
+		}
+
+		// Inside import block - check if import should be kept
+		if inImportBlock && trim != "" && !strings.HasPrefix(trim, "//") {
+			// NEVER skip handlers import in test files - KEEP IT ALWAYS
+			if strings.Contains(trim, "/internal/handlers\"") {
+				result = append(result, line)
+				continue
+			}
+
+			// Check for common unused imports
+			shouldSkip := false
+
+			// Skip unused bytes
+			if strings.Contains(trim, `"bytes"`) && !strings.Contains(code, "bytes.") {
+				shouldSkip = true
+			}
+
+			// Skip unused encoding/json
+			if strings.Contains(trim, `"encoding/json"`) && !strings.Contains(code, "json.") {
+				shouldSkip = true
+			}
+
+			// Skip unused models
+			if strings.Contains(trim, "/internal/models\"") && !strings.Contains(code, "models.") {
+				shouldSkip = true
+			}
+
+			// If not skipping, keep this import
+			if !shouldSkip {
+				result = append(result, line)
+			}
+			continue
+		}
+
+		// Not in import block - always keep
+		result = append(result, line)
+	}
+
+	return strings.Join(result, "\n")
+}
+
+// ============================================================================
+// END OF FILE: internal/rules/scaffold.go
+// ============================================================================

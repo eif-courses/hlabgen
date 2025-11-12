@@ -1,0 +1,11 @@
+AppName,Mode,Timestamp,Model,BuildSuccess,TestsPass,CoveragePct,LintWarnings,MLDuration,RepairAttempts
+ApprovalAPI,rules,2025-11-12T09:27:07+02:00,gpt-4o,false,false,0.00,0,0.02,0
+NotificationAPI,rules,2025-11-12T09:27:10+02:00,gpt-4o,false,false,0.00,0,0.03,0
+PaymentAPI,rules,2025-11-12T09:27:11+02:00,gpt-4o,false,false,0.00,0,0.02,0
+WorkflowAPI,rules,2025-11-12T09:27:14+02:00,gpt-4o,false,false,0.00,0,0.02,0
+AuthAPI,rules,2025-11-12T09:27:08+02:00,gpt-4o,false,false,0.00,0,0.03,0
+InventoryAPI,rules,2025-11-12T09:27:09+02:00,gpt-4o,false,false,0.00,0,0.02,0
+OrderAPI,rules,2025-11-12T09:27:11+02:00,gpt-4o,false,false,0.00,0,0.02,0
+PermissionAPI,rules,2025-11-12T09:27:12+02:00,gpt-4o,false,false,0.00,0,0.02,0
+SchedulerAPI,rules,2025-11-12T09:27:12+02:00,gpt-4o,false,false,0.00,0,0.02,0
+SearchAPI,rules,2025-11-12T09:27:13+02:00,gpt-4o,false,false,0.00,0,0.01,0

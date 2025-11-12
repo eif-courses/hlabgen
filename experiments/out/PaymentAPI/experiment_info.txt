@@ -1,10 +1,10 @@
 App: PaymentAPI
 Mode: hybrid
-Timestamp: 2025-11-11T22:02:04+02:00
+Timestamp: 2025-11-12T09:27:40+02:00
 OpenAI Model: gpt-4o
 BuildSuccess: false
 TestsPass: false
 Coverage: 0.0%
-Duration: 27.519233ms
+Duration: 2.058862911s
 RepairAttempts: 1
 RuleFixes: 4

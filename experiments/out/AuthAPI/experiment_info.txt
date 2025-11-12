@@ -1,10 +1,10 @@
 App: AuthAPI
 Mode: hybrid
-Timestamp: 2025-11-11T22:02:01+02:00
+Timestamp: 2025-11-12T09:27:27+02:00
 OpenAI Model: gpt-4o
 BuildSuccess: true
 TestsPass: true
 Coverage: 65.8%
-Duration: 26.431795ms
+Duration: 1.864811779s
 RepairAttempts: 0
 RuleFixes: 8
